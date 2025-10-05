@@ -14,6 +14,11 @@ public class TheatermgntApplication {
         // test feature branch 2
 
         // test feature branch 3
+
+        // COMMIT 1
+        // COMMIT 2
+        // COMMIT 3
+
 	}
 
 }
