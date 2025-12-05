@@ -10,7 +10,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class SeatCreationRequest {
+public class SeatRequest {
+    String id;
+
     @NotBlank(message = "Row chair is required")
     String rowChair;
 

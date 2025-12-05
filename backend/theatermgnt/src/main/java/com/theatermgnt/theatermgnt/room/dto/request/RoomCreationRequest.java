@@ -2,7 +2,8 @@ package com.theatermgnt.theatermgnt.room.dto.request;
 
 
 import com.theatermgnt.theatermgnt.common.enums.RoomType;
-import com.theatermgnt.theatermgnt.seat.dto.request.SeatCreationRequest;
+import com.theatermgnt.theatermgnt.room.enums.RoomStatus;
+import com.theatermgnt.theatermgnt.seat.dto.request.SeatRequest;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -26,7 +27,7 @@ public class RoomCreationRequest {
     @NotNull
     RoomType roomType;
 
-    String status;
+    RoomStatus status;
 
-    List<SeatCreationRequest> seats;
+    List<SeatRequest> seats;
 }

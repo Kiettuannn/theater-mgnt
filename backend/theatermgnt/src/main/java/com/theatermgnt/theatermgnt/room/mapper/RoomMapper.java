@@ -21,5 +21,8 @@ public interface RoomMapper {
     RoomResponse toRoomResponse(Room room);
 
 
+    @Mapping(target = "cinema", ignore = true)
+    @Mapping(target = "seats", ignore = true)
+    @Mapping(target = "id", ignore = true)
     void updateRoom(@MappingTarget Room room, RoomUpdateRequest request);
 }

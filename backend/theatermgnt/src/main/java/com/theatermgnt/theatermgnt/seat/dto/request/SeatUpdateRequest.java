@@ -9,6 +9,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SeatUpdateRequest {
+    String id;
     String rowChair;
     Integer seatNumber;
     String seatTypeId;

@@ -3,6 +3,7 @@ package com.theatermgnt.theatermgnt.room.entity;
 import com.theatermgnt.theatermgnt.cinema.entity.Cinema;
 import com.theatermgnt.theatermgnt.common.entity.BaseEntity;
 import com.theatermgnt.theatermgnt.common.enums.RoomType;
+import com.theatermgnt.theatermgnt.room.enums.RoomStatus;
 import com.theatermgnt.theatermgnt.seat.entity.Seat;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,7 +35,8 @@ public class Room extends BaseEntity {
     @Enumerated(EnumType.STRING)
     RoomType roomType;
 
-    String status;
+    @Enumerated(EnumType.STRING)
+    RoomStatus status;
 
     Integer totalSeats;
 }

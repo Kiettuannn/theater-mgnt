@@ -43,15 +43,35 @@ public class RoomService {
         // Create room and save room
         Room room = roomMapper.toRoom(request);
         room.setCinema(cinema);
-
-        if(request.getSeats() != null) {
-            room.setTotalSeats(request.getSeats().size());
-        }
         Room savedRoom = roomRepository.save(room);
 
-        // Create seats for the room
-        List<Seat> savedSeats = seatService.createSeatsForRoom(savedRoom, request.getSeats());
-        savedRoom.setSeats(savedSeats);
+        if(request.getSeats() != null) {
+            seatService.syncSeats(room, request.getSeats());
+        }
+
+        return roomMapper.toRoomResponse(savedRoom);
+    }
+
+    @Transactional
+    public RoomResponse updateRoom(String roomId, RoomUpdateRequest request) {
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_EXISTED));
+
+        // Validation: Check if the room has screening from now to future
+//        boolean isRoomBusy = screeningRepository.existsByRoomIdAndStartTimeAfter(roomId, LocalDateTime.now());
+
+        // Update room
+        roomMapper.updateRoom(room,request);
+
+        if(request.getName() != null && roomRepository.existsByNameAndCinemaIdAndIdNot(request.getName(),
+                room.getCinema().getId(), roomId)) {
+            throw new AppException(ErrorCode.ROOM_EXISTED);
+        }
+        if(request.getSeats() != null) {
+            seatService.syncSeats(room, request.getSeats());
+        }
+
+        Room savedRoom = roomRepository.save(room);
         return roomMapper.toRoomResponse(savedRoom);
     }
 
@@ -73,13 +93,7 @@ public class RoomService {
         return roomMapper.toRoomResponse(room);
     }
 
-    public RoomResponse updateRoom(String roomId, RoomUpdateRequest request) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_EXISTED));
 
-        roomMapper.updateRoom(room, request);
-        return roomMapper.toRoomResponse(roomRepository.save(room));
-    }
 
     public void deleteRoom(String roomId) {
         if (!roomRepository.existsById(roomId))
