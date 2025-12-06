@@ -18,7 +18,12 @@ public interface RoomMapper {
 
     @Mapping(target = "cinemaName", source = "cinema.name")
     @Mapping(target = "cinemaId", source = "cinema.id")
+    @Mapping(target = "seats", ignore = true)
     RoomResponse toRoomResponse(Room room);
+
+    @Mapping(target = "cinemaName", source = "cinema.name")
+    @Mapping(target = "cinemaId", source = "cinema.id")
+    RoomResponse toRoomResponseWithSeats(Room room);
 
 
     @Mapping(target = "cinema", ignore = true)

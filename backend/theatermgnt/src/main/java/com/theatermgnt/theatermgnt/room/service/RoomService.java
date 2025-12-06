@@ -72,7 +72,7 @@ public class RoomService {
         }
 
         Room savedRoom = roomRepository.save(room);
-        return roomMapper.toRoomResponse(savedRoom);
+        return roomMapper.toRoomResponseWithSeats(savedRoom);
     }
 
     public List<RoomResponse> getRoomsByCinema(String cinemaId) {
@@ -90,7 +90,7 @@ public class RoomService {
     public RoomResponse getRoom(String roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_EXISTED));
-        return roomMapper.toRoomResponse(room);
+        return roomMapper.toRoomResponseWithSeats(room);
     }
 
 
