@@ -13,5 +13,5 @@ public class SeatResponse {
     String seatName;
     String rowChair;
     Integer seatNumber;
-    String seatType;
+    String seatTypeId;
 }

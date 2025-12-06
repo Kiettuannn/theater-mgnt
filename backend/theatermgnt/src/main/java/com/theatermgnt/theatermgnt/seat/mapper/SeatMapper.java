@@ -14,7 +14,7 @@ public interface SeatMapper {
 
     Seat toSeat(SeatRequest request);
 
-    @Mapping(source = "seatType.typeName", target = "seatType")
+    @Mapping(source = "seatType.id", target = "seatTypeId")
     @Mapping(target = "seatName", expression = "java(seat.getRowChair() + seat.getSeatNumber())")
     SeatResponse toSeatResponse(Seat seat);
 

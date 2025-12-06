@@ -8,5 +8,5 @@ import java.util.List;
 public interface RoomRepository extends JpaRepository<Room,String> {
     List<Room> findByCinemaId(String cinemaId);
     boolean existsByNameAndCinemaId(String name, String cinemaId);
-    boolean existsByNameAndCinemaIdAndIdNot(String name, String cinemaId, String roomId);
+    boolean existsByNameAndCinemaIdAndIdNot(String name, String cinemaId, String id);
 }
