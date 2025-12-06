@@ -41,11 +41,11 @@ export const MENU_ITEMS: MenuItem[] = [
     requiredPermissions: [PERMISSIONS.MOVIE_READ],
   },
   {
-    id: "theaters",
-    label: "Theaters",
+    id: "cinemas",
+    label: "Cinemas",
     icon: Theater,
-    path: ROUTES.THEATERS,
-    requiredPermissions: [PERMISSIONS.THEATER_READ],
+    path: ROUTES.CINEMAS,
+    requiredPermissions: [PERMISSIONS.CINEMAS_READ],
   },
   {
     id: "rooms",

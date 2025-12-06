@@ -6,8 +6,8 @@ export function TheaterList() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Theaters Management"
-        description="Manage theaters and screening rooms"
+        title="Cinemas Management"
+        description="Manage Cinemas and screening rooms"
       />
 
       <Card className="p-8">
@@ -15,10 +15,10 @@ export function TheaterList() {
           <div className="rounded-full bg-purple-100 p-6">
             <Theater className="h-12 w-12 text-purple-600" />
           </div>
-          <h3 className="text-2xl font-semibold">Theaters Management</h3>
+          <h3 className="text-2xl font-semibold">Cinemas Management</h3>
           <p className="text-muted-foreground max-w-md">
-            This is the theaters management page. Here you can view, create,
-            edit, and delete theaters and screening rooms.
+            This is the Cinemas management page. Here you can view, create,
+            edit, and delete Cinemas and screening rooms.
           </p>
         </div>
       </Card>

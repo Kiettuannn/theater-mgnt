@@ -1,66 +1,28 @@
 import { RoomCard, AddRoomButton } from "@/components/rooms";
-import type { Room } from "@/types/room";
-
-// Mock data - replace with actual API call
-const mockRooms: Room[] = [
-  {
-    id: "1",
-    name: "Phòng 1",
-    type: "Standard",
-    capacity: 120,
-    status: "active",
-    currentMovie: "Avatar: The Way of Water",
-    nextShowtime: "14:00",
-  },
-  {
-    id: "2",
-    name: "Phòng 2",
-    type: "Premium",
-    capacity: 150,
-    status: "active",
-    currentMovie: "Top Gun: Maverick",
-    nextShowtime: "15:30",
-  },
-  {
-    id: "3",
-    name: "Phòng 3",
-    type: "Standard",
-    capacity: 100,
-    status: "active",
-    currentMovie: "The Batman",
-    nextShowtime: "16:30",
-  },
-  {
-    id: "4",
-    name: "Phòng 4",
-    type: "IMAX",
-    capacity: 200,
-    status: "maintenance",
-  },
-  {
-    id: "5",
-    name: "Phòng 5",
-    type: "VIP",
-    capacity: 80,
-    status: "active",
-    currentMovie: "Spider-Man: No Way Home",
-    nextShowtime: "18:00",
-  },
-  {
-    id: "6",
-    name: "Phòng 6",
-    type: "Standard",
-    capacity: 120,
-    status: "active",
-    currentMovie: "Avatar: The Way of Water",
-    nextShowtime: "19:30",
-  },
-];
+import { useRoomManager } from "@/hooks/useRoomManager";
+import type { Room } from "@/types/RoomType/room";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/constants/routes";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { SearchAddBar } from "@/components/ui/SearchAddBar";
+import { Monitor } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 
 export function RoomList() {
+  const { rooms, loadData, loading } = useRoomManager();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  console.log("Rooms:", rooms);
+
   const handleEdit = (room: Room) => {
-    console.log("Edit room:", room);
-    // TODO: Implement edit functionality
+    navigate(ROUTES.ROOMS_EDIT.replace(":id", room.id.toString()));
   };
 
   const handleViewSchedule = (room: Room) => {
@@ -69,26 +31,38 @@ export function RoomList() {
   };
 
   const handleAddRoom = () => {
-    console.log("Add new room");
-    // TODO: Implement add room functionality
+    navigate(ROUTES.ROOMS_CREATE);
   };
+
+  const filteredRooms = rooms.filter((room) =>
+    room.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  if (loading) {
+    return <LoadingSpinner message="Loading rooms..." />;
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between border-b border-border pb-4">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Phòng chiếu</h1>
-          <p className="text-muted-foreground mt-1">
-            Quản lý thông tin và trạng thái các phòng chiếu
-          </p>
-        </div>
-        <AddRoomButton onClick={handleAddRoom} />
-      </div>
-
+      <PageHeader
+        title="Rooms Management"
+        description="Manage your theater rooms here."
+      />
+      {/* Search and Actions Bar */}
+      <SearchAddBar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        placeholder="Search by room name..."
+        totalCount={rooms.length}
+        filteredCount={filteredRooms.length}
+        icon={<Monitor className="w-4 h-4" />}
+        label="rooms"
+        buttonText="Add Room"
+        onAddClick={handleAddRoom}
+      />
       {/* Rooms Grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {mockRooms.map((room) => (
+        {filteredRooms.map((room) => (
           <RoomCard
             key={room.id}
             room={room}

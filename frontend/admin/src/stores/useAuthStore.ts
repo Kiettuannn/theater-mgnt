@@ -1,44 +1,19 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-export interface Permission {
-  name: string;
-  description: string;
-}
-
-export interface Role {
-  name: string;
-  description: string;
-  permissions: Permission[];
-}
-
-interface User {
-  id: string;
-  email: string;
-  username: string;
-  accountId?: string;
-  accountType?: string;
-  firstName?: string;
-  lastName?: string;
-  staffId?: string;
-  cinemaId?: string | null;
-  jobTitle?: string | null;
-  avatarUrl?: string | null;
-  roles?: Role[];
-}
-
 interface AuthState {
   // State
   token: string | null;
-  user: User | null;
+  userId: string | null;
+  permissions: string[]; // List of permission codes from JWT scope
   isAuthenticated: boolean;
-  permissions: Permission[];
   
   // Actions
-  setAuth: (token: string, user: User) => void;
+  setAuth: (token: string, userId: string, permissions: string[]) => void;
   clearAuth: () => void;
-  updateUser: (user: Partial<User>) => void;
-  setPermissions: (permissions: Permission[]) => void;
+  hasPermission: (permission: string) => boolean;
+  hasAnyPermission: (permissions: string[]) => boolean;
+  hasAllPermissions: (permissions: string[]) => boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -46,46 +21,39 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       // Initial state
       token: null,
-      user: null,
-      isAuthenticated: false,
+      userId: null,
       permissions: [],
+      isAuthenticated: false,
       
       // Actions
-      setAuth: (token, user) => {
-        // Extract all permissions from all roles
-        const allPermissions = user.roles?.flatMap(role => role.permissions) || [];
+      setAuth: (token, userId, permissions) => {
         set({
           token,
-          user,
+          userId,
+          permissions,
           isAuthenticated: true,
-          permissions: allPermissions,
         });
       },
       
       clearAuth: () => {
         set({
           token: null,
-          user: null,
-          isAuthenticated: false,
+          userId: null,
           permissions: [],
+          isAuthenticated: false,
         });
       },
-      
-      updateUser: (userData) => {
-        const currentUser = get().user;
-        if (currentUser) {
-          const updatedUser = { ...currentUser, ...userData };
-          // Re-extract permissions if roles are updated
-          const allPermissions = updatedUser.roles?.flatMap(role => role.permissions) || [];
-          set({
-            user: updatedUser,
-            permissions: allPermissions,
-          });
-        }
+
+      hasPermission: (permission: string) => {
+        return get().permissions.includes(permission);
       },
 
-      setPermissions: (permissions) => {
-        set({ permissions });
+      hasAnyPermission: (permissionsToCheck: string[]) => {
+        return permissionsToCheck.some(permission => get().permissions.includes(permission));
+      },
+
+      hasAllPermissions: (permissionsToCheck: string[]) => {
+        return permissionsToCheck.every(permission => get().permissions.includes(permission));
       },
     }),
     {
@@ -93,9 +61,9 @@ export const useAuthStore = create<AuthState>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         token: state.token,
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
+        userId: state.userId,
         permissions: state.permissions,
+        isAuthenticated: state.isAuthenticated,
       }),
     }
   )
@@ -103,7 +71,6 @@ export const useAuthStore = create<AuthState>()(
 
 // Selectors for optimized re-renders
 export const selectIsAuthenticated = (state: AuthState) => state.isAuthenticated;
-export const selectUser = (state: AuthState) => state.user;
 export const selectToken = (state: AuthState) => state.token;
+export const selectUserId = (state: AuthState) => state.userId;
 export const selectPermissions = (state: AuthState) => state.permissions;
-export const selectRoles = (state: AuthState) => state.user?.roles || [];

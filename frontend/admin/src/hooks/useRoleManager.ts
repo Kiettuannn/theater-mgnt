@@ -8,28 +8,14 @@ import {
   type RoleRequest,
 } from "@/services/roleService";
 import { useNotificationStore } from "@/stores";
-
-interface ConfirmDialogState {
-  isOpen: boolean;
-  title: string;
-  description: string;
-  onConfirm: () => void;
-  variant?: "default" | "destructive";
-  confirmText?: string;
-}
+import { useConfirmDialog } from "./useConfirmDialog";
 
 export function useRoleManager() {
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
-    isOpen: false,
-    title: "",
-    description: "",
-    onConfirm: () => {},
-    variant: "destructive",
-    confirmText: "Confirm",
-  });
+  
+  const { confirmDialog, showConfirmDialog, closeConfirmDialog, confirmAndClose } = useConfirmDialog();
 
   const addNotification = useNotificationStore(
     (state) => state.addNotification
@@ -136,24 +122,16 @@ export function useRoleManager() {
   // Delete role with confirmation
   const handleDeleteRole = useCallback(
     (roleId: string, roleName: string) => {
-      setConfirmDialog({
-        isOpen: true,
+      showConfirmDialog({
         title: "Delete Role",
         description: `Are you sure you want to delete role "${roleName}"? This action cannot be undone.`,
         variant: "destructive",
         confirmText: "Delete",
-        onConfirm: () => {
-          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
-          performDelete(roleId, roleName);
-        },
+        onConfirm: confirmAndClose(() => performDelete(roleId, roleName)),
       });
     },
-    [performDelete]
+    [showConfirmDialog, confirmAndClose, performDelete]
   );
-
-  const closeConfirmDialog = useCallback(() => {
-    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
-  }, []);
 
   return {
     // State

@@ -35,10 +35,10 @@ export const FEATURES: readonly Feature[] = [
     bgColor: "bg-blue-500/10",
   },
   {
-    id: "THEATER",
-    label: "Theaters Management",
+    id: "CINEMAS",
+    label: "Cinemas Management",
     icon: Theater,
-    description: "Manage theaters and seats",
+    description: "Manage cinemas and seats",
     color: "text-purple-500",
     bgColor: "bg-purple-500/10",
   },

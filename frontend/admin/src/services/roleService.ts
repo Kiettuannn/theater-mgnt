@@ -1,5 +1,7 @@
 import httpClient from "@/configurations/httpClient";
 import type { Permission } from "./permissionService";
+import {handleApiResponse } from "@/utils/apiResponse";
+import type { ApiResponse } from "@/utils/apiResponse";
 
 export interface Role {
   name: string;
@@ -13,22 +15,19 @@ export interface RoleRequest {
   permissions: string[]; // Array of permission names
 }
 
-export interface ApiResponse<T> {
-  code: number;
-  message?: string;
-  result: T;
-}
 
 // Get all roles
 export const getAllRoles = async (): Promise<Role[]> => {
-  const response = await httpClient.get<ApiResponse<Role[]>>("/roles");
-  return response.data.result;
+  return handleApiResponse<Role[]>(
+    httpClient.get<ApiResponse<Role[]>>("/roles")
+  );
 };
 
 // Create role
 export const createRole = async (request: RoleRequest): Promise<Role> => {
-  const response = await httpClient.post<ApiResponse<Role>>("/roles", request);
-  return response.data.result;
+  return handleApiResponse<Role>(
+    httpClient.post<ApiResponse<Role>>("/roles", request)
+  );
 };
 
 // Update role

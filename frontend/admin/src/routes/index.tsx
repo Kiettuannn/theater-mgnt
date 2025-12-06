@@ -8,8 +8,8 @@ import { PermissionList } from "@/pages/Permissions";
 import { RoleList } from "@/pages/Roles";
 import { MovieList } from "@/pages/Movies";
 import { ShowtimeList } from "@/pages/Showtimes";
-import { TheaterList } from "@/pages/Theaters";
-import { RoomList } from "@/pages/Rooms";
+import { TheaterList } from "@/pages/Cinemas";
+import { RoomList, CreateRoom, EditRoom } from "@/pages/Rooms";
 import { TicketList } from "@/pages/Tickets";
 import { CustomerList } from "@/pages/Customers";
 import { StaffList } from "@/pages/Staff";
@@ -79,10 +79,10 @@ export const routes = [
             ],
           },
           {
-            path: `${ROUTES.THEATERS}`,
+            path: `${ROUTES.CINEMAS}`,
             element: (
               <ProtectedRoute
-                requiredPermissions={[PERMISSIONS.THEATER_READ]}
+                requiredPermissions={[PERMISSIONS.CINEMAS_READ]}
               />
             ),
             children: [
@@ -101,6 +101,34 @@ export const routes = [
               {
                 index: true,
                 element: <RoomList />,
+              },
+              {
+                path: "create",
+                element: (
+                  <ProtectedRoute
+                    requiredPermissions={[PERMISSIONS.ROOM_CREATE]}
+                  />
+                ),
+                children: [
+                  {
+                    index: true,
+                    element: <CreateRoom />,
+                  },
+                ],
+              },
+              {
+                path: "edit/:id",
+                element: (
+                  <ProtectedRoute
+                    requiredPermissions={[PERMISSIONS.ROOM_UPDATE]}
+                  />
+                ),
+                children: [
+                  {
+                    index: true,
+                    element: <EditRoom />,
+                  },
+                ],
               },
             ],
           },

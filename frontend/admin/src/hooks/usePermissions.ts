@@ -4,20 +4,19 @@ import type { PermissionType } from '@/constants/permissions';
 
 /**
  * Hook to check if user has specific permission(s)
+ * Permissions are now stored as string codes directly from JWT scope (e.g., "BOOKING_DELETE", "COMBO_READ")
  */
 export const usePermissions = () => {
   const permissions = useAuthStore(selectPermissions);
 
-  const permissionNames = useMemo(
-    () => permissions.map(p => p.name),
-    [permissions]
-  );
+  // Permissions are already string codes, no need to extract names
+  const permissionCodes = useMemo(() => permissions, [permissions]);
 
   /**
    * Check if user has a specific permission
    */
   const hasPermission = (permission: PermissionType): boolean => {
-    return permissionNames.includes(permission);
+    return permissionCodes.includes(permission);
   };
 
   /**
@@ -27,7 +26,7 @@ export const usePermissions = () => {
     if (!requiredPermissions || requiredPermissions.length === 0) {
       return true; // No permissions required
     }
-    return requiredPermissions.some(permission => permissionNames.includes(permission));
+    return requiredPermissions.some(permission => permissionCodes.includes(permission));
   };
 
   /**
@@ -37,7 +36,7 @@ export const usePermissions = () => {
     if (!requiredPermissions || requiredPermissions.length === 0) {
       return true; // No permissions required
     }
-    return requiredPermissions.every(permission => permissionNames.includes(permission));
+    return requiredPermissions.every(permission => permissionCodes.includes(permission));
   };
 
   /**
@@ -52,7 +51,7 @@ export const usePermissions = () => {
 
   return {
     permissions,
-    permissionNames,
+    permissionCodes,
     hasPermission,
     hasAnyPermission,
     hasAllPermissions,
@@ -65,7 +64,7 @@ export const usePermissions = () => {
  */
 export const checkPermission = (permission: PermissionType): boolean => {
   const permissions = useAuthStore.getState().permissions;
-  return permissions.some(p => p.name === permission);
+  return permissions.includes(permission);
 };
 
 /**
@@ -76,8 +75,7 @@ export const checkAnyPermission = (requiredPermissions: PermissionType[]): boole
     return true;
   }
   const permissions = useAuthStore.getState().permissions;
-  const permissionNames = permissions.map(p => p.name);
-  return requiredPermissions.some(permission => permissionNames.includes(permission));
+  return requiredPermissions.some(permission => permissions.includes(permission));
 };
 
 /**
@@ -88,6 +86,5 @@ export const checkAllPermissions = (requiredPermissions: PermissionType[]): bool
     return true;
   }
   const permissions = useAuthStore.getState().permissions;
-  const permissionNames = permissions.map(p => p.name);
-  return requiredPermissions.every(permission => permissionNames.includes(permission));
+  return requiredPermissions.every(permission => permissions.includes(permission));
 };

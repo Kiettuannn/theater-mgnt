@@ -8,7 +8,7 @@ import {
   API
 } from "../configurations/configuration";
 import { useAuthStore } from "@/stores";
-import { getMyInfo } from "./staffService";
+import { extractPermissionsFromToken, extractUserIdFromToken, isTokenExpired } from "@/utils/jwtUtils";
 
 export const login = async (loginIdentifier: string, password: string) => {
   const response = await httpClient.post(API.LOGIN, {
@@ -19,39 +19,24 @@ export const login = async (loginIdentifier: string, password: string) => {
   const token = response.data?.result?.token;
 
   if (token) {
-    setToken(token);
-    
-    // Fetch user info with permissions after successful login
-    try {
-      const userInfoResponse = await getMyInfo();
-      const userInfo = userInfoResponse.data?.result;
-      
-      if (userInfo) {
-        // Update Zustand store with full user info including roles and permissions
-        useAuthStore.getState().setAuth(token, {
-          id: userInfo.accountId || '',
-          email: userInfo.email || loginIdentifier,
-          username: userInfo.username || loginIdentifier,
-          accountId: userInfo.accountId,
-          accountType: userInfo.accountType,
-          firstName: userInfo.firstName,
-          lastName: userInfo.lastName,
-          staffId: userInfo.staffId,
-          cinemaId: userInfo.cinemaId,
-          jobTitle: userInfo.jobTitle,
-          avatarUrl: userInfo.avatarUrl,
-          roles: userInfo.roles || [],
-        });
-      }
-    } catch (error) {
-      console.error('Failed to fetch user info:', error);
-      // If fetching user info fails, still set basic auth
-      useAuthStore.getState().setAuth(token, {
-        id: response.data?.result?.userId || '',
-        email: loginIdentifier,
-        username: loginIdentifier,
-      });
+    // Check if token is expired (shouldn't happen right after login, but safe to check)
+    if (isTokenExpired(token)) {
+      throw new Error('Received expired token from server');
     }
+
+    // Extract userId and permissions from token
+    const userId = extractUserIdFromToken(token);
+    const permissions = extractPermissionsFromToken(token);
+
+    if (!userId) {
+      throw new Error('Invalid token: missing user ID');
+    }
+
+    // Save token to localStorage
+    setToken(token);
+
+    // Update auth store with minimal required data
+    useAuthStore.getState().setAuth(token, userId, permissions);
   }
 
   return response;

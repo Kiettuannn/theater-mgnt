@@ -1,4 +1,5 @@
 import httpClient from "@/configurations/httpClient";
+import { handleApiResponse, type ApiResponse } from "@/utils/apiResponse";
 
 export interface Permission {
   name: string;
@@ -10,29 +11,21 @@ export interface PermissionRequest {
   description: string;
 }
 
-export interface ApiResponse<T> {
-  code: number;
-  message?: string;
-  result: T;
-}
 
 // Get all permissions
 export const getAllPermissions = async (): Promise<Permission[]> => {
-  const response = await httpClient.get<ApiResponse<Permission[]>>(
-    "/permissions"
+  return handleApiResponse<Permission[]>(
+    httpClient.get<ApiResponse<Permission[]>>("/permissions")
   );
-  return response.data.result;
 };
 
 // Create permission
 export const createPermission = async (
   request: PermissionRequest
 ): Promise<Permission> => {
-  const response = await httpClient.post<ApiResponse<Permission>>(
-    "/permissions",
-    request
+  return handleApiResponse<Permission>(
+    httpClient.post<ApiResponse<Permission>>("/permissions", request)
   );
-  return response.data.result;
 };
 
 // Delete permission

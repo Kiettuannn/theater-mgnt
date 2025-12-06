@@ -50,24 +50,22 @@ export function Profile() {
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
-      const response = await getMyInfo();
+      const data = await getMyInfo();
+      console.log("Profile data:", data);
 
-      if (response.data.code === 1000) {
-        const data = response.data.result;
-        setProfile(data);
+      setProfile(data);
 
-        // Update form data
-        setFormData({
-          firstName: data.firstName || "",
-          lastName: data.lastName || "",
-          email: data.email || "",
-          phoneNumber: data.phoneNumber || "",
-          address: data.address || "",
-          dob: data.dob || "",
-          gender: data.gender || "MALE",
-          avatarUrl: data.avatarUrl || "",
-        });
-      }
+      // Update form data
+      setFormData({
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
+        email: data.email || "",
+        phoneNumber: data.phoneNumber || "",
+        address: data.address || "",
+        dob: data.dob || "",
+        gender: data.gender || "MALE",
+        avatarUrl: data.avatarUrl || "",
+      });
     } catch (error) {
       console.error("Error fetching profile:", error);
       addNotification({
@@ -134,19 +132,17 @@ export function Profile() {
         avatarUrl: formData.avatarUrl || undefined,
       };
 
-      const response = await updateMyInfo(profile.staffId, updateData);
+      await updateMyInfo(profile.staffId, updateData);
 
-      if (response.data.code === 1000) {
-        addNotification({
-          type: "success",
-          title: "Success",
-          message: "Profile updated successfully!",
-          duration: 3000,
-        });
-        setIsEditing(false);
-        // Refresh profile data
-        await fetchProfile();
-      }
+      addNotification({
+        type: "success",
+        title: "Success",
+        message: "Profile updated successfully!",
+        duration: 3000,
+      });
+      setIsEditing(false);
+      // Refresh profile data
+      await fetchProfile();
     } catch (err) {
       console.error("Error updating profile:", err);
       addNotification({

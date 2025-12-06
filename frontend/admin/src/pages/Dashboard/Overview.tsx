@@ -18,9 +18,7 @@ export function DashboardOverview() {
           <p className="text-2xl font-bold text-foreground">24</p>
         </div>
         <div className="bg-card rounded-lg border border-border p-6">
-          <h3 className="text-sm font-medium text-muted-foreground">
-            Phòng chiếu
-          </h3>
+          <h3 className="text-sm font-medium text-muted-foreground">Rooms</h3>
           <p className="text-2xl font-bold text-foreground">8</p>
         </div>
         <div className="bg-card rounded-lg border border-border p-6">

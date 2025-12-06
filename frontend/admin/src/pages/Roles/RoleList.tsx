@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { SearchAddBar } from "@/components/ui/SearchAddBar";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { RoleFormDialog } from "@/components/roles/RoleFormDialog";
@@ -83,44 +83,25 @@ export function RoleList() {
       />
 
       {/* Search and Actions Bar */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
-        <div className="relative w-full sm:w-96">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input
-            type="text"
-            placeholder="Search roles..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-10"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="text-sm text-muted-foreground">
-            Total: {roles.length} roles
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => navigate(ROUTES.PERMISSIONS)}
-            className="gap-2"
-          >
-            <ShieldCheck className="w-4 h-4" />
-            Permission Matrix
-          </Button>
-          <Button onClick={handleOpenCreateDialog} className="gap-2">
-            <Plus className="w-4 h-4" />
-            Create Role
-          </Button>
-        </div>
-      </div>
+      <SearchAddBar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        placeholder="Search roles..."
+        totalCount={roles.length}
+        filteredCount={filteredRoles.length}
+        icon={<Shield className="w-4 h-4" />}
+        label="roles"
+        buttonText="Create Role"
+        onAddClick={handleOpenCreateDialog}
+      />
+      <Button
+        variant="outline"
+        onClick={() => navigate(ROUTES.PERMISSIONS)}
+        className="gap-2 mt-2"
+      >
+        <ShieldCheck className="w-4 h-4" />
+        Permission Matrix
+      </Button>
 
       {/* Roles Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

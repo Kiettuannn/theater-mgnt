@@ -7,15 +7,7 @@ import {
 import { getAllRoles, updateRole, type Role } from "@/services/roleService";
 import { useNotificationStore } from "@/stores";
 import { FEATURES, ACTIONS } from "@/constants/features";
-
-interface ConfirmDialogState {
-  isOpen: boolean;
-  title: string;
-  description: string;
-  onConfirm: () => void;
-  variant?: "default" | "destructive";
-  confirmText?: string;
-}
+import { useConfirmDialog } from "./useConfirmDialog";
 
 export function usePermissionManager() {
   const [permissions, setPermissions] = useState<Permission[]>([]);
@@ -23,14 +15,8 @@ export function usePermissionManager() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [updatingCell, setUpdatingCell] = useState<string | null>(null);
-  const [confirmDialog, setConfirmDialog] = useState<ConfirmDialogState>({
-    isOpen: false,
-    title: "",
-    description: "",
-    onConfirm: () => {},
-    variant: "destructive",
-    confirmText: "Confirm",
-  });
+  
+  const { confirmDialog, showConfirmDialog, closeConfirmDialog, confirmAndClose } = useConfirmDialog();
 
   const addNotification = useNotificationStore(
     (state) => state.addNotification
@@ -190,8 +176,7 @@ export function usePermissionManager() {
       const feature = FEATURES.find((f) => f.id === featureId);
       const featureName = feature ? feature.label : "all features";
 
-      setConfirmDialog({
-        isOpen: true,
+      showConfirmDialog({
         title: enable ? "Add All Permissions" : "Remove All Permissions",
         description: `Are you sure you want to ${
           enable ? "add" : "remove"
@@ -200,13 +185,10 @@ export function usePermissionManager() {
         }?`,
         variant: enable ? "default" : "destructive",
         confirmText: enable ? "Add All" : "Remove All",
-        onConfirm: () => {
-          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
-          performToggleAllForRole(role, enable, featureId);
-        },
+        onConfirm: confirmAndClose(() => performToggleAllForRole(role, enable, featureId)),
       });
     },
-    [performToggleAllForRole]
+    [performToggleAllForRole, showConfirmDialog, confirmAndClose]
   );
 
   // Perform the actual toggle operation
@@ -310,8 +292,7 @@ export function usePermissionManager() {
         ? `${actionInfo.label} ${feature?.label || ""}`
         : permissionName;
 
-      setConfirmDialog({
-        isOpen: true,
+      showConfirmDialog({
         title: currentState ? "Remove Permission" : "Add Permission",
         description: `Are you sure you want to ${
           currentState ? "remove" : "add"
@@ -320,18 +301,11 @@ export function usePermissionManager() {
         }?`,
         variant: currentState ? "destructive" : "default",
         confirmText: currentState ? "Remove" : "Add",
-        onConfirm: () => {
-          setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
-          performTogglePermission(role, permissionName, currentState);
-        },
+        onConfirm: confirmAndClose(() => performTogglePermission(role, permissionName, currentState)),
       });
     },
-    [performTogglePermission]
+    [performTogglePermission, showConfirmDialog, confirmAndClose]
   );
-
-  const closeConfirmDialog = useCallback(() => {
-    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
-  }, []);
 
   return {
     // State
