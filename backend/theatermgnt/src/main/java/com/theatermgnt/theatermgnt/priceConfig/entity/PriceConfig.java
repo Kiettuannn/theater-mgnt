@@ -1,16 +1,19 @@
 package com.theatermgnt.theatermgnt.priceConfig.entity;
 
+import java.math.BigDecimal;
+
+import jakarta.persistence.*;
+
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.theatermgnt.theatermgnt.common.entity.BaseEntity;
 import com.theatermgnt.theatermgnt.common.enums.DayType;
 import com.theatermgnt.theatermgnt.common.enums.TimeSlot;
 import com.theatermgnt.theatermgnt.seatType.entity.SeatType;
-import jakarta.persistence.*;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-
-import java.math.BigDecimal;
 
 @Setter
 @Getter

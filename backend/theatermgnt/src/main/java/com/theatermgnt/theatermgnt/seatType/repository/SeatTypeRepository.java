@@ -1,6 +1,5 @@
 package com.theatermgnt.theatermgnt.seatType.repository;
 
-import com.theatermgnt.theatermgnt.seatType.entity.SeatType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

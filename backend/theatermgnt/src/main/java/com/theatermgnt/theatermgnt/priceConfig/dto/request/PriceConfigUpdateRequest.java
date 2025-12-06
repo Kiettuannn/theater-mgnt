@@ -1,11 +1,11 @@
 package com.theatermgnt.theatermgnt.priceConfig.dto.request;
 
+import java.math.BigDecimal;
 
 import jakarta.validation.constraints.NotNull;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
 
 @Data
 @Builder
@@ -22,5 +22,4 @@ public class PriceConfigUpdateRequest {
 
     @NotNull
     BigDecimal price;
-
 }

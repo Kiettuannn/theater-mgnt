@@ -1,9 +1,9 @@
 package com.theatermgnt.theatermgnt.seatType.dto.response;
 
+import java.math.BigDecimal;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
 
 @Data
 @Builder
@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SeatTypeResponse {
-     String id;
-     String typeName;
-     BigDecimal basePriceModifier;
+    String id;
+    String typeName;
+    BigDecimal basePriceModifier;
 }

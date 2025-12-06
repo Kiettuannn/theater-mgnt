@@ -1,15 +1,18 @@
 package com.theatermgnt.theatermgnt.room.entity;
 
+import jakarta.persistence.*;
+
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.theatermgnt.theatermgnt.cinema.entity.Cinema;
 import com.theatermgnt.theatermgnt.common.entity.BaseEntity;
 import com.theatermgnt.theatermgnt.common.enums.RoomType;
 import com.theatermgnt.theatermgnt.room.enums.RoomStatus;
 import com.theatermgnt.theatermgnt.seat.entity.Seat;
-import jakarta.persistence.*;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 import java.util.List;
 
@@ -27,6 +30,7 @@ public class Room extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cinema_id", nullable = false)
     Cinema cinema;
+
     String name;
 
     @OneToMany(fetch =  FetchType.LAZY, mappedBy = "room", cascade = CascadeType.ALL)
@@ -37,6 +41,7 @@ public class Room extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     RoomStatus status;
+
 
     Integer totalSeats;
 }

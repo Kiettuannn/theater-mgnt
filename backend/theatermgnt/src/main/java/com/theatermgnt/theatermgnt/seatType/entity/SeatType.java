@@ -1,13 +1,16 @@
 package com.theatermgnt.theatermgnt.seatType.entity;
 
-import com.theatermgnt.theatermgnt.common.entity.BaseEntity;
+import java.math.BigDecimal;
+
 import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
-import java.math.BigDecimal;
+import com.theatermgnt.theatermgnt.common.entity.BaseEntity;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Setter
 @Getter

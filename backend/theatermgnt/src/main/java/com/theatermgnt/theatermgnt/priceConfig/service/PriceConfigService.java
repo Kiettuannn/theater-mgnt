@@ -1,5 +1,9 @@
 package com.theatermgnt.theatermgnt.priceConfig.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.theatermgnt.theatermgnt.common.exception.AppException;
 import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
 import com.theatermgnt.theatermgnt.priceConfig.dto.request.PriceConfigCreationRequest;
@@ -10,13 +14,11 @@ import com.theatermgnt.theatermgnt.priceConfig.mapper.PriceConfigMapper;
 import com.theatermgnt.theatermgnt.priceConfig.repository.PriceConfigRepository;
 import com.theatermgnt.theatermgnt.seatType.entity.SeatType;
 import com.theatermgnt.theatermgnt.seatType.repository.SeatTypeRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -28,7 +30,8 @@ public class PriceConfigService {
     PriceConfigMapper priceConfigMapper;
 
     public PriceConfigResponse createPriceConfig(PriceConfigCreationRequest request) {
-        SeatType seatType = seatTypeRepository.findById(request.getSeatTypeId())
+        SeatType seatType = seatTypeRepository
+                .findById(request.getSeatTypeId())
                 .orElseThrow(() -> new AppException(ErrorCode.SEATTYPE_NOT_EXISTED));
 
         PriceConfig priceConfig = priceConfigMapper.toPriceConfig(request);
@@ -50,13 +53,15 @@ public class PriceConfigService {
     }
 
     public PriceConfigResponse getPriceConfig(String priceConfigId) {
-        PriceConfig priceConfig = priceConfigRepository.findById(priceConfigId)
+        PriceConfig priceConfig = priceConfigRepository
+                .findById(priceConfigId)
                 .orElseThrow(() -> new AppException(ErrorCode.PRICECONFIG_NOT_EXISTED));
         return priceConfigMapper.toPriceConfigResponse(priceConfig);
     }
 
     public PriceConfigResponse updatePriceConfig(String priceConfigId, PriceConfigUpdateRequest request) {
-        PriceConfig priceConfig = priceConfigRepository.findById(priceConfigId)
+        PriceConfig priceConfig = priceConfigRepository
+                .findById(priceConfigId)
                 .orElseThrow(() -> new AppException(ErrorCode.PRICECONFIG_NOT_EXISTED));
 
         priceConfigMapper.updatePriceConfig(priceConfig, request);
@@ -64,8 +69,7 @@ public class PriceConfigService {
     }
 
     public void deletePriceConfig(String priceConfigId) {
-        if (!priceConfigRepository.existsById(priceConfigId))
-            throw new AppException(ErrorCode.PRICECONFIG_NOT_EXISTED);
+        if (!priceConfigRepository.existsById(priceConfigId)) throw new AppException(ErrorCode.PRICECONFIG_NOT_EXISTED);
         priceConfigRepository.deleteById(priceConfigId);
     }
 }

@@ -1,16 +1,18 @@
 package com.theatermgnt.theatermgnt.authorization.controller;
 
-import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.theatermgnt.theatermgnt.authorization.dto.request.PermissionRequest;
 import com.theatermgnt.theatermgnt.authorization.dto.response.PermissionResponse;
 import com.theatermgnt.theatermgnt.authorization.service.PermissionService;
+import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequestMapping("/permissions")
 @RestController

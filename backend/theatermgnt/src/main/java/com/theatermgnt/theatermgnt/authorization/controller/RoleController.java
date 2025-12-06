@@ -1,16 +1,18 @@
 package com.theatermgnt.theatermgnt.authorization.controller;
 
-import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.theatermgnt.theatermgnt.authorization.dto.request.RoleRequest;
 import com.theatermgnt.theatermgnt.authorization.dto.response.RoleResponse;
 import com.theatermgnt.theatermgnt.authorization.service.RoleService;
+import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequestMapping("/roles")
 @RestController
@@ -31,7 +33,7 @@ public class RoleController {
     @PutMapping("/{roleId}")
     ApiResponse<RoleResponse> updateRole(@PathVariable String roleId, @RequestBody RoleRequest request) {
         return ApiResponse.<RoleResponse>builder()
-                .result(roleService.update(roleId,request))
+                .result(roleService.update(roleId, request))
                 .build();
     }
     /// Get all roles

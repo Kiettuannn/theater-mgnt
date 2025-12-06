@@ -13,12 +13,17 @@
           <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.5.5.Final/mapstruct-processor-1.5.5.Final.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct/1.5.5.Final/mapstruct-1.5.5.Final.jar" />
         </processorPath>
+        <module name="theater-management" />
         <module name="theatermgnt" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="theatermgnt" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="theater-management" options="-parameters" />
       <module name="theatermgnt" options="-parameters" />
     </option>
   </component>

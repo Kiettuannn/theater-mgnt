@@ -1,13 +1,15 @@
 package com.theatermgnt.theatermgnt.account.dto.request;
 
+import java.time.LocalDate;
+
+import jakarta.validation.constraints.*;
+
 import com.theatermgnt.theatermgnt.common.enums.Gender;
 import com.theatermgnt.theatermgnt.validator.DobConstraint;
-import jakarta.validation.constraints.*;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
-
-import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor

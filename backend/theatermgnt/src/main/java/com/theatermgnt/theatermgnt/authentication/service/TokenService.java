@@ -1,5 +1,15 @@
 package com.theatermgnt.theatermgnt.authentication.service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.StringJoiner;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -10,20 +20,12 @@ import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
 import com.theatermgnt.theatermgnt.constant.PredefinedRole;
 import com.theatermgnt.theatermgnt.staff.entity.Staff;
 import com.theatermgnt.theatermgnt.staff.repository.StaffRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.StringJoiner;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -45,16 +47,17 @@ public class TokenService {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
         String scope = "";
-        if(account.getAccountType() == AccountType.INTERNAL) {
-            Staff staff = staffRepository.findByAccountId(account.getId())
+        if (account.getAccountType() == AccountType.INTERNAL) {
+            Staff staff = staffRepository
+                    .findByAccountId(account.getId())
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-            if(staff != null) {
+            if (staff != null) {
                 scope = buildScope(staff);
-            }else{
+            } else {
                 log.warn("Account {} has USER type but no matching User profile found.", account.getId());
             }
-        } else{
+        } else {
             scope = "ROLE_" + PredefinedRole.CUSTOMER_ROLE;
         }
 
@@ -63,15 +66,14 @@ public class TokenService {
                 .subject(account.getId())
                 .issueTime(new Date())
                 .expirationTime(new Date(
-                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli())
-                )
+                        Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", scope)
                 .build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(jwsHeader, payload);
 
-        try{
+        try {
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
             return jwsObject.serialize();
         } catch (JOSEException e) {

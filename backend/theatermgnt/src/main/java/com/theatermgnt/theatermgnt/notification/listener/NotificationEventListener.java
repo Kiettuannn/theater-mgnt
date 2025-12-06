@@ -1,16 +1,20 @@
 package com.theatermgnt.theatermgnt.notification.listener;
 
-import com.theatermgnt.theatermgnt.account.entity.Account;
-import com.theatermgnt.theatermgnt.authentication.dto.request.ResetPasswordRequest;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
 import com.theatermgnt.theatermgnt.authentication.event.PasswordResetEvent;
 import com.theatermgnt.theatermgnt.notification.dto.request.EmailBuilderRequest;
-import com.theatermgnt.theatermgnt.notification.dto.request.Recipient;
-import com.theatermgnt.theatermgnt.notification.dto.request.SendEmailRequest;
 import com.theatermgnt.theatermgnt.notification.enums.EmailType;
 import com.theatermgnt.theatermgnt.notification.service.EmailBuilderService;
 import com.theatermgnt.theatermgnt.notification.service.EmailService;
 import com.theatermgnt.theatermgnt.notification.service.EmailTemplateFactory;
 import com.theatermgnt.theatermgnt.staff.event.StaffCreatedEvent;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -44,7 +48,9 @@ public class NotificationEventListener {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handlePasswordResetEvent(PasswordResetEvent event) {
-        log.info("Handling password reset OTP event for email: {}", event.getAccount().getEmail());
+        log.info(
+                "Handling password reset OTP event for email: {}",
+                event.getAccount().getEmail());
 
         String subject = "Prove Your Cifastar HCM Identity";
 
@@ -53,16 +59,15 @@ public class NotificationEventListener {
                 "username", event.getAccount().getUsername(),
                 "otpCode", event.getOtpCode(),
                 "email", event.getAccount().getEmail(),
-                "otpDuration", OTP_VALID_DURATION
-        );
+                "otpDuration", OTP_VALID_DURATION);
 
         String htmlContent = emailTemplateFactory.buildTemplate(EmailType.RESET_PASSWORD, variables);
 
         emailBuilderService.buildAndSendEmail(EmailBuilderRequest.builder()
-                        .account(event.getAccount())
-                        .subject(subject)
-                        .htmlContent(htmlContent)
-                        .emailTypeForLog("Password Reset OTP")
+                .account(event.getAccount())
+                .subject(subject)
+                .htmlContent(htmlContent)
+                .emailTypeForLog("Password Reset OTP")
                 .build());
     }
 

@@ -1,9 +1,11 @@
 package com.theatermgnt.theatermgnt.authentication.event;
 
+import org.springframework.context.ApplicationEvent;
+
 import com.theatermgnt.theatermgnt.account.entity.Account;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.context.ApplicationEvent;
 
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

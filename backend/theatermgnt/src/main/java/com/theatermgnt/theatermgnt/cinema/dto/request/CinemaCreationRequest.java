@@ -1,8 +1,8 @@
 package com.theatermgnt.theatermgnt.cinema.dto.request;
 
-
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -24,5 +24,4 @@ public class CinemaCreationRequest {
 
     @Pattern(regexp = "^\\+?[0-9]{8,15}$", message = "CINEMA_PHONE_NUMBER_INVALID")
     String phoneNumber;
-
 }

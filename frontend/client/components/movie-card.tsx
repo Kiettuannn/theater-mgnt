@@ -1,17 +1,17 @@
 "use client"
 
 import { Star, Clock } from "lucide-react"
-import type { Movie } from "@/lib/types"
 import { useState } from "react"
 import Link from "next/link"
 
 interface MovieCardProps {
-  movie: Movie
+  movie: any
   onBook?: () => void
 }
 
 export function MovieCard({ movie, onBook }: MovieCardProps) {
   const [isHovered, setIsHovered] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
   return (
     <div>
@@ -24,21 +24,22 @@ export function MovieCard({ movie, onBook }: MovieCardProps) {
           {/* Movie Poster */}
           <div className="relative h-80 overflow-hidden bg-muted dark:bg-slate-800">
             <img
-              src={movie.poster || "/placeholder.svg"}
+              src={imageError ? "/placeholder.svg" : (movie.poster || movie.posterUrl || "/placeholder.svg")}
               alt={movie.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              onError={() => setImageError(true)}
             />
 
             {/* Rating Badge */}
             <div className="absolute top-4 right-4 bg-yellow-500 text-slate-950 px-3 py-1 rounded-full text-sm font-bold">
-              {movie.rating}
+              {movie.rating || movie.ageRatingName || 'NR'}
             </div>
 
             {/* Book Now Button (no blur, no dark overlay) */}
             {isHovered && (
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-6 py-3 rounded-lg shadow-lg">
-                  <span className="text-purple-700 dark:text-purple-300 font-semibold">Book Now</span>
+                  <span className="text-purple-700 dark:text-purple-300 font-semibold">View Details</span>
                 </div>
               </div>
             )}
@@ -50,14 +51,27 @@ export function MovieCard({ movie, onBook }: MovieCardProps) {
 
             {/* Genre Tags */}
             <div className="flex flex-wrap gap-2">
-              {movie.genre.map((g) => (
-                <span
-                  key={g}
-                  className="text-xs bg-purple-500/20 text-purple-600 dark:text-purple-300 px-2 py-1 rounded"
-                >
-                  {g}
-                </span>
-              ))}
+              {movie.genre && movie.genre.length > 0 ? (
+                movie.genre.slice(0, 3).map((g: string) => (
+                  <span
+                    key={g}
+                    className="text-xs bg-purple-500/20 text-purple-600 dark:text-purple-300 px-2 py-1 rounded"
+                  >
+                    {g}
+                  </span>
+                ))
+              ) : movie.genreNames && movie.genreNames.length > 0 ? (
+                movie.genreNames.slice(0, 3).map((g: string) => (
+                  <span
+                    key={g}
+                    className="text-xs bg-purple-500/20 text-purple-600 dark:text-purple-300 px-2 py-1 rounded"
+                  >
+                    {g}
+                  </span>
+                ))
+              ) : (
+                <span className="text-xs text-muted-foreground">No genres</span>
+              )}
             </div>
 
             {/* Director */}
@@ -69,16 +83,20 @@ export function MovieCard({ movie, onBook }: MovieCardProps) {
             <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2 border-t border-border dark:border-slate-800">
               <div className="flex items-center gap-1">
                 <Clock size={16} />
-                <span>{movie.duration} min</span>
+                <span>{movie.duration || movie.durationMinutes || 0} min</span>
               </div>
-              <div className="flex items-center gap-1">
-                <Star size={16} className="text-yellow-500" />
-                <span>8.5/10</span>
-              </div>
+              {movie.rating && (
+                <div className="flex items-center gap-1">
+                  <Star size={16} className="text-yellow-500" />
+                  <span>8.5/10</span>
+                </div>
+              )}
             </div>
 
             {/* Description */}
-            <p className="text-sm text-muted-foreground line-clamp-2">{movie.description}</p>
+            {movie.description && (
+              <p className="text-sm text-muted-foreground line-clamp-2">{movie.description}</p>
+            )}
           </div>
         </div>
       </Link>

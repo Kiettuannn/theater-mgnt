@@ -2,9 +2,9 @@ package com.theatermgnt.theatermgnt.customer.entity;
 
 import java.time.LocalDate;
 
-import com.theatermgnt.theatermgnt.account.entity.Account;
 import jakarta.persistence.*;
 
+import com.theatermgnt.theatermgnt.account.entity.Account;
 import com.theatermgnt.theatermgnt.common.enums.Gender;
 
 import lombok.*;

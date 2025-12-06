@@ -1,22 +1,24 @@
 package com.theatermgnt.theatermgnt.authorization.service;
 
+import java.util.HashSet;
+import java.util.List;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+
 import com.theatermgnt.theatermgnt.authorization.dto.request.RoleRequest;
 import com.theatermgnt.theatermgnt.authorization.dto.response.RoleResponse;
 import com.theatermgnt.theatermgnt.authorization.entity.Role;
-import com.theatermgnt.theatermgnt.common.exception.AppException;
-import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
 import com.theatermgnt.theatermgnt.authorization.mapper.RoleMapper;
 import com.theatermgnt.theatermgnt.authorization.repository.PermissionRepository;
 import com.theatermgnt.theatermgnt.authorization.repository.RoleRepository;
+import com.theatermgnt.theatermgnt.common.exception.AppException;
+import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import java.util.HashSet;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor

@@ -1,8 +1,8 @@
 package com.theatermgnt.theatermgnt.account.dto.request;
 
-import com.theatermgnt.theatermgnt.validator.PasswordMatches;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

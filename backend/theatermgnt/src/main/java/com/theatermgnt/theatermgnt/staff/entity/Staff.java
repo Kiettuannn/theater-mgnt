@@ -1,16 +1,16 @@
 package com.theatermgnt.theatermgnt.staff.entity;
 
-import com.theatermgnt.theatermgnt.account.entity.Account;
-import com.theatermgnt.theatermgnt.authorization.entity.Role;
+import java.time.LocalDate;
+import java.util.Set;
+
 import jakarta.persistence.*;
 
+import com.theatermgnt.theatermgnt.account.entity.Account;
+import com.theatermgnt.theatermgnt.authorization.entity.Role;
 import com.theatermgnt.theatermgnt.common.enums.Gender;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDate;
-import java.util.Set;
 
 @Setter
 @Getter

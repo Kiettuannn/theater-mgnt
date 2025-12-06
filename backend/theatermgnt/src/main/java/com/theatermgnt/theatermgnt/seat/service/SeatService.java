@@ -1,5 +1,10 @@
 package com.theatermgnt.theatermgnt.seat.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.theatermgnt.theatermgnt.common.exception.AppException;
 import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
 import com.theatermgnt.theatermgnt.room.entity.Room;
@@ -10,6 +15,7 @@ import com.theatermgnt.theatermgnt.seat.mapper.SeatMapper;
 import com.theatermgnt.theatermgnt.seat.repository.SeatRepository;
 import com.theatermgnt.theatermgnt.seatType.entity.SeatType;
 import com.theatermgnt.theatermgnt.seatType.repository.SeatTypeRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

@@ -1,6 +1,7 @@
 package com.theatermgnt.theatermgnt.customer.dto.response;
 
 import com.theatermgnt.theatermgnt.common.dto.response.BaseUserResponse;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;

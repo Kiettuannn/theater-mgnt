@@ -3,7 +3,6 @@ package com.theatermgnt.theatermgnt.notification.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

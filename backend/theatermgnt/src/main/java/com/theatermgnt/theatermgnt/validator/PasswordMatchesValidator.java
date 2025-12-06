@@ -1,8 +1,9 @@
 package com.theatermgnt.theatermgnt.validator;
 
-import com.theatermgnt.theatermgnt.account.dto.request.PasswordCreationRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+
+import com.theatermgnt.theatermgnt.account.dto.request.PasswordCreationRequest;
 
 public class PasswordMatchesValidator implements ConstraintValidator<PasswordMatches, PasswordCreationRequest> {
 
@@ -13,9 +14,9 @@ public class PasswordMatchesValidator implements ConstraintValidator<PasswordMat
 
     @Override
     public boolean isValid(PasswordCreationRequest request, ConstraintValidatorContext context) {
-       if(request == null) {
-           return true; // Let @NotNull handle null case
-       }
-       return request.getPassword() != null && request.getPassword().equals(request.getConfirmPassword());
+        if (request == null) {
+            return true; // Let @NotNull handle null case
+        }
+        return request.getPassword() != null && request.getPassword().equals(request.getConfirmPassword());
     }
 }

@@ -1,25 +1,22 @@
 package com.theatermgnt.theatermgnt.authentication.service;
 
-import com.theatermgnt.theatermgnt.account.entity.Account;
-import com.theatermgnt.theatermgnt.account.repository.AccountRepository;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.theatermgnt.theatermgnt.account.service.RegistrationService;
 import com.theatermgnt.theatermgnt.authentication.dto.request.ExchangeTokenRequest;
 import com.theatermgnt.theatermgnt.authentication.dto.request.OAuthCustomerCreationRequest;
 import com.theatermgnt.theatermgnt.authentication.dto.response.AuthenticationResponse;
 import com.theatermgnt.theatermgnt.authentication.repository.httpClient.OutboundIdentityClient;
 import com.theatermgnt.theatermgnt.authentication.repository.httpClient.OutboundUserClient;
-import com.theatermgnt.theatermgnt.common.exception.AppException;
-import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
-import com.theatermgnt.theatermgnt.customer.dto.request.CustomerAccountCreationRequest;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -49,34 +46,31 @@ public class OAuthLoginService {
     public AuthenticationResponse loginWithGoogleCode(String code) {
         // 1. Exchange code for access token
         var response = outboundIdentityClient.exchangeToken(ExchangeTokenRequest.builder()
-                    .code(code)
-                    .clientId(CLIENT_ID)
-                    .clientSecret(CLIENT_SECRET)
-                    .redirectUri(REDIRECT_URI)
-                    .grantType(GRANT_TYPE)
-                .build()
-        );
+                .code(code)
+                .clientId(CLIENT_ID)
+                .clientSecret(CLIENT_SECRET)
+                .redirectUri(REDIRECT_URI)
+                .grantType(GRANT_TYPE)
+                .build());
 
         // 2. Get user info
         var userInfo = outboundUserClient.getUserInfo("json", response.getAccessToken());
 
         log.info("User info from Google: {}", userInfo);
 
-
         // 3. Find or create account and profile
         var account = registrationService.registerOAuthCustomer(OAuthCustomerCreationRequest.builder()
-                        .email(userInfo.getEmail())
-                        .firstName(userInfo.getGivenName())
-                        .lastName(userInfo.getFamilyName())
+                .email(userInfo.getEmail())
+                .firstName(userInfo.getGivenName())
+                .lastName(userInfo.getFamilyName())
                 .build());
 
         var token = tokenService.generateToken(account);
 
-        return AuthenticationResponse.builder()
-                .token(token)
-                .build();
+        return AuthenticationResponse.builder().token(token).build();
     }
+
     private String generateTemporaryPassword() {
-        return UUID.randomUUID().toString().replace("-","").substring(0,16);
+        return UUID.randomUUID().toString().replace("-", "").substring(0, 16);
     }
 }

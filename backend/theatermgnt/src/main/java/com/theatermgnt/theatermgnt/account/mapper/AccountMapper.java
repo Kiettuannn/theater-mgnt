@@ -17,7 +17,6 @@ public interface AccountMapper {
     @Mapping(target = "accountType", ignore = true)
     Account toAccount(BaseAccountCreationRequest request);
 
-
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "username", ignore = true)

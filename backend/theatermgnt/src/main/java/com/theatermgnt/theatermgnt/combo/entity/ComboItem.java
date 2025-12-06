@@ -1,12 +1,14 @@
 package com.theatermgnt.theatermgnt.combo.entity;
 
-import com.theatermgnt.theatermgnt.cinema.entity.Cinema;
-import com.theatermgnt.theatermgnt.common.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
+
+import com.theatermgnt.theatermgnt.common.entity.BaseEntity;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Setter
 @Getter
@@ -22,6 +24,7 @@ public class ComboItem extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comboId", nullable = false)
     Combo combo;
+
     String name;
     Integer quantity;
 }

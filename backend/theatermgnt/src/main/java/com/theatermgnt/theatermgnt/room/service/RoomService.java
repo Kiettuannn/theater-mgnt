@@ -1,5 +1,9 @@
 package com.theatermgnt.theatermgnt.room.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.theatermgnt.theatermgnt.cinema.entity.Cinema;
 import com.theatermgnt.theatermgnt.cinema.repository.CinemaRepository;
 import com.theatermgnt.theatermgnt.common.exception.AppException;
@@ -12,6 +16,7 @@ import com.theatermgnt.theatermgnt.room.mapper.RoomMapper;
 import com.theatermgnt.theatermgnt.room.repository.RoomRepository;
 import com.theatermgnt.theatermgnt.seat.entity.Seat;
 import com.theatermgnt.theatermgnt.seat.service.SeatService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -34,7 +39,8 @@ public class RoomService {
 
     @Transactional
     public RoomResponse createRoom(RoomCreationRequest request) {
-        Cinema cinema = cinemasRepository.findById(request.getCinemaId())
+        Cinema cinema = cinemasRepository
+                .findById(request.getCinemaId())
                 .orElseThrow(() -> new AppException(ErrorCode.CINEMA_NOT_EXISTED));
 
         if (roomRepository.existsByNameAndCinemaId(request.getName(), request.getCinemaId()))
@@ -82,22 +88,18 @@ public class RoomService {
     }
 
     public List<RoomResponse> getRooms() {
-        return roomRepository.findAll().stream()
-                .map(roomMapper::toRoomResponse)
-                .toList();
+        return roomRepository.findAll().stream().map(roomMapper::toRoomResponse).toList();
     }
 
     public RoomResponse getRoom(String roomId) {
-        Room room = roomRepository.findById(roomId)
-                .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_EXISTED));
+        Room room = roomRepository.findById(roomId).orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_EXISTED));
         return roomMapper.toRoomResponseWithSeats(room);
     }
 
 
 
     public void deleteRoom(String roomId) {
-        if (!roomRepository.existsById(roomId))
-            throw new AppException(ErrorCode.ROOM_NOT_EXISTED);
+        if (!roomRepository.existsById(roomId)) throw new AppException(ErrorCode.ROOM_NOT_EXISTED);
         roomRepository.deleteById(roomId);
     }
 }

@@ -1,18 +1,21 @@
 package com.theatermgnt.theatermgnt.priceConfig.controller;
 
+import java.util.List;
+
+import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
 import com.theatermgnt.theatermgnt.priceConfig.dto.request.PriceConfigCreationRequest;
 import com.theatermgnt.theatermgnt.priceConfig.dto.request.PriceConfigUpdateRequest;
 import com.theatermgnt.theatermgnt.priceConfig.dto.response.PriceConfigResponse;
 import com.theatermgnt.theatermgnt.priceConfig.service.PriceConfigService;
-import jakarta.validation.Valid;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/priceConfigs")
@@ -51,8 +54,8 @@ public class PriceConfigController {
     }
 
     @PutMapping("/{priceConfigId}")
-    ApiResponse<PriceConfigResponse> updatePriceConfig(@PathVariable String priceConfigId,
-                                         @RequestBody @Valid PriceConfigUpdateRequest request) {
+    ApiResponse<PriceConfigResponse> updatePriceConfig(
+            @PathVariable String priceConfigId, @RequestBody @Valid PriceConfigUpdateRequest request) {
         return ApiResponse.<PriceConfigResponse>builder()
                 .result(priceConfigService.updatePriceConfig(priceConfigId, request))
                 .build();

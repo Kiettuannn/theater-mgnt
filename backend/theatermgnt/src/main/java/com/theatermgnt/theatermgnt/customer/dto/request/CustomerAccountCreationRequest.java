@@ -1,6 +1,5 @@
 package com.theatermgnt.theatermgnt.customer.dto.request;
 
-
 import com.theatermgnt.theatermgnt.account.dto.request.BaseAccountCreationRequest;
 
 import lombok.*;
@@ -12,6 +11,4 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder(toBuilder = true)
 @EqualsAndHashCode(callSuper = true)
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CustomerAccountCreationRequest extends BaseAccountCreationRequest {
-
-}
+public class CustomerAccountCreationRequest extends BaseAccountCreationRequest {}

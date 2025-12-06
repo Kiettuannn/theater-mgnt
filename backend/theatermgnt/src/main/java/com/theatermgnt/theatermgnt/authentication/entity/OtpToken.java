@@ -1,12 +1,13 @@
 package com.theatermgnt.theatermgnt.authentication.entity;
 
-import com.theatermgnt.theatermgnt.account.entity.Account;
-import com.theatermgnt.theatermgnt.customer.entity.Customer;
+import java.time.Instant;
+
 import jakarta.persistence.*;
+
+import com.theatermgnt.theatermgnt.account.entity.Account;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.Instant;
 
 @Getter
 @Setter

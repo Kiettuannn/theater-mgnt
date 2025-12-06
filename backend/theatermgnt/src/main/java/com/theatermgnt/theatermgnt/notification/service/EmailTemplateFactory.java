@@ -1,18 +1,18 @@
 package com.theatermgnt.theatermgnt.notification.service;
 
-import com.theatermgnt.theatermgnt.common.exception.AppException;
-import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
+import java.time.Year;
+import java.util.Map;
 
-import com.theatermgnt.theatermgnt.notification.enums.EmailType;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.time.Year;
-import java.util.Map;
+import com.theatermgnt.theatermgnt.notification.enums.EmailType;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -36,5 +36,4 @@ public class EmailTemplateFactory {
         };
         return templateEngine.process(templateName, context);
     }
-
 }

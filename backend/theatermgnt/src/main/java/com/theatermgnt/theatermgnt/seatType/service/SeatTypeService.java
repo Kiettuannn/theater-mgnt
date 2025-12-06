@@ -1,5 +1,9 @@
 package com.theatermgnt.theatermgnt.seatType.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.theatermgnt.theatermgnt.common.exception.AppException;
 import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
 import com.theatermgnt.theatermgnt.seatType.dto.request.SeatTypeCreationRequest;
@@ -8,13 +12,11 @@ import com.theatermgnt.theatermgnt.seatType.dto.response.SeatTypeResponse;
 import com.theatermgnt.theatermgnt.seatType.entity.SeatType;
 import com.theatermgnt.theatermgnt.seatType.mapper.SeatTypeMapper;
 import com.theatermgnt.theatermgnt.seatType.repository.SeatTypeRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -26,9 +28,9 @@ public class SeatTypeService {
 
     SeatTypeMapper seatTypeMapper;
 
-    public SeatTypeResponse createSeatType(SeatTypeCreationRequest request){
+    public SeatTypeResponse createSeatType(SeatTypeCreationRequest request) {
 
-        if(seatTypeRepository.existsByTypeName(request.getTypeName()))
+        if (seatTypeRepository.existsByTypeName(request.getTypeName()))
             throw new AppException(ErrorCode.SEATTYPE_EXISTED);
 
         SeatType seatType = seatTypeMapper.toSeatType(request);
@@ -36,23 +38,28 @@ public class SeatTypeService {
         return seatTypeMapper.toSeatTypeResponse(seatTypeRepository.save(seatType));
     }
 
-    public List<SeatTypeResponse> getSeatTypes(){
+    public List<SeatTypeResponse> getSeatTypes() {
         return seatTypeRepository.findAll().stream()
-                .map(seatTypeMapper::toSeatTypeResponse).toList();
+                .map(seatTypeMapper::toSeatTypeResponse)
+                .toList();
     }
 
-    public SeatTypeResponse getSeatType(String seatTypeId){
-        return seatTypeMapper.toSeatTypeResponse(seatTypeRepository.findById(seatTypeId).orElseThrow(()-> new AppException(ErrorCode.SEATTYPE_NOT_EXISTED)));
+    public SeatTypeResponse getSeatType(String seatTypeId) {
+        return seatTypeMapper.toSeatTypeResponse(seatTypeRepository
+                .findById(seatTypeId)
+                .orElseThrow(() -> new AppException(ErrorCode.SEATTYPE_NOT_EXISTED)));
     }
 
-    public void deleteSeatType(String seatTypeId){
+    public void deleteSeatType(String seatTypeId) {
         seatTypeRepository.deleteById(seatTypeId);
     }
 
-    public SeatTypeResponse updateSeatType(String seatTypeId, SeatTypeUpdateRequest request){
-        SeatType seatType = seatTypeRepository.findById(seatTypeId).orElseThrow(()-> new AppException(ErrorCode.SEATTYPE_NOT_EXISTED));
+    public SeatTypeResponse updateSeatType(String seatTypeId, SeatTypeUpdateRequest request) {
+        SeatType seatType = seatTypeRepository
+                .findById(seatTypeId)
+                .orElseThrow(() -> new AppException(ErrorCode.SEATTYPE_NOT_EXISTED));
 
-        seatTypeMapper.updateSeatType(seatType,request);
+        seatTypeMapper.updateSeatType(seatType, request);
 
         return seatTypeMapper.toSeatTypeResponse(seatTypeRepository.save(seatType));
     }

@@ -32,6 +32,7 @@ public class Account {
 
     @Column(unique = true)
     String username;
+
     String password;
 
     @Column(unique = true)

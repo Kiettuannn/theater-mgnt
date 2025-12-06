@@ -1,13 +1,13 @@
 package com.theatermgnt.theatermgnt.notification.repository.httpClient;
 
-import com.theatermgnt.theatermgnt.notification.dto.request.EmailRequest;
-import com.theatermgnt.theatermgnt.notification.dto.response.EmailResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+
+import com.theatermgnt.theatermgnt.notification.dto.request.EmailRequest;
+import com.theatermgnt.theatermgnt.notification.dto.response.EmailResponse;
 
 @FeignClient(name = "email-client", url = "https://api.brevo.com")
 public interface EmailClient {

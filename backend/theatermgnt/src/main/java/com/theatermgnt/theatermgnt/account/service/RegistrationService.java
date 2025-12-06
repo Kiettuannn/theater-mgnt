@@ -1,37 +1,37 @@
 package com.theatermgnt.theatermgnt.account.service;
 
-import com.theatermgnt.theatermgnt.account.repository.AccountRepository;
-import com.theatermgnt.theatermgnt.authentication.dto.request.OAuthCustomerCreationRequest;
-import com.theatermgnt.theatermgnt.constant.PredefinedRole;
-import com.theatermgnt.theatermgnt.customer.repository.CustomerRepository;
-import com.theatermgnt.theatermgnt.customer.service.CustomerService;
-import com.theatermgnt.theatermgnt.staff.dto.request.StaffAccountCreationRequest;
-import com.theatermgnt.theatermgnt.customer.dto.response.CustomerResponse;
-import com.theatermgnt.theatermgnt.staff.dto.response.StaffResponse;
-import com.theatermgnt.theatermgnt.authorization.entity.Role;
-import com.theatermgnt.theatermgnt.staff.entity.Staff;
-import com.theatermgnt.theatermgnt.staff.event.StaffCreatedEvent;
-import com.theatermgnt.theatermgnt.staff.mapper.StaffMapper;
-import com.theatermgnt.theatermgnt.authorization.repository.RoleRepository;
-import com.theatermgnt.theatermgnt.staff.service.StaffService;
-import org.springframework.context.ApplicationEventPublisher;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.theatermgnt.theatermgnt.customer.dto.request.CustomerAccountCreationRequest;
 import com.theatermgnt.theatermgnt.account.entity.Account;
-import com.theatermgnt.theatermgnt.customer.entity.Customer;
+import com.theatermgnt.theatermgnt.account.repository.AccountRepository;
+import com.theatermgnt.theatermgnt.authentication.dto.request.OAuthCustomerCreationRequest;
 import com.theatermgnt.theatermgnt.authentication.enums.AccountType;
+import com.theatermgnt.theatermgnt.authorization.entity.Role;
+import com.theatermgnt.theatermgnt.authorization.repository.RoleRepository;
+import com.theatermgnt.theatermgnt.constant.PredefinedRole;
+import com.theatermgnt.theatermgnt.customer.dto.request.CustomerAccountCreationRequest;
+import com.theatermgnt.theatermgnt.customer.dto.response.CustomerResponse;
+import com.theatermgnt.theatermgnt.customer.entity.Customer;
 import com.theatermgnt.theatermgnt.customer.mapper.CustomerMapper;
+import com.theatermgnt.theatermgnt.customer.repository.CustomerRepository;
+import com.theatermgnt.theatermgnt.customer.service.CustomerService;
+import com.theatermgnt.theatermgnt.staff.dto.request.StaffAccountCreationRequest;
+import com.theatermgnt.theatermgnt.staff.dto.response.StaffResponse;
+import com.theatermgnt.theatermgnt.staff.entity.Staff;
+import com.theatermgnt.theatermgnt.staff.event.StaffCreatedEvent;
+import com.theatermgnt.theatermgnt.staff.mapper.StaffMapper;
+import com.theatermgnt.theatermgnt.staff.service.StaffService;
+import org.springframework.context.ApplicationEventPublisher;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -58,8 +58,9 @@ public class RegistrationService {
     }
 
     @Transactional
-    public Account registerOAuthCustomer (OAuthCustomerCreationRequest request) {
-        return accountRepository.findByEmail(request.getEmail()).orElseGet(() -> {;
+    public Account registerOAuthCustomer(OAuthCustomerCreationRequest request) {
+        return accountRepository.findByEmail(request.getEmail()).orElseGet(() -> {
+            ;
             Account newAccount = Account.builder()
                     .email(request.getEmail())
                     .username(request.getEmail())
@@ -76,7 +77,6 @@ public class RegistrationService {
             customerRepository.save(newCustomer);
             return savedAccount;
         });
-
     }
 
     /// Create staff account
@@ -85,7 +85,7 @@ public class RegistrationService {
     public StaffResponse registerStaffAccount(StaffAccountCreationRequest request) {
         Set<Role> roles = new HashSet<>();
         roleRepository.findById(PredefinedRole.STAFF_ROLE).ifPresent(roles::add);
-        return internalCreateStaff(request,roles);
+        return internalCreateStaff(request, roles);
     }
 
     /// Only use for initial admin account creation
@@ -93,7 +93,7 @@ public class RegistrationService {
     public StaffResponse createAdminAccount(StaffAccountCreationRequest request) {
         Set<Role> roles = new HashSet<>();
         roleRepository.findById(PredefinedRole.ADMIN_ROLE).ifPresent(roles::add);
-        return internalCreateStaff(request,roles);
+        return internalCreateStaff(request, roles);
     }
 
     private StaffResponse internalCreateStaff(StaffAccountCreationRequest request, Set<Role> roles) {

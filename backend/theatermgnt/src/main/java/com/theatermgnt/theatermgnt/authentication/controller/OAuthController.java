@@ -1,18 +1,19 @@
 package com.theatermgnt.theatermgnt.authentication.controller;
 
-import com.theatermgnt.theatermgnt.account.entity.Account;
-import com.theatermgnt.theatermgnt.authentication.dto.response.AuthenticationResponse;
-import com.theatermgnt.theatermgnt.authentication.service.OAuthLoginService;
-import com.theatermgnt.theatermgnt.authentication.service.TokenService;
-import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.theatermgnt.theatermgnt.authentication.dto.response.AuthenticationResponse;
+import com.theatermgnt.theatermgnt.authentication.service.OAuthLoginService;
+import com.theatermgnt.theatermgnt.authentication.service.TokenService;
+import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @RequestMapping("/auth")
 @RestController

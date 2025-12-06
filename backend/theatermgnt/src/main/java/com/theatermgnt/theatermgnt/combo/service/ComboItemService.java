@@ -1,24 +1,24 @@
 package com.theatermgnt.theatermgnt.combo.service;
 
-import com.theatermgnt.theatermgnt.cinema.entity.Cinema;
-import com.theatermgnt.theatermgnt.cinema.repository.CinemaRepository;
-import com.theatermgnt.theatermgnt.combo.entity.Combo;
-import com.theatermgnt.theatermgnt.combo.repository.ComboRepository;
-import com.theatermgnt.theatermgnt.common.exception.AppException;
-import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.theatermgnt.theatermgnt.combo.dto.request.ComboItemCreationRequest;
 import com.theatermgnt.theatermgnt.combo.dto.request.ComboItemUpdateRequest;
 import com.theatermgnt.theatermgnt.combo.dto.response.ComboItemResponse;
+import com.theatermgnt.theatermgnt.combo.entity.Combo;
 import com.theatermgnt.theatermgnt.combo.entity.ComboItem;
 import com.theatermgnt.theatermgnt.combo.mapper.ComboItemMapper;
 import com.theatermgnt.theatermgnt.combo.repository.ComboItemRepository;
+import com.theatermgnt.theatermgnt.combo.repository.ComboRepository;
+import com.theatermgnt.theatermgnt.common.exception.AppException;
+import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -30,7 +30,8 @@ public class ComboItemService {
     ComboItemMapper comboItemMapper;
 
     public ComboItemResponse createComboItem(ComboItemCreationRequest request) {
-        Combo combo = comboRepository.findById(request.getComboId())
+        Combo combo = comboRepository
+                .findById(request.getComboId())
                 .orElseThrow(() -> new AppException(ErrorCode.COMBO_NOT_EXISTED));
 
         if (comboItemRepository.existsByNameAndComboId(request.getName(), request.getComboId()))
@@ -55,13 +56,15 @@ public class ComboItemService {
     }
 
     public ComboItemResponse getComboItem(String comboItemId) {
-        ComboItem comboItem = comboItemRepository.findById(comboItemId)
+        ComboItem comboItem = comboItemRepository
+                .findById(comboItemId)
                 .orElseThrow(() -> new AppException(ErrorCode.COMBO_ITEM_NOT_EXISTED));
         return comboItemMapper.toComboItemResponse(comboItem);
     }
 
     public ComboItemResponse updateComboItem(String comboItemId, ComboItemUpdateRequest request) {
-        ComboItem comboItem = comboItemRepository.findById(comboItemId)
+        ComboItem comboItem = comboItemRepository
+                .findById(comboItemId)
                 .orElseThrow(() -> new AppException(ErrorCode.COMBO_ITEM_NOT_EXISTED));
 
         comboItemMapper.updateComboItem(comboItem, request);
@@ -69,8 +72,7 @@ public class ComboItemService {
     }
 
     public void deleteComboItem(String comboItemId) {
-        if (!comboItemRepository.existsById(comboItemId))
-            throw new AppException(ErrorCode.COMBO_ITEM_NOT_EXISTED);
+        if (!comboItemRepository.existsById(comboItemId)) throw new AppException(ErrorCode.COMBO_ITEM_NOT_EXISTED);
         comboItemRepository.deleteById(comboItemId);
     }
 }

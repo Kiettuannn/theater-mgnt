@@ -1,18 +1,21 @@
 package com.theatermgnt.theatermgnt.room.controller;
 
+import java.util.List;
+
+import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
 import com.theatermgnt.theatermgnt.room.dto.request.RoomCreationRequest;
 import com.theatermgnt.theatermgnt.room.dto.request.RoomUpdateRequest;
 import com.theatermgnt.theatermgnt.room.dto.response.RoomResponse;
 import com.theatermgnt.theatermgnt.room.service.RoomService;
-import jakarta.validation.Valid;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/rooms")
@@ -51,8 +54,7 @@ public class RoomController {
     }
 
     @PutMapping("/{roomId}")
-    ApiResponse<RoomResponse> updateRoom(@PathVariable String roomId,
-                                         @RequestBody @Valid RoomUpdateRequest request) {
+    ApiResponse<RoomResponse> updateRoom(@PathVariable String roomId, @RequestBody @Valid RoomUpdateRequest request) {
         return ApiResponse.<RoomResponse>builder()
                 .result(roomService.updateRoom(roomId, request))
                 .build();
@@ -61,8 +63,6 @@ public class RoomController {
     @DeleteMapping("/{roomId}")
     ApiResponse<String> deleteRoom(@PathVariable String roomId) {
         roomService.deleteRoom(roomId);
-        return ApiResponse.<String>builder()
-                .result("Delete room successfully")
-                .build();
+        return ApiResponse.<String>builder().result("Delete room successfully").build();
     }
 }

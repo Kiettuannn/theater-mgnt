@@ -1,4 +1,3 @@
-
 server:
   port: 8080
   servlet:
@@ -8,9 +7,14 @@ spring:
   application:
     name: theater-mgnt
   datasource:
-    url: jdbc:postgresql://db.zpjvpfkwbcnszfzdwynf.supabase.co:5432/postgres
+    url: jdbc:postgresql://localhost:5433/theaterdb
     username: postgres
-    password: 3kSE347@123
+    password: 123456
+
+    #  datasource:
+    #    url: jdbc:postgresql://db.zpjvpfkwbcnszfzdwynf.supabase.co:5432/postgres
+    #    username: postgres
+    #    password: 3kSE347@123
 
     driver-class-name: org.postgresql.Driver
   #
@@ -41,8 +45,6 @@ jwt:
   valid-duration: 3600
 otp:
   valid-duration: 10
-
-
 
 brevo:
   apiKey: ${BREVO_API_KEY}

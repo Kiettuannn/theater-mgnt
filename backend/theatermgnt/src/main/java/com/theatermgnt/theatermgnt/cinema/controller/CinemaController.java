@@ -1,18 +1,21 @@
 package com.theatermgnt.theatermgnt.cinema.controller;
 
+import java.util.List;
+
+import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.theatermgnt.theatermgnt.cinema.dto.request.CinemaCreationRequest;
 import com.theatermgnt.theatermgnt.cinema.dto.request.CinemaUpdateRequest;
 import com.theatermgnt.theatermgnt.cinema.dto.response.CinemaResponse;
 import com.theatermgnt.theatermgnt.cinema.service.CinemaService;
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
-import jakarta.validation.Valid;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/cinemas")
@@ -23,28 +26,28 @@ public class CinemaController {
     CinemaService cinemaService;
 
     @PostMapping
-    ApiResponse<CinemaResponse> createCinema(@RequestBody @Valid CinemaCreationRequest request){
+    ApiResponse<CinemaResponse> createCinema(@RequestBody @Valid CinemaCreationRequest request) {
         return ApiResponse.<CinemaResponse>builder()
                 .result(cinemaService.createCinema(request))
                 .build();
     }
 
     @GetMapping
-    ApiResponse<List<CinemaResponse>> getCinemas(){
+    ApiResponse<List<CinemaResponse>> getCinemas() {
         return ApiResponse.<List<CinemaResponse>>builder()
                 .result(cinemaService.getCinemas())
                 .build();
     }
 
     @GetMapping("/{cinemaId}")
-    ApiResponse<CinemaResponse> getCinema(@PathVariable("cinemaId") String cinemaId){
+    ApiResponse<CinemaResponse> getCinema(@PathVariable("cinemaId") String cinemaId) {
         return ApiResponse.<CinemaResponse>builder()
                 .result(cinemaService.getCinema(cinemaId))
                 .build();
     }
 
     @DeleteMapping("/{cinemaId}")
-    ApiResponse<String> deleteCinema(@PathVariable("cinemaId") String cinemaId){
+    ApiResponse<String> deleteCinema(@PathVariable("cinemaId") String cinemaId) {
         cinemaService.deleteCinema(cinemaId);
         return ApiResponse.<String>builder()
                 .result("Delete cinema successfully")
@@ -52,7 +55,8 @@ public class CinemaController {
     }
 
     @PutMapping("/{cinemaId}")
-    ApiResponse<CinemaResponse> updateUser(@PathVariable String cinemaId,@RequestBody @Valid CinemaUpdateRequest request){
+    ApiResponse<CinemaResponse> updateUser(
+            @PathVariable String cinemaId, @RequestBody @Valid CinemaUpdateRequest request) {
         return ApiResponse.<CinemaResponse>builder()
                 .result(cinemaService.updateCinema(cinemaId, request))
                 .build();

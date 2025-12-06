@@ -1,31 +1,32 @@
 package com.theatermgnt.theatermgnt.staff.service;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import jakarta.transaction.Transactional;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+import com.theatermgnt.theatermgnt.account.entity.Account;
+import com.theatermgnt.theatermgnt.authorization.entity.Role;
+import com.theatermgnt.theatermgnt.authorization.repository.RoleRepository;
+import com.theatermgnt.theatermgnt.common.exception.AppException;
+import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
 import com.theatermgnt.theatermgnt.constant.PredefinedRole;
 import com.theatermgnt.theatermgnt.staff.dto.request.SearchStaffRequest;
 import com.theatermgnt.theatermgnt.staff.dto.request.StaffAccountCreationRequest;
 import com.theatermgnt.theatermgnt.staff.dto.request.StaffProfileUpdateRequest;
 import com.theatermgnt.theatermgnt.staff.dto.response.StaffResponse;
-import com.theatermgnt.theatermgnt.account.entity.Account;
-import com.theatermgnt.theatermgnt.authorization.entity.Role;
 import com.theatermgnt.theatermgnt.staff.entity.Staff;
-import com.theatermgnt.theatermgnt.common.exception.AppException;
-import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
 import com.theatermgnt.theatermgnt.staff.mapper.StaffMapper;
-import com.theatermgnt.theatermgnt.authorization.repository.RoleRepository;
 import com.theatermgnt.theatermgnt.staff.repository.StaffRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -36,10 +37,9 @@ public class StaffService {
     StaffMapper staffMapper;
     RoleRepository roleRepository;
 
-
     /// CREATE STAFF PROFILE
     @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
+    //    @PreAuthorize("hasRole('ADMIN')")
     public Staff createStaffProfile(StaffAccountCreationRequest request, Account account, Set<Role> roles) {
         Staff staff = staffMapper.toStaff(request);
         staff.setAccount(account);
@@ -48,7 +48,7 @@ public class StaffService {
     }
 
     /// GET ALL STAFF
-    @PreAuthorize("hasRole('ADMIN')")
+    //    @PreAuthorize("hasRole('ADMIN')")
     public List<StaffResponse> getAll() {
         return staffRepository.findAll().stream()
                 .map(staffMapper::toStaffResponse)
@@ -56,10 +56,9 @@ public class StaffService {
     }
 
     /// GET STAFF BY ID
-    @PreAuthorize("hasRole('ADMIN')")
+    //    @PreAuthorize("hasRole('ADMIN')")
     public StaffResponse getStaffProfile(String staffId) {
-        Staff staff = staffRepository.findById(staffId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        Staff staff = staffRepository.findById(staffId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return staffMapper.toStaffResponse(staff);
     }
 
@@ -68,7 +67,8 @@ public class StaffService {
         var context = SecurityContextHolder.getContext();
         String accountId = context.getAuthentication().getName();
 
-        Staff staff = staffRepository.findByAccountId(accountId)
+        Staff staff = staffRepository
+                .findByAccountId(accountId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return staffMapper.toStaffResponse(staff);
     }
@@ -90,11 +90,11 @@ public class StaffService {
         boolean isCallerAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_" + PredefinedRole.ADMIN_ROLE));
 
-        Staff staffToUpdate = staffRepository.findById(staffId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        Staff staffToUpdate =
+                staffRepository.findById(staffId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         staffMapper.updateStaffProfile(staffToUpdate, request);
-        if(isCallerAdmin && request.getRoles() != null) {
+        if (isCallerAdmin && request.getRoles() != null) {
             log.info("Updating roles for staff: {}", staffId);
             var roles = roleRepository.findAllById(request.getRoles());
             staffToUpdate.setRoles(new HashSet<>(roles));

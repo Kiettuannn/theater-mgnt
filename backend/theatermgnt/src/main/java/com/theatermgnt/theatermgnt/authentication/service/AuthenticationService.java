@@ -1,51 +1,38 @@
 package com.theatermgnt.theatermgnt.authentication.service;
 
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jose.crypto.MACVerifier;
-import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
-import com.theatermgnt.theatermgnt.authentication.dto.request.*;
-import com.theatermgnt.theatermgnt.authentication.dto.response.AuthenticationResponse;
-import com.theatermgnt.theatermgnt.authentication.dto.response.IntrospectResponse;
-import com.theatermgnt.theatermgnt.account.entity.Account;
-import com.theatermgnt.theatermgnt.authentication.entity.InvalidatedToken;
-import com.theatermgnt.theatermgnt.authentication.entity.OtpToken;
-import com.theatermgnt.theatermgnt.authentication.event.PasswordResetEvent;
-import com.theatermgnt.theatermgnt.authentication.repository.OtpTokenRepository;
-import com.theatermgnt.theatermgnt.authentication.repository.httpClient.OutboundIdentityClient;
-import com.theatermgnt.theatermgnt.authentication.repository.httpClient.OutboundUserClient;
-import com.theatermgnt.theatermgnt.constant.PredefinedRole;
-import com.theatermgnt.theatermgnt.customer.dto.request.CustomerAccountCreationRequest;
-import com.theatermgnt.theatermgnt.customer.dto.response.CustomerResponse;
-import com.theatermgnt.theatermgnt.customer.entity.Customer;
-import com.theatermgnt.theatermgnt.customer.repository.CustomerRepository;
-import com.theatermgnt.theatermgnt.staff.entity.Staff;
-import com.theatermgnt.theatermgnt.authentication.enums.AccountType;
-import com.theatermgnt.theatermgnt.common.exception.AppException;
-import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
-import com.theatermgnt.theatermgnt.account.repository.AccountRepository;
-import com.theatermgnt.theatermgnt.authentication.repository.InvalidatedTokenRepository;
-import com.theatermgnt.theatermgnt.staff.repository.StaffRepository;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.CollectionUtils;
-
 import java.security.SecureRandom;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.StringJoiner;
-import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.MACVerifier;
+import com.nimbusds.jwt.SignedJWT;
+import com.theatermgnt.theatermgnt.account.entity.Account;
+import com.theatermgnt.theatermgnt.account.repository.AccountRepository;
+import com.theatermgnt.theatermgnt.authentication.dto.request.*;
+import com.theatermgnt.theatermgnt.authentication.dto.response.AuthenticationResponse;
+import com.theatermgnt.theatermgnt.authentication.dto.response.IntrospectResponse;
+import com.theatermgnt.theatermgnt.authentication.entity.InvalidatedToken;
+import com.theatermgnt.theatermgnt.authentication.entity.OtpToken;
+import com.theatermgnt.theatermgnt.authentication.event.PasswordResetEvent;
+import com.theatermgnt.theatermgnt.authentication.repository.InvalidatedTokenRepository;
+import com.theatermgnt.theatermgnt.authentication.repository.OtpTokenRepository;
+import com.theatermgnt.theatermgnt.common.exception.AppException;
+import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -58,7 +45,6 @@ public class AuthenticationService {
     OtpTokenRepository otpTokenRepository;
     TokenService tokenService;
 
-
     @NonFinal
     @Value("${jwt.signerKey}")
     protected String SIGNER_KEY;
@@ -67,12 +53,9 @@ public class AuthenticationService {
     @Value("${jwt.refreshable-duration}")
     protected long REFRESHABLE_DURATION;
 
-
     @NonFinal
     @Value("${otp.valid-duration}")
     protected long OTP_VALID_DURATION;
-
-
 
     /// INTROSPECT
     public IntrospectResponse introspect(IntrospectRequest request) throws ParseException, JOSEException {
@@ -86,41 +69,33 @@ public class AuthenticationService {
             log.error("Token verification failed: {}", e.getMessage());
             isValid = false;
         }
-        return IntrospectResponse.builder()
-                .valid(isValid)
-                .build();
-
+        return IntrospectResponse.builder().valid(isValid).build();
     }
     /// AUTHENTICATE
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
-        var account = accountRepository.findByUsernameOrEmailOrPhoneNumber(request.getLoginIdentifier(),
-                request.getLoginIdentifier(), request.getLoginIdentifier())
+        var account = accountRepository
+                .findByUsernameOrEmailOrPhoneNumber(
+                        request.getLoginIdentifier(), request.getLoginIdentifier(), request.getLoginIdentifier())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), account.getPassword());
-        if(!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
+        if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
         var token = tokenService.generateToken(account);
-        return AuthenticationResponse.builder()
-                .authenticated(true)
-                .token(token)
-                .build();
+        return AuthenticationResponse.builder().authenticated(true).token(token).build();
     }
 
     /// LOGOUT METHOD
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
-        try{
+        try {
             var signToken = verifyToken(request.getToken(), true);
             String jti = signToken.getJWTClaimsSet().getJWTID();
             Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
 
             InvalidatedToken invalidatedToken =
-                    InvalidatedToken.builder()
-                            .id(jti)
-                            .expiryTime(expiryTime)
-                            .build();
+                    InvalidatedToken.builder().id(jti).expiryTime(expiryTime).build();
             invalidatedTokenRepository.save(invalidatedToken);
         } catch (AppException e) {
             log.info("Token already expired: {}", e.getMessage());
@@ -137,10 +112,7 @@ public class AuthenticationService {
         var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
         InvalidatedToken invalidatedToken =
-                InvalidatedToken.builder()
-                        .id(jti)
-                        .expiryTime(expiryTime)
-                        .build();
+                InvalidatedToken.builder().id(jti).expiryTime(expiryTime).build();
         invalidatedTokenRepository.save(invalidatedToken);
 
         // Step 3: Generate new token based on current user
@@ -149,23 +121,16 @@ public class AuthenticationService {
                 .findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         var token = tokenService.generateToken(account);
-        return AuthenticationResponse.builder()
-                .token(token)
-                .authenticated(true)
-                .build();
+        return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }
-
 
     /// FORGOT PASSWORD
     public void forgotPassword(ForgotPasswordRequest request) {
         var account = accountRepository.findByUsernameOrEmailOrPhoneNumber(
-                request.getLoginIdentifier(),
-                request.getLoginIdentifier(),
-                request.getLoginIdentifier()
-        );
+                request.getLoginIdentifier(), request.getLoginIdentifier(), request.getLoginIdentifier());
 
         // Does not throw exception if not found
-        if(account.isEmpty()) {
+        if (account.isEmpty()) {
             log.info("Password reset requested for non-existing account: {}", request.getLoginIdentifier());
             return; // Exit silently to prevent user enumeration
         }
@@ -189,7 +154,7 @@ public class AuthenticationService {
         try{
             eventPublisher.publishEvent(new PasswordResetEvent(account.get(), otpCode));
             log.info("Password reset requested for account: {}", account.get().getEmail());
-        } catch (Exception e){
+        } catch (Exception e) {
             // Log error but do not throw to avoid user enumeration
             log.error("Error publishing password reset event: {}", e.getMessage());
         }
@@ -199,23 +164,23 @@ public class AuthenticationService {
     public void resetPassword(ResetPasswordRequest request) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
-        var account = accountRepository.findByUsernameOrEmailOrPhoneNumber(
-                request.getLoginIdentifier(),
-                request.getLoginIdentifier(),
-                request.getLoginIdentifier())
+        var account = accountRepository
+                .findByUsernameOrEmailOrPhoneNumber(
+                        request.getLoginIdentifier(), request.getLoginIdentifier(), request.getLoginIdentifier())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         // Get saved OTP from database
-        OtpToken savedOtpToken = otpTokenRepository.findByAccount(account)
+        OtpToken savedOtpToken = otpTokenRepository
+                .findByAccount(account)
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
 
         // Validate OTP code and expiry
-        if(savedOtpToken.getExpiryTime().isBefore(Instant.now())) {
+        if (savedOtpToken.getExpiryTime().isBefore(Instant.now())) {
             otpTokenRepository.delete(savedOtpToken);
             throw new AppException(ErrorCode.OTP_EXPIRED);
         }
 
-        if(!savedOtpToken.getCode().equals(request.getOtpCode())) {
+        if (!savedOtpToken.getCode().equals(request.getOtpCode())) {
             throw new AppException(ErrorCode.INVALID_OTP);
         }
         // OTP is valid - proceed to reset password
@@ -227,13 +192,12 @@ public class AuthenticationService {
         log.info("Password has been reset for user: {}", account.getEmail());
     }
 
-
     /// VERIFY TOKEN
     private SignedJWT verifyToken(String token, boolean isRefreshToken) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
 
-        Date expiryTime =(isRefreshToken)
+        Date expiryTime = (isRefreshToken)
                 ? new Date(signedJWT
                         .getJWTClaimsSet()
                         .getIssueTime()
@@ -244,17 +208,16 @@ public class AuthenticationService {
 
         var verified = signedJWT.verify(verifier);
 
-        if(!(verified && expiryTime.after(new Date())) ) {
+        if (!(verified && expiryTime.after(new Date()))) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
         // Case:User has logged out -> token is invalidated
-        if(invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
+        if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
         return signedJWT;
     }
-
 
     /// GENERATE OTP CODE
     private String generateOtpCode() {
@@ -263,4 +226,3 @@ public class AuthenticationService {
         return String.valueOf(otp);
     }
 }
-
