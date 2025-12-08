@@ -3,6 +3,7 @@
 import { ChevronRight, Play, X } from "lucide-react"
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 
 export function HeroSection() {
   const [showTrailer, setShowTrailer] = useState(false)
@@ -76,11 +77,14 @@ export function HeroSection() {
           <div className="relative h-96 md:h-full hidden md:flex items-center justify-center">
             <div className="relative w-full max-w-sm">
               {/* Movie poster card */}
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                <img
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl aspect-[2/3]">
+                <Image
                   src="/premium-cinema-movie-poster.jpg"
                   alt="Featured Movie"
-                  className="w-full h-auto object-cover"
+                  fill
+                  priority
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 400px"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
 

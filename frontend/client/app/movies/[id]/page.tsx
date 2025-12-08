@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { use } from "react"
 import { ChevronLeft, Clock } from "lucide-react"
 import { showtimes } from "@/lib/mock-data"
 import type { Showtime } from "@/lib/types"
 import { getMovieById, mapMovieForDisplay } from "@/lib/api-movie"
+import { MovieSchema } from "@/components/movie-schema"
+import { ShowtimeSchema } from "@/components/showtime-schema"
 
 export default function MovieDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -78,14 +81,23 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="min-h-screen bg-background dark:bg-slate-950 pt-20">
+    <>
+      {/* SEO: Structured Data */}
+      {movie && <MovieSchema movie={movie} />}
+      {movie && movieShowtimes.map((showtime) => (
+        <ShowtimeSchema key={showtime.id} movie={movie} showtime={showtime} />
+      ))}
+
+      <div className="min-h-screen bg-background dark:bg-slate-950 pt-20">
       {/* Movie Hero */}
       <div className="relative h-96 md:h-[500px] overflow-hidden bg-gradient-to-b from-purple-900/20 to-background dark:to-slate-950">
-        <img
+        <Image
           src={movie.poster || "/placeholder.svg"}
           alt={movie.title}
-          className="w-full h-full object-cover opacity-40"
-          onError={(e) => { e.currentTarget.src = "/placeholder.svg" }}
+          fill
+          priority
+          className="object-cover opacity-40"
+          sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background dark:from-slate-950 via-transparent" />
 
@@ -106,12 +118,15 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Poster */}
           <div className="flex justify-center md:justify-start">
-            <img
-              src={movie.poster || "/placeholder.svg"}
-              alt={movie.title}
-              className="w-48 h-72 rounded-xl shadow-2xl object-cover"
-              onError={(e) => { e.currentTarget.src = "/placeholder.svg" }}
-            />
+            <div className="relative w-48 h-72">
+              <Image
+                src={movie.poster || "/placeholder.svg"}
+                alt={movie.title}
+                fill
+                className="rounded-xl shadow-2xl object-cover"
+                sizes="(max-width: 768px) 192px, 192px"
+              />
+            </div>
           </div>
 
           {/* Details */}
@@ -244,6 +259,7 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
         )}
       </div>
     </div>
+    </>
   )
 }
 

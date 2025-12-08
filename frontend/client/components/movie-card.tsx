@@ -3,6 +3,7 @@
 import { Star, Clock } from "lucide-react"
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 
 interface MovieCardProps {
   movie: any
@@ -23,10 +24,12 @@ export function MovieCard({ movie, onBook }: MovieCardProps) {
         >
           {/* Movie Poster */}
           <div className="relative h-80 overflow-hidden bg-muted dark:bg-slate-800">
-            <img
+            <Image
               src={imageError ? "/placeholder.svg" : (movie.poster || movie.posterUrl || "/placeholder.svg")}
               alt={movie.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               onError={() => setImageError(true)}
             />
 

@@ -62,8 +62,16 @@ public class SecurityConfig {
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
+        // Local development
         corsConfiguration.addAllowedOrigin("http://localhost:5173");
         corsConfiguration.addAllowedOrigin("http://localhost:3000");
+
+        // Production - Vercel frontend
+        corsConfiguration.addAllowedOrigin("https://theater-mgnt-seo.vercel.app");
+
+        // Ngrok - Allow any ngrok subdomain (URL changes on restart)
+        corsConfiguration.addAllowedOriginPattern("https://*.ngrok-free.app");
+
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
         corsConfiguration.setAllowCredentials(true);

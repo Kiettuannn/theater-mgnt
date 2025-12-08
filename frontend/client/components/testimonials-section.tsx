@@ -1,6 +1,7 @@
 "use client"
 
 import { Star } from "lucide-react"
+import Image from "next/image"
 import { testimonials } from "@/lib/mock-data"
 
 export function TestimonialsSection() {
@@ -44,11 +45,15 @@ export function TestimonialsSection() {
 
               {/* Author */}
               <div className="flex items-center gap-4 pt-6 border-t border-slate-800">
-                <img
-                  src={testimonial.avatar || "/placeholder.svg"}
-                  alt={testimonial.name}
-                  className="w-12 h-12 rounded-full object-cover"
-                />
+                <div className="relative w-12 h-12 rounded-full overflow-hidden">
+                  <Image
+                    src={testimonial.avatar || "/placeholder.svg"}
+                    alt={testimonial.name}
+                    fill
+                    className="object-cover"
+                    sizes="48px"
+                  />
+                </div>
                 <div>
                   <p className="font-semibold text-white">{testimonial.name}</p>
                   <p className="text-sm text-slate-400">{testimonial.role}</p>
