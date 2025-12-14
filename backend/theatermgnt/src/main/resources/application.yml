@@ -21,7 +21,25 @@ spring:
         jdbc:
           batch_size: 50
         order_inserts: true
-        order_updates: true
+  ai:
+    google:
+      ai:
+        api-key: ${GEMINI_KEY}
+
+        embedding:
+          model: text-embedding-004
+
+        chat:
+          options:
+            model: gemini-2.0-flash
+            temperature: 0.7
+
+    vectorstore:
+      pgvector:
+        dimension: 768
+        index-type: HNSW
+        initialize-schema: true
+
 
 outbound:
   identity:

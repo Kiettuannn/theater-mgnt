@@ -2,7 +2,6 @@ package com.theatermgnt.theatermgnt.cinema.dto.request;
 
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CinemaUpdateRequest {
+
     @Size(min = 3, message = "CINEMA_NAME_INVALID")
     String name;
 
