@@ -4,9 +4,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.chat.memory.repository.jdbc.JdbcChatMemoryRepository;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.request.ChatBotInternalRequest;
@@ -22,11 +27,21 @@ import lombok.extern.slf4j.Slf4j;
 public class ChatService {
     ChatClient chatClient;
     VectorStore vectorStore;
+    JdbcChatMemoryRepository jdbcChatMemoryRepository;
 
-    public ChatService(ChatClient.Builder builder, VectorStore vectorStore) {
-        this.chatClient = builder.build();
+    public ChatService(ChatClient.Builder builder, VectorStore vectorStore,
+                       JdbcChatMemoryRepository jdbcChatMemoryRepository) {
         this.vectorStore = vectorStore;
+        this.jdbcChatMemoryRepository = jdbcChatMemoryRepository;
+
+        ChatMemory chatMemory = MessageWindowChatMemory.builder()
+                .chatMemoryRepository(jdbcChatMemoryRepository)
+                .maxMessages(30)
+                .build();
+        chatClient = builder.defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+                .build();
     }
+
 
     public ChatBotInternalResponse chat(ChatBotInternalRequest request) {
 
@@ -67,7 +82,16 @@ public class ChatService {
 				"""
                             .formatted(context, request.getQuery().trim());
 
-            String answer = chatClient.prompt().user(finalPrompt).call().content();
+            var contextHolder = SecurityContextHolder.getContext();
+            String conversationId = contextHolder.getAuthentication().getName(); // AccountId
+
+            String answer = chatClient.prompt()
+                    .advisors(advisorSpec -> advisorSpec.param(
+                            ChatMemory.CONVERSATION_ID, conversationId
+                    ))
+                    .user(finalPrompt)
+                    .call()
+                    .content();
 
             return ChatBotInternalResponse.builder()
                     .answer(answer)
@@ -78,6 +102,31 @@ public class ChatService {
             return ChatBotInternalResponse.builder()
                     .answer("Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại sau.")
                     .build();
+        }
+    }
+
+    /**
+     * Xóa toàn bộ lịch sử chat của một conversation
+     */
+    public void clearConversation(String conversationId) {
+        try {
+            jdbcChatMemoryRepository.deleteByConversationId(conversationId);
+            log.info("Cleared conversation: {}", conversationId);
+        } catch (Exception e) {
+            log.error("Error clearing conversation: {}", conversationId, e);
+        }
+    }
+
+    /**
+     * Xóa lịch sử chat của user hiện tại (lấy từ SecurityContext)
+     */
+    public void clearCurrentUserConversation() {
+        try {
+            var contextHolder = SecurityContextHolder.getContext();
+            String accountId = contextHolder.getAuthentication().getName();
+            clearConversation(accountId);
+        } catch (Exception e) {
+            log.error("Error clearing current user conversation", e);
         }
     }
 }

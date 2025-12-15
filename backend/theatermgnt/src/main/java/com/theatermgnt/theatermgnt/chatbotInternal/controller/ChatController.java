@@ -23,4 +23,9 @@ public class ChatController {
     public ChatBotInternalResponse chat(@RequestBody ChatBotInternalRequest request) {
         return chatService.chat(request);
     }
+
+    @DeleteMapping("/conversation")
+    public void clearConversation() {
+        chatService.clearCurrentUserConversation();
+    }
 }

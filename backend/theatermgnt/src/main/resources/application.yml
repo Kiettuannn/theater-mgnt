@@ -29,7 +29,7 @@ spring:
       chat:
         completions-path: v1beta/openai/chat/completions
         options:
-          model: gemini-2.5-flash
+          model: gemini-2.0-flash
       embedding:
         embeddings-path: v1beta/openai/embeddings
         options:
@@ -39,6 +39,11 @@ spring:
         dimension: 768
         index-type: HNSW
         initialize-schema: true
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
 
 
 outbound:
