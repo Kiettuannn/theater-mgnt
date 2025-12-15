@@ -48,12 +48,13 @@ public enum ErrorCode {
     COMBO_ITEM_EXISTED(2011, "Seat existed", HttpStatus.BAD_REQUEST),
     COMBO_ITEM_NOT_EXISTED(2012, "Seat not existed", HttpStatus.BAD_REQUEST),
 
-    //AgeRating
+    // AgeRating
     AGERATING_EXISTED(2015, "Age rating existed", HttpStatus.BAD_REQUEST),
     AGERATING_NOT_EXISTED(2016, "Age rating not existed", HttpStatus.NOT_FOUND),
     INVALID_AGERATING_ID(2017, "Age rating ID must not exceed {max} characters", HttpStatus.BAD_REQUEST),
     INVALID_AGERATING_CODE(2018, "Age rating code must be between {min} and {max} characters", HttpStatus.BAD_REQUEST),
-    INVALID_AGERATING_DESCRIPTION(2019, "Age rating description must not exceed {max} characters", HttpStatus.BAD_REQUEST),
+    INVALID_AGERATING_DESCRIPTION(
+            2019, "Age rating description must not exceed {max} characters", HttpStatus.BAD_REQUEST),
     AGERATING_CODE_EXISTED(2036, "Age rating code existed", HttpStatus.BAD_REQUEST),
     // Genre
     GENRE_EXISTED(2020, "Genre existed", HttpStatus.BAD_REQUEST),
@@ -63,7 +64,7 @@ public enum ErrorCode {
     GENRE_NAME_REQUIRED(2024, "Genre name is required", HttpStatus.BAD_REQUEST),
     INVALID_GENRE_NAME(2025, "Genre name must not exceed {max} characters", HttpStatus.BAD_REQUEST),
     GENRE_NAME_EXISTED(2037, "Genre name existed", HttpStatus.BAD_REQUEST),
-    //Movie
+    // Movie
     MOVIE_EXISTED(2026, "Movie existed", HttpStatus.BAD_REQUEST),
     MOVIE_NOT_EXISTED(2027, "Movie not existed", HttpStatus.NOT_FOUND),
     INVALID_MOVIE_TITLE(2028, "Movie title must not exceed {max} characters", HttpStatus.BAD_REQUEST),
@@ -74,7 +75,7 @@ public enum ErrorCode {
     INVALID_POSTER_URL(2033, "Poster URL must be a valid URL", HttpStatus.BAD_REQUEST),
     INVALID_TRAILER_URL(2034, "Trailer URL must be a valid URL", HttpStatus.BAD_REQUEST),
     INVALID_MOVIE_GENRES(2035, "Movie must have between {min} and {max} genres", HttpStatus.BAD_REQUEST),
-    //-----
+    // -----
     CANNOT_SEND_EMAIL(3001, "Cannot send email", HttpStatus.BAD_REQUEST),
     ;
     private int code;

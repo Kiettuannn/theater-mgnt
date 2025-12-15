@@ -2,10 +2,10 @@ package com.theatermgnt.theatermgnt.movie.mapper;
 
 import java.util.List;
 
-import com.theatermgnt.theatermgnt.movie.dto.request.CreateAgeRatingRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
+import com.theatermgnt.theatermgnt.movie.dto.request.CreateAgeRatingRequest;
 import com.theatermgnt.theatermgnt.movie.dto.response.AgeRatingResponse;
 import com.theatermgnt.theatermgnt.movie.entity.AgeRating;
 

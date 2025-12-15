@@ -1,7 +1,7 @@
 package com.theatermgnt.theatermgnt.staff.event;
 
-import com.theatermgnt.theatermgnt.account.entity.Account;
 import com.theatermgnt.theatermgnt.staff.entity.Staff;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

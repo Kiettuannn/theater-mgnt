@@ -17,7 +17,6 @@ import com.theatermgnt.theatermgnt.movie.dto.response.MovieSimpleResponse;
 import com.theatermgnt.theatermgnt.movie.entity.AgeRating;
 import com.theatermgnt.theatermgnt.movie.entity.Genre;
 import com.theatermgnt.theatermgnt.movie.entity.Movie;
-
 import com.theatermgnt.theatermgnt.movie.mapper.MovieMapper;
 import com.theatermgnt.theatermgnt.movie.repository.AgeRatingRepository;
 import com.theatermgnt.theatermgnt.movie.repository.GenreRepository;
@@ -48,9 +47,8 @@ public class MovieService {
 
         // Validate Genres exist
         Set<Genre> genres = request.getGenreIds().stream()
-                .map(id -> genreRepository
-                        .findById(id)
-                        .orElseThrow(() -> new AppException(ErrorCode.GENRE_NOT_EXISTED)))
+                .map(id ->
+                        genreRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.GENRE_NOT_EXISTED)))
                 .collect(Collectors.toSet());
 
         // Map and set relationships
@@ -68,14 +66,11 @@ public class MovieService {
     // ========== READ ==========
     public List<MovieSimpleResponse> getAllMovies() {
         List<Movie> movies = movieRepository.findAllWithGenres();
-        return movies.stream()
-                .map(movieMapper::toMovieSimpleResponse)
-                .collect(Collectors.toList());
+        return movies.stream().map(movieMapper::toMovieSimpleResponse).collect(Collectors.toList());
     }
 
     public MovieResponse getMovieById(String id) {
-        Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+        Movie movie = movieRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
         return movieMapper.toMovieResponse(movie);
     }
 
@@ -116,8 +111,7 @@ public class MovieService {
 
     // ========== UPDATE ==========
     public MovieResponse updateMovie(String id, UpdateMovieRequest request) {
-        Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+        Movie movie = movieRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
 
         // Update basic fields using MapStruct
         movieMapper.updateMovieFromRequest(request, movie);
@@ -146,8 +140,7 @@ public class MovieService {
     }
 
     public MovieResponse archiveMovie(String id) {
-        Movie movie = movieRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+        Movie movie = movieRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
         movie.setStatus(MovieStatus.archived);
         Movie archivedMovie = movieRepository.save(movie);
         log.info("Archived movie with id: {}", archivedMovie.getId());
@@ -156,8 +149,8 @@ public class MovieService {
 
     // ========== DELETE ==========
     public void deleteMovie(String movieId) {
-        Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+        Movie movie =
+                movieRepository.findById(movieId).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
         movieRepository.delete(movie);
         log.info("Deleted movie with id: {}", movieId);
     }

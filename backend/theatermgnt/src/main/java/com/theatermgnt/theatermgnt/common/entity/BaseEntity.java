@@ -32,7 +32,7 @@ public abstract class BaseEntity implements Serializable {
     LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at" , nullable = true)
+    @Column(name = "updated_at", nullable = true)
     LocalDateTime updatedAt;
 
     @Column(name = "deleted", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")

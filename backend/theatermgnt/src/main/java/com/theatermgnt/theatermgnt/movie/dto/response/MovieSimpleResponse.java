@@ -4,7 +4,6 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.theatermgnt.theatermgnt.common.enums.MovieStatus;
-import com.theatermgnt.theatermgnt.movie.entity.Movie;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

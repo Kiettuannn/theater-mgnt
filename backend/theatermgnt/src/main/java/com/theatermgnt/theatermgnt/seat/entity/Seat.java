@@ -22,7 +22,6 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "seats")
 @SQLDelete(sql = "UPDATE seats SET deleted = true WHERE id = ?")
 @Where(clause = "deleted = false")
-
 public class Seat extends BaseEntity {
     String rowChair;
     Integer seatNumber;

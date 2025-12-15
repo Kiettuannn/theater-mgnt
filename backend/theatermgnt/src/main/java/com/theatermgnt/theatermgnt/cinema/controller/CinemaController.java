@@ -52,12 +52,12 @@ public class CinemaController {
                 .result("Delete cinema successfully")
                 .build();
     }
-//
-//    @PutMapping("/{cinemaId}")
-//    ApiResponse<CinemaResponse> updateUser(
-//            @PathVariable String cinemaId, @RequestBody @Valid CinemaUpdateRequest request) {
-//        return ApiResponse.<CinemaResponse>builder()
-//                .result(cinemaService.updateCinema(cinemaId, request))
-//                .build();
-//    }
+    //
+    //    @PutMapping("/{cinemaId}")
+    //    ApiResponse<CinemaResponse> updateUser(
+    //            @PathVariable String cinemaId, @RequestBody @Valid CinemaUpdateRequest request) {
+    //        return ApiResponse.<CinemaResponse>builder()
+    //                .result(cinemaService.updateCinema(cinemaId, request))
+    //                .build();
+    //    }
 }

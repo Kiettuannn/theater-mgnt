@@ -1,12 +1,11 @@
 package com.theatermgnt.theatermgnt.room.dto.response;
 
-import com.theatermgnt.theatermgnt.common.enums.RoomType;
+import java.util.List;
+
 import com.theatermgnt.theatermgnt.seat.dto.response.SeatResponse;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.List;
 
 @Data
 @Builder

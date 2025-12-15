@@ -2,12 +2,12 @@ package com.theatermgnt.theatermgnt.movie.repository;
 
 import java.util.List;
 
-import com.theatermgnt.theatermgnt.common.enums.MovieStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.theatermgnt.theatermgnt.common.enums.MovieStatus;
 import com.theatermgnt.theatermgnt.movie.entity.Movie;
 
 @Repository

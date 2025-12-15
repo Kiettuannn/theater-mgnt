@@ -1,16 +1,10 @@
 package com.theatermgnt.theatermgnt.chatbotInternal.config;
 
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.ai.document.Document;
 import org.springframework.ai.document.DocumentReader;
-
-import org.springframework.ai.document.MetadataMode;
-import org.springframework.ai.embedding.EmbeddingModel;
-import org.springframework.ai.openai.OpenAiEmbeddingModel;
-import org.springframework.ai.openai.OpenAiEmbeddingOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.transformer.splitter.TextSplitter;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
@@ -21,44 +15,44 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.retry.support.RetryTemplate;
-import org.springframework.web.client.RestClient;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.List;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@RequiredArgsConstructor
 public class RagConfig {
+
     @Value("classpath:/data/staff_handbook.pdf")
     Resource handbookFile;
-
 
     @Bean
     ApplicationRunner ragApplicationRunner(VectorStore vectorStore, JdbcTemplate jdbcTemplate) {
         return args -> {
-            Integer count = jdbcTemplate.queryForObject(
-                    "select count(*) from vector_store", Integer.class);
+            Integer count = jdbcTemplate.queryForObject("select count(*) from vector_store", Integer.class);
 
-            if(count != null && count == 0) {
-                log.info("Vector store already initialized with {} vectors", count);
+            if (count != null && count == 0) {
+                log.info("Vector store is empty. Initializing from handbook...");
                 loadDocument(vectorStore, handbookFile);
-            }else{
+            } else {
                 log.info("Vector store already initialized with {} vectors", count);
             }
         };
     }
 
-
     void loadDocument(VectorStore vectorStore, Resource resource) {
         log.info("Loading document {} into Vector Store", resource.getFilename());
 
-        DocumentReader documentReader = new TikaDocumentReader(handbookFile);
+        DocumentReader documentReader = new TikaDocumentReader(resource);
         List<Document> documents = documentReader.get();
-        TextSplitter textSplitter = new TokenTextSplitter();
+
+        // Configure TextSplitter
+        TextSplitter textSplitter = new TokenTextSplitter(800, 350, 10, 5000, true);
         List<Document> splitDocuments = textSplitter.apply(documents);
         vectorStore.add(splitDocuments);
-        log.info("Loaded {} documents", resource.getFilename());
     }
 }

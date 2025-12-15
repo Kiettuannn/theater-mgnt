@@ -25,8 +25,10 @@ public class Movie extends BaseEntity {
     String description;
     Integer durationMinutes;
     String director;
+
     @Column(name = "movie_cast")
     String castMembers;
+
     String posterUrl;
     String trailerUrl;
     LocalDate releaseDate;

@@ -3,10 +3,9 @@ package com.theatermgnt.theatermgnt.movie.dto.request;
 import java.time.LocalDate;
 import java.util.Set;
 
-import com.theatermgnt.theatermgnt.common.enums.MovieStatus;
 import jakarta.validation.constraints.*;
 
-import com.theatermgnt.theatermgnt.movie.entity.Movie;
+import com.theatermgnt.theatermgnt.common.enums.MovieStatus;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

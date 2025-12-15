@@ -2,17 +2,16 @@ package com.theatermgnt.theatermgnt.movie.controller;
 
 import java.util.List;
 
-import com.theatermgnt.theatermgnt.common.enums.MovieStatus;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.*;
 
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
+import com.theatermgnt.theatermgnt.common.enums.MovieStatus;
 import com.theatermgnt.theatermgnt.movie.dto.request.CreateMovieRequest;
 import com.theatermgnt.theatermgnt.movie.dto.request.UpdateMovieRequest;
 import com.theatermgnt.theatermgnt.movie.dto.response.MovieResponse;
 import com.theatermgnt.theatermgnt.movie.dto.response.MovieSimpleResponse;
-import com.theatermgnt.theatermgnt.movie.entity.Movie;
 import com.theatermgnt.theatermgnt.movie.service.MovieService;
 
 import lombok.AccessLevel;
@@ -54,8 +53,7 @@ public class MovieController {
     }
 
     @GetMapping("/status/{status}")
-    ApiResponse<List<MovieSimpleResponse>> getMoviesByStatus(
-            @PathVariable("status") MovieStatus status) {
+    ApiResponse<List<MovieSimpleResponse>> getMoviesByStatus(@PathVariable("status") MovieStatus status) {
         return ApiResponse.<List<MovieSimpleResponse>>builder()
                 .result(movieService.getMoviesByStatus(status))
                 .build();
@@ -93,8 +91,7 @@ public class MovieController {
 
     @PutMapping("/{id}")
     ApiResponse<MovieResponse> updateMovie(
-            @PathVariable("id") String id,
-            @Valid @RequestBody UpdateMovieRequest request) {
+            @PathVariable("id") String id, @Valid @RequestBody UpdateMovieRequest request) {
         return ApiResponse.<MovieResponse>builder()
                 .result(movieService.updateMovie(id, request))
                 .build();

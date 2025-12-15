@@ -1,17 +1,16 @@
 package com.theatermgnt.theatermgnt.room.dto.request;
 
-import com.theatermgnt.theatermgnt.room.enums.RoomStatus;
-import com.theatermgnt.theatermgnt.seat.dto.request.SeatRequest;
-import com.theatermgnt.theatermgnt.seat.dto.request.SeatUpdateRequest;
+import java.util.List;
+
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import com.theatermgnt.theatermgnt.common.enums.RoomType;
+import com.theatermgnt.theatermgnt.room.enums.RoomStatus;
+import com.theatermgnt.theatermgnt.seat.dto.request.SeatRequest;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.List;
 
 @Data
 @Builder

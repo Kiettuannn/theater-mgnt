@@ -151,7 +151,7 @@ public class AuthenticationService {
         otpTokenRepository.save(newOtpToken);
 
         // Publish event to send email
-        try{
+        try {
             eventPublisher.publishEvent(new PasswordResetEvent(account.get(), otpCode));
             log.info("Password reset requested for account: {}", account.get().getEmail());
         } catch (Exception e) {

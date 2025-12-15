@@ -63,8 +63,6 @@ public class StaffController {
                 .build();
     }
 
-
-
     @PutMapping("/{staffId}")
     public ApiResponse<StaffResponse> updateStaffProfile(
             @PathVariable String staffId, @RequestBody StaffProfileUpdateRequest request) {
