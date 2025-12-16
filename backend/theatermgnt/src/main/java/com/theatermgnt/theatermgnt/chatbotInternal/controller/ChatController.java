@@ -1,5 +1,6 @@
 package com.theatermgnt.theatermgnt.chatbotInternal.controller;
 
+import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatMessageResponse;
 import org.springframework.web.bind.annotation.*;
 
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.request.ChatBotInternalRequest;
@@ -10,6 +11,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/chat")
@@ -22,6 +25,11 @@ public class ChatController {
     @PostMapping
     public ChatBotInternalResponse chat(@RequestBody ChatBotInternalRequest request) {
         return chatService.chat(request);
+    }
+
+    @GetMapping("/history")
+    public List<ChatMessageResponse> getChatHistory(){
+        return chatService.getChatHistory();
     }
 
     @DeleteMapping("/conversation")
