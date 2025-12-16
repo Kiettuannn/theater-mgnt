@@ -71,7 +71,6 @@ public class ChatService {
             String context = similarDocs.stream()
                     .map(Document::getText).collect(Collectors.joining("\n\n---\n\n"));
 
-            // System instruction - CỐ ĐỊNH, không thay đổi theo từng câu hỏi
             String systemInstruction =
                     """
 				Bạn là một trợ lý quản lý rạp chiếu phim chuyên nghiệp và hữu ích.
@@ -96,7 +95,6 @@ public class ChatService {
 				4. Trả lời ngắn gọn, đúng trọng tâm, văn phong lịch sự.
 				""";
 
-            // User message với context từ vector store
             String userMessageWithContext =
                     """
 				Dưới đây là các quy định và thông tin nội bộ của rạp có thể liên quan:
