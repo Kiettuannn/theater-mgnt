@@ -10,14 +10,13 @@ import org.hibernate.annotations.Where;
 @Entity
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "files")
 @SQLDelete(sql = "UPDATE files SET deleted = true WHERE id = ?")
 @Where(clause = "deleted = false")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class File extends BaseEntity {
+public class FileMgnt extends BaseEntity {
     String ownerId;
     String contentType;
     long size;
