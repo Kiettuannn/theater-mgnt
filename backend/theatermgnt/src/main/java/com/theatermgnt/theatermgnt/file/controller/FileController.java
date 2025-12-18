@@ -40,4 +40,11 @@ public class FileController {
                 .result(fileService.getFileById(fileId))
                 .build();
     }
+
+    @DeleteMapping("/{fileId}")
+    ApiResponse<Void> deleteFileById(@PathVariable String fileId) {
+        fileService.deleteFileById(fileId);
+        return ApiResponse.<Void>builder()
+                .build();
+    }
 }

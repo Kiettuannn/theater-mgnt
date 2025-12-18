@@ -53,5 +53,12 @@ public class FileService {
         return fileMgntMapper.toFileResponse(file);
     }
 
+    public void deleteFileById(String id) {
+        if(!fileMgntRepository.existsById(id)) throw new AppException(ErrorCode.FILE_NOT_FOUND);
+        fileMgntRepository.deleteById(id);
+    }
+
+
+
 
 }
