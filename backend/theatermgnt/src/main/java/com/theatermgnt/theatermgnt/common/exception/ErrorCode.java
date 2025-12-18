@@ -77,6 +77,10 @@ public enum ErrorCode {
     INVALID_MOVIE_GENRES(2035, "Movie must have between {min} and {max} genres", HttpStatus.BAD_REQUEST),
     // -----
     CANNOT_SEND_EMAIL(3001, "Cannot send email", HttpStatus.BAD_REQUEST),
+
+
+    // FILE
+    FILE_NOT_FOUND(5001, "File not existed", HttpStatus.NOT_FOUND)
     ;
     private int code;
     private String message;

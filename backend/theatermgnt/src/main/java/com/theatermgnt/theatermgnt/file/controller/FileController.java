@@ -1,7 +1,7 @@
 package com.theatermgnt.theatermgnt.file.controller;
 
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
-import com.theatermgnt.theatermgnt.file.dto.response.FileListResponse;
+import com.theatermgnt.theatermgnt.file.dto.response.FileItemResponse;
 import com.theatermgnt.theatermgnt.file.dto.response.FileUploadResponse;
 import com.theatermgnt.theatermgnt.file.service.FileService;
 import lombok.AccessLevel;
@@ -28,9 +28,16 @@ public class FileController {
     }
 
     @GetMapping
-    ApiResponse<List<FileListResponse>> getAllFiles() {
-        return ApiResponse.<List<FileListResponse>>builder()
+    ApiResponse<List<FileItemResponse>> getAllFiles() {
+        return ApiResponse.<List<FileItemResponse>>builder()
                 .result(fileService.getAllFiles())
+                .build();
+    }
+
+    @GetMapping("/{fileId}")
+    ApiResponse<FileItemResponse> getFileById(@PathVariable String fileId) {
+        return ApiResponse.<FileItemResponse>builder()
+                .result(fileService.getFileById(fileId))
                 .build();
     }
 }

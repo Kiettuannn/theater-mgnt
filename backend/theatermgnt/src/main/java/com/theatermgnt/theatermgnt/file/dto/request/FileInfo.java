@@ -22,5 +22,6 @@ public class FileInfo {
     long size;
     String md5Checksum;
     String url;
+    String originalFileName;
     LocalDateTime uploadTime;
 }

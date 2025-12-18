@@ -21,6 +21,7 @@ public class FileMgnt extends BaseEntity {
     String contentType;
     long size;
     String md5Checksum;
+    String originalFileName;
     String url;
     String cloudPublicId;
 }

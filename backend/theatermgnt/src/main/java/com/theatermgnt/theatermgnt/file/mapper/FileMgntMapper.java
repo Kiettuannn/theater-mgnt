@@ -1,8 +1,7 @@
 package com.theatermgnt.theatermgnt.file.mapper;
 
 import com.theatermgnt.theatermgnt.file.dto.request.FileInfo;
-import com.theatermgnt.theatermgnt.file.dto.response.FileListResponse;
-import com.theatermgnt.theatermgnt.file.dto.response.FileUploadResponse;
+import com.theatermgnt.theatermgnt.file.dto.response.FileItemResponse;
 import com.theatermgnt.theatermgnt.file.entity.FileMgnt;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,5 +13,5 @@ public interface FileMgntMapper {
     FileMgnt toFileMgmt(FileInfo fileInfo);
 
     @Mapping(target = "uploadDate", source = "createdAt")
-    FileListResponse toFileListResponse(FileMgnt fileMgmt);
+    FileItemResponse toFileResponse(FileMgnt fileMgmt);
 }

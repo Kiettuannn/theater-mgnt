@@ -1,7 +1,10 @@
 package com.theatermgnt.theatermgnt.file.service;
 
-import com.theatermgnt.theatermgnt.file.dto.response.FileListResponse;
+import com.theatermgnt.theatermgnt.common.exception.AppException;
+import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
+import com.theatermgnt.theatermgnt.file.dto.response.FileItemResponse;
 import com.theatermgnt.theatermgnt.file.dto.response.FileUploadResponse;
+import com.theatermgnt.theatermgnt.file.entity.FileMgnt;
 import com.theatermgnt.theatermgnt.file.mapper.FileMgntMapper;
 import com.theatermgnt.theatermgnt.file.repository.FileMgntRepository;
 import com.theatermgnt.theatermgnt.file.repository.FileRepository;
@@ -39,9 +42,16 @@ public class FileService {
                 .build();
     }
 
-    public List<FileListResponse> getAllFiles()  {
+    public List<FileItemResponse> getAllFiles()  {
         return fileMgntRepository.findAll().stream()
-                .map(fileMgntMapper::toFileListResponse)
+                .map(fileMgntMapper::toFileResponse)
                 .toList();
     }
+    public FileItemResponse getFileById(String id) {
+        FileMgnt file =  fileMgntRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.FILE_NOT_FOUND));
+        return fileMgntMapper.toFileResponse(file);
+    }
+
+
 }

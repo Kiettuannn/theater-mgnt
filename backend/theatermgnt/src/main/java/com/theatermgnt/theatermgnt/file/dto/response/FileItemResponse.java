@@ -10,9 +10,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class FileListResponse {
+public class FileItemResponse {
     String id;
     String url;
+    String originalFileName;
     String contentType;
     long size;
     LocalDateTime uploadDate;
