@@ -12,6 +12,7 @@ import {
   Receipt,
   BarChart3,
   DoorOpen,
+  Image,
 } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { PERMISSIONS } from "@/constants/permissions";
@@ -116,5 +117,11 @@ export const MENU_ITEMS: MenuItem[] = [
     icon: BarChart3,
     path: ROUTES.REPORTS,
     requiredPermissions: [PERMISSIONS.REPORT_READ],
+  },
+  {
+    id: "media",
+    label: "Media Library",
+    icon: Image,
+    path: ROUTES.MEDIA,
   },
 ];

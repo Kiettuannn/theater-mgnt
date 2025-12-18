@@ -23,6 +23,7 @@ import { PERMISSIONS } from "@/constants/permissions";
 import { ROUTES } from "@/constants/routes";
 import { Navigate } from "react-router-dom";
 import { TicketBookingPage } from "@/pages/TicketBooking/TickKetBookingPage";
+import MediaLibrary from "@/pages/Medias/MediaLibrary";
 
 export const routes = [
   {
@@ -247,6 +248,10 @@ export const routes = [
                 element: <ReportList />,
               },
             ],
+          },
+          {
+            path: `${ROUTES.MEDIA}`,
+            element: <MediaLibrary />,
           },
           {
             path: `${ROUTES.TICKET_BOOKING}`,
