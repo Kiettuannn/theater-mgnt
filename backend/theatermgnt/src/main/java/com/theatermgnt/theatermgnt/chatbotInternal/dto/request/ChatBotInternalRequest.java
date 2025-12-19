@@ -9,5 +9,5 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChatBotInternalRequest {
-    String query; // Chỉ cần câu hỏi, conversationId = accountId từ SecurityContext
+    String query;
 }
