@@ -86,7 +86,9 @@ public enum ErrorCode {
     FILE_SYNC_TO_VECTOR_STORE_FAILED(5004, "File sync to vector store failed", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_DELETE_FROM_VECTOR_STORE_FAILED(5005, "File delete from vector store failed", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_FILE_TYPE(5006, "Invalid file type", HttpStatus.BAD_REQUEST),
-    DOCUMENT_ALREADY_EXISTS(5007, "Document already exists", HttpStatus.BAD_REQUEST)
+    DOCUMENT_ALREADY_EXISTS(5007, "Document already exists", HttpStatus.BAD_REQUEST),
+    DOCUMENT_NOT_FOUND(5008, "Document not found", HttpStatus.NOT_FOUND),
+    DOCUMENT_ALREADY_PROCESSING(5009, "Document is already being processed", HttpStatus.BAD_REQUEST),
 
     ;
     private int code;

@@ -1,6 +1,7 @@
 package com.theatermgnt.theatermgnt.chatbotInternal.service;
 
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.request.AddDocumentRequest;
+import com.theatermgnt.theatermgnt.chatbotInternal.dto.request.SyncFileToVectorStoreRequest;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatbotDocumentResponse;
 import com.theatermgnt.theatermgnt.chatbotInternal.entity.ChatbotDocument;
 import com.theatermgnt.theatermgnt.chatbotInternal.enums.DocumentStatus;
@@ -15,11 +16,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -72,6 +76,51 @@ public class ChatbotConfigService {
         if(request.isSyncImmediately()){
         }
         return chatbotDocumentMapper.toChatbotDocumentResponse(chatbotDocument);
+    }
+
+    // Sync document to vector store
+    @Async
+    @Transactional
+    public CompletableFuture<Void> syncDocumentToVector(String documentId) {
+        try{
+            // Look document
+            ChatbotDocument doc = chatbotDocumentRepository.findById(documentId)
+                    .orElseThrow(() -> new AppException(ErrorCode.DOCUMENT_NOT_FOUND));
+
+            // Check if already processing
+            if(doc.getDocumentStatus() == DocumentStatus.PROCESSING){
+                throw new AppException(ErrorCode.DOCUMENT_ALREADY_PROCESSING);
+            }
+
+            // Update status to processing
+            doc.setDocumentStatus(DocumentStatus.PROCESSING);
+            doc.setSyncError(null);
+            chatbotDocumentRepository.save(doc);
+
+            // Sync to vector store
+            int syncedChunks = vectorStoreService.syncFileToVectorStore(SyncFileToVectorStoreRequest.builder()
+                            .fileId(doc.getFileMgnt().getId())
+                            .fileUrl(doc.getFileMgnt().getUrl())
+                            .fileName(doc.getFileMgnt().getOriginalFileName())
+                            .documentType(doc.getDocumentType())
+                            .chatbotDocumentId(doc.getId())
+                    .build());
+
+            // Update status to active
+            doc.setDocumentStatus(DocumentStatus.ACTIVE);
+            doc.setChunksCount(syncedChunks);
+            doc.setLastSyncedAt(LocalDateTime.now());
+            chatbotDocumentRepository.save(doc);
+        }catch(AppException e){
+            // Update status to FAILED
+            ChatbotDocument doc = chatbotDocumentRepository.findById(documentId).orElse(null);
+            if(doc != null){
+                doc.setDocumentStatus(DocumentStatus.FAILED);
+                doc.setSyncError(e.getMessage());
+                chatbotDocumentRepository.save(doc);
+            }
+        }
+        return CompletableFuture.completedFuture(null);
     }
 
 }
