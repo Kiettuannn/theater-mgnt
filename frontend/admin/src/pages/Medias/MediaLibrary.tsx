@@ -12,11 +12,12 @@ import {
 import { SearchAddBar } from "@/components/ui/SearchAddBar";
 import { PageHeader } from "@/components/ui/PageHeader";
 import type { MediaFile, ViewMode, SortBy } from "@/types/media.types";
-import { getAllMediaFiles } from "@/services/mediaService";
+import { getAllMediaFiles, deleteMediaFile } from "@/services/mediaService";
 import { FileGridView } from "@/components/media/FileGridView";
 import { FileListView } from "@/components/media/FileListView";
 import { FilePreviewPanel } from "@/components/media/FilePreviewPanel";
 import { UploadDialog } from "@/components/media/UploadDialog";
+import { useNotificationStore } from "@/stores";
 
 export default function MediaLibrary() {
   const [files, setFiles] = useState<MediaFile[]>([]);
@@ -28,6 +29,9 @@ export default function MediaLibrary() {
   const [fileTypeFilter, setFileTypeFilter] = useState<string>("all");
   const [loading, setLoading] = useState(true);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const addNotification = useNotificationStore(
+    (state) => state.addNotification
+  );
 
   // Load files from API
   useEffect(() => {
@@ -101,10 +105,24 @@ export default function MediaLibrary() {
     loadFiles();
   };
 
-  const handleDeleteFile = (fileId: string) => {
-    // TODO: Implement file deletion API
-    console.log("Delete file:", fileId);
-    alert("File deletion feature will be implemented soon!");
+  const handleDeleteFile = async (fileId: string) => {
+    try {
+      await deleteMediaFile(fileId);
+      addNotification({
+        type: "success",
+        title: "Success",
+        message: "File deleted successfully!",
+      });
+      // Reload files after deletion
+      await loadFiles();
+    } catch (error) {
+      console.error("Failed to delete file:", error);
+      addNotification({
+        type: "error",
+        title: "Error",
+        message: "Failed to delete file. Please try again.",
+      });
+    }
   };
 
   return (

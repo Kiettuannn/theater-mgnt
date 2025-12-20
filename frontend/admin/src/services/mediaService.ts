@@ -30,6 +30,13 @@ export const uploadMediaFile = async (file: File): Promise<{ url: string }> => {
   );
 };
 
+// Delete media file
+export const deleteMediaFile = async (fileId: string): Promise<void> => {
+  return handleApiResponse<void>(
+    httpClient.delete<ApiResponse<void>>(`/media/${fileId}`)
+  );
+}
+
 // Helper function to format file size
 export const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return "0 Bytes";

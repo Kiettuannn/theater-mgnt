@@ -6,6 +6,9 @@ import {
 } from "@/services/mediaService";
 import { X, Download, Trash2, ExternalLink } from "lucide-react";
 import { FileTypeIcon } from "./FileTypeIcon";
+import { useNotificationStore } from "@/stores";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { useState } from "react";
 
 interface FilePreviewPanelProps {
   file: MediaFile | null;
@@ -18,6 +21,11 @@ export function FilePreviewPanel({
   onClose,
   onDelete,
 }: FilePreviewPanelProps) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const addNotification = useNotificationStore(
+    (state) => state.addNotification
+  );
+
   if (!file) return null;
 
   const fileName =
@@ -49,7 +57,11 @@ export function FilePreviewPanel({
 
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(file.url);
-    alert("URL copied to clipboard!");
+    addNotification({
+      type: "success",
+      title: "Success",
+      message: "URL copied to clipboard!",
+    });
   };
 
   return (
@@ -161,12 +173,7 @@ export function FilePreviewPanel({
             </button>
             {onDelete && (
               <button
-                onClick={() => {
-                  if (confirm("Are you sure you want to delete this file?")) {
-                    onDelete(file.id);
-                    onClose();
-                  }
-                }}
+                onClick={() => setShowDeleteConfirm(true)}
                 className="flex items-center justify-center gap-2 px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
@@ -175,6 +182,24 @@ export function FilePreviewPanel({
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        onConfirm={() => {
+          if (onDelete && file) {
+            onDelete(file.id);
+            onClose();
+            setShowDeleteConfirm(false);
+          }
+        }}
+        title="Delete File"
+        description="Are you sure you want to delete this file? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="destructive"
+      />
     </>
   );
 }
