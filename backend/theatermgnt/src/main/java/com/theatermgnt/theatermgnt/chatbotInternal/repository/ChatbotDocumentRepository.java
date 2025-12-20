@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ChatbotDocumentRepository extends JpaRepository<ChatbotDocument, String> {
+    boolean existsByFileId(String fileId);
 }

@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "chatbot_documents")
 @SQLDelete(sql = "UPDATE chatbot_documents SET deleted = true WHERE id = ?")
 @Where(clause = "deleted = false")

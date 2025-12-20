@@ -84,9 +84,11 @@ public enum ErrorCode {
     FILE_DOWNLOAD_FAILED(5002, "File download failed", HttpStatus.NOT_FOUND),
     DOCUMENT_PARSING_FAILED(5003, "Document parsing failed", HttpStatus.BAD_REQUEST),
     FILE_SYNC_TO_VECTOR_STORE_FAILED(5004, "File sync to vector store failed", HttpStatus.INTERNAL_SERVER_ERROR),
-    FILE_DELETE_FROM_VECTOR_STORE_FAILED(5005, "File delete from vector store failed", HttpStatus.INTERNAL_SERVER_ERROR)
+    FILE_DELETE_FROM_VECTOR_STORE_FAILED(5005, "File delete from vector store failed", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_FILE_TYPE(5006, "Invalid file type", HttpStatus.BAD_REQUEST),
+    DOCUMENT_ALREADY_EXISTS(5007, "Document already exists", HttpStatus.BAD_REQUEST)
 
-            ;
+    ;
     private int code;
     private String message;
     private HttpStatusCode statusCode;
