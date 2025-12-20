@@ -80,8 +80,13 @@ public enum ErrorCode {
 
 
     // FILE
-    FILE_NOT_FOUND(5001, "File not existed", HttpStatus.NOT_FOUND)
-    ;
+    FILE_NOT_FOUND(5001, "File not existed", HttpStatus.NOT_FOUND),
+    FILE_DOWNLOAD_FAILED(5002, "File download failed", HttpStatus.NOT_FOUND),
+    DOCUMENT_PARSING_FAILED(5003, "Document parsing failed", HttpStatus.BAD_REQUEST),
+    FILE_SYNC_TO_VECTOR_STORE_FAILED(5004, "File sync to vector store failed", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_DELETE_FROM_VECTOR_STORE_FAILED(5005, "File delete from vector store failed", HttpStatus.INTERNAL_SERVER_ERROR)
+
+            ;
     private int code;
     private String message;
     private HttpStatusCode statusCode;

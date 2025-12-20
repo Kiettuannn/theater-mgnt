@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "vector_documents", indexes = {
         @Index(name = "idx_file_id", columnList = "fileId"),
         @Index(name = "idx_chatbot_doc_id", columnList = "chatbotDocumentId")

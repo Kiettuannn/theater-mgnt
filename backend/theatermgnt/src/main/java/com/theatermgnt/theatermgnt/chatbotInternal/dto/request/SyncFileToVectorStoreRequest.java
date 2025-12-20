@@ -9,10 +9,10 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class AddDocumentRequest {
+public class SyncFileToVectorStoreRequest {
     String fileId;
+    String fileUrl;
+    String fileName;
     DocumentType documentType;
-    String description;
-    Integer priority;
-    boolean syncImmediately;
+    String chatbotDocumentId;
 }

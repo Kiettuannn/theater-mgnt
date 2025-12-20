@@ -1,13 +1,18 @@
 package com.theatermgnt.theatermgnt.chatbotInternal.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.theatermgnt.theatermgnt.chatbotInternal.constant.Sender;
+import com.theatermgnt.theatermgnt.chatbotInternal.dto.request.ChatBotInternalRequest;
+import com.theatermgnt.theatermgnt.chatbotInternal.dto.request.SyncFileToVectorStoreRequest;
+import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatBotInternalResponse;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatMessageResponse;
+import com.theatermgnt.theatermgnt.chatbotInternal.entity.VectorDocument;
+import com.theatermgnt.theatermgnt.chatbotInternal.repository.VectorDocumentRepository;
+import com.theatermgnt.theatermgnt.common.exception.AppException;
+import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -16,147 +21,152 @@ import org.springframework.ai.chat.memory.repository.jdbc.JdbcChatMemoryReposito
 import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.document.Document;
+import org.springframework.ai.document.DocumentReader;
+import org.springframework.ai.reader.tika.TikaDocumentReader;
+import org.springframework.ai.transformer.splitter.TextSplitter;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
-import com.theatermgnt.theatermgnt.chatbotInternal.dto.request.ChatBotInternalRequest;
-import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatBotInternalResponse;
-
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ChatService {
-    ChatClient chatClient;
+@RequiredArgsConstructor
+public class VectorStoreService {
     VectorStore vectorStore;
-    JdbcChatMemoryRepository jdbcChatMemoryRepository;
-    ChatMemory chatMemory;
+    VectorDocumentRepository vectorDocumentRepository;
 
-    public ChatService(ChatClient.Builder builder, VectorStore vectorStore,
-                       JdbcChatMemoryRepository jdbcChatMemoryRepository) {
-        this.vectorStore = vectorStore;
-        this.jdbcChatMemoryRepository = jdbcChatMemoryRepository;
+    // Sync file to vector store with metadata
+    @Transactional
+    public int syncFileToVectorStore(SyncFileToVectorStoreRequest request){
+       try{
+           // Download file
+           Resource resource = downloadFileAsResource(request.getFileUrl());
 
-        this.chatMemory = MessageWindowChatMemory.builder()
-                .chatMemoryRepository(jdbcChatMemoryRepository)
-                .maxMessages(30)
-                .build();
-        this.chatClient = builder.defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
-                .build();
+           // Read document
+           DocumentReader documentReader = new TikaDocumentReader(resource);
+           List<Document> documents = documentReader.get();
+
+           if(documents.isEmpty()){
+               throw new AppException(ErrorCode.DOCUMENT_PARSING_FAILED);
+           }
+
+           // Split into chunks
+           TextSplitter textSplitter = new TokenTextSplitter(800, 350, 10, 5000, true);
+           List<Document> splitDocuments = textSplitter.apply(documents);
+
+           // Enrich metadata
+           List<Document> enrichedDocuments = new ArrayList<>();
+           for(int i = 0; i < splitDocuments.size(); i++){
+               Document doc = splitDocuments.get(i);
+               Map<String, Object> metadata = doc.getMetadata();
+
+               // Add custom metadata
+               metadata.put("fileId", request.getFileId());
+               metadata.put("fileName", request.getFileName());
+               metadata.put("documentType", request.getDocumentType().name());
+               metadata.put("chatbotDocumentId", request.getChatbotDocumentId());
+               metadata.put("chunkIndex", i);
+               metadata.put("totalChunks", splitDocuments.size());
+               metadata.put("syncedAt", LocalDateTime.now().toString());
+
+               enrichedDocuments.add(doc);
+           }
+
+           // Add to vector store
+           vectorStore.add(enrichedDocuments);
+
+           // Track in repository
+           if(vectorDocumentRepository != null){
+               for(int i = 0; i < enrichedDocuments.size(); i++){
+                   Document doc = enrichedDocuments.get(i);
+                   String vectorId = doc.getId();
+                   VectorDocument vectorDocument = VectorDocument.builder()
+                           .fileId(request.getFileId())
+                           .vectorId(vectorId)
+                           .chatbotDocumentId(request.getChatbotDocumentId())
+                           .chunkIndex(i)
+                           .build();
+                   vectorDocumentRepository.save(vectorDocument);
+               }
+           }
+            log.info("Synced {} chunks from file {} to vector store", splitDocuments.size(), request.getFileName());
+           return splitDocuments.size();
+       }catch (AppException e){
+              log.error("Error syncing file to vector store: {}", e.getMessage());
+              throw new AppException(ErrorCode.FILE_SYNC_TO_VECTOR_STORE_FAILED);
+       }
     }
 
+    @Transactional
+    public void deleteFileFromVectorStore(String fileId){
+        try{
+          log.info("Deleting file {} from vector store", fileId);
 
-    public ChatBotInternalResponse chat(ChatBotInternalRequest request) {
+          // Get vector IDs
+          List<VectorDocument> vectorDocuments = vectorDocumentRepository.findByFileId(fileId);
+            if(!vectorDocuments.isEmpty()){
+                List<String> vectorIds = vectorDocuments.stream()
+                        .map(VectorDocument::getVectorId)
+                        .toList();
 
-        try {
-            List<Document> similarDocs = vectorStore.similaritySearch(
-                    SearchRequest.builder()
-                            .query(request.getQuery())
-                            .topK(5)
-                            .build());
+                // Delete from vector store
+                vectorStore.delete(vectorIds);
 
-            if (similarDocs == null || similarDocs.isEmpty()) {
-                return ChatBotInternalResponse.builder()
-                        .answer("Xin lỗi, tôi không tìm thấy thông tin này trong sổ tay quy định.")
-                        .build();
+                // Delete tracking records
+                vectorDocumentRepository.deleteByFileId(fileId);
+
+                log.info("Removed {} vectors for file {}", vectorIds.size(), fileId);
             }
-
-
-            // Build context
-            String context = similarDocs.stream()
-                    .map(Document::getText).collect(Collectors.joining("\n\n---\n\n"));
-
-            String systemInstruction =
-                    """
-				Bạn là một trợ lý quản lý rạp chiếu phim chuyên nghiệp và hữu ích.
-				Bạn có khả năng ghi nhớ thông tin trong cuộc hội thoại để trả lời các câu hỏi tiếp theo.
-
-				YÊU CẦU KHI TRẢ LỜI:
-				1. Nếu câu hỏi liên quan đến quy định/chính sách rạp chiếu phim:
-				   - Chỉ trả lời dựa trên thông tin từ tài liệu được cung cấp
-				   - Nếu không tìm thấy thông tin trong tài liệu, hãy nói: "Xin lỗi, tôi không tìm thấy thông tin này trong sổ tay quy định."
-				
-				2. Nếu câu hỏi liên quan đến cuộc hội thoại hiện tại (ví dụ: "tôi tên gì?", "em nói gì vừa rồi?"):
-				   - Sử dụng thông tin từ lịch sử chat để trả lời
-				   - Tham khảo các tin nhắn trước đó trong cuộc trò chuyện
-				
-				3. Định dạng câu trả lời theo Markdown để dễ đọc:
-				   - Sử dụng **in đậm** cho các thuật ngữ quan trọng
-				   - Sử dụng dấu gạch đầu dòng (-) cho danh sách
-				   - Xuống hàng giữa các ý chính
-				   - Sử dụng số thứ tự (1., 2., 3.) cho các bước hoặc quy trình
-				   - Sử dụng > cho lưu ý đặc biệt
-				
-				4. Trả lời ngắn gọn, đúng trọng tâm, văn phong lịch sự.
-				""";
-
-            String userMessageWithContext =
-                    """
-				Dưới đây là các quy định và thông tin nội bộ của rạp có thể liên quan:
-				---------------------
-				%s
-				---------------------
-
-				Câu hỏi: %s
-				"""
-                            .formatted(context, request.getQuery().trim());
-
-            var contextHolder = SecurityContextHolder.getContext();
-            String conversationId = contextHolder.getAuthentication().getName(); // AccountId
-
-            String answer = chatClient.prompt()
-                    .advisors(advisorSpec -> advisorSpec.param(
-                            ChatMemory.CONVERSATION_ID, conversationId
-                    ))
-                    .system(systemInstruction)
-                    .user(userMessageWithContext)
-                    .call()
-                    .content();
-
-            return ChatBotInternalResponse.builder()
-                    .answer(answer)
-                    .build();
-
-        } catch (Exception e) {
-            log.error("Chat error for query='{}'", request.getQuery(), e);
-            return ChatBotInternalResponse.builder()
-                    .answer("Đã xảy ra lỗi khi xử lý yêu cầu. Vui lòng thử lại sau.")
-                    .build();
+        }catch (Exception e){
+            log.error("Error deleting file from vector store: {}", e.getMessage());
+            throw new AppException(ErrorCode.FILE_DELETE_FROM_VECTOR_STORE_FAILED);
         }
     }
 
 
-    public void clearCurrentUserConversation() {
-        try {
-            var contextHolder = SecurityContextHolder.getContext();
-            String accountId = contextHolder.getAuthentication().getName();
-            jdbcChatMemoryRepository.deleteByConversationId(accountId);
-        } catch (Exception e) {
-            log.error("Error clearing current user conversation", e);
+    private Resource downloadFileAsResource(String fileUrl){
+        WebClient webClient = WebClient.create();
+        try{
+            byte[] bytes = webClient.get()
+                    .uri(fileUrl)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, response ->
+                            Mono.error(new AppException(ErrorCode.FILE_DOWNLOAD_FAILED)))
+                    .bodyToMono(byte[].class)
+                    .block();
+            if(bytes == null){
+                throw new AppException(ErrorCode.FILE_DOWNLOAD_FAILED);
+            }
+            return new ByteArrayResource(bytes);
+        }catch(Exception e){
+            log.error("Error downloading file from URL: {}", fileUrl, e);
+            throw new AppException(ErrorCode.FILE_DOWNLOAD_FAILED);
         }
     }
 
-    public List<ChatMessageResponse> getChatHistory(){
-        var contextHolder = SecurityContextHolder.getContext();
-        String conversationId = contextHolder.getAuthentication().getName();
-
-        List<Message> messages= chatMemory.get(conversationId);
-        if(messages==null || messages.isEmpty()){
-            return Collections.emptyList();
-        }
-        return messages.stream()
-                .map(msg -> ChatMessageResponse.builder()
-                        .text(msg.getText())
-                        .sender(msg instanceof UserMessage ? Sender.USER : Sender.BOT)
-                        .timestamp(LocalDateTime.now())
-                        .build()
-        ).collect(Collectors.toList());
-    }
 }
 
 
