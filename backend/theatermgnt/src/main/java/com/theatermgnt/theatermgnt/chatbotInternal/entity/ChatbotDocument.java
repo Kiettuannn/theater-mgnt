@@ -41,5 +41,4 @@ public class ChatbotDocument extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     DocumentStatus documentStatus;
-
 }

@@ -10,7 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface ChatbotDocumentRepository extends JpaRepository<ChatbotDocument, String> {
-    boolean existsByFileId(String fileId);
+    boolean existsByFileMgntId(String fileId);
 
     List<ChatbotDocument> findAllByDocumentStatus(DocumentStatus documentStatus);
 }

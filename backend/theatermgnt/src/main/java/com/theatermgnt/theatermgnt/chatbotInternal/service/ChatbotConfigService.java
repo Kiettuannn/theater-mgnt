@@ -11,6 +11,7 @@ import com.theatermgnt.theatermgnt.chatbotInternal.repository.ChatbotDocumentRep
 import com.theatermgnt.theatermgnt.common.exception.AppException;
 import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
 import com.theatermgnt.theatermgnt.file.entity.FileMgnt;
+import com.theatermgnt.theatermgnt.file.mapper.FileMgntMapper;
 import com.theatermgnt.theatermgnt.file.repository.FileMgntRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +57,7 @@ public class ChatbotConfigService {
         }
 
         // Check already added
-        if(chatbotDocumentRepository.existsByFileId(file.getId())) {
+        if(chatbotDocumentRepository.existsByFileMgntId(file.getId())) {
             throw new AppException(ErrorCode.DOCUMENT_ALREADY_EXISTS);
         }
 
@@ -75,6 +76,7 @@ public class ChatbotConfigService {
 
         // Sync immediately if requested
         if(request.isSyncImmediately()){
+            syncDocumentToVector(chatbotDocument.getId());
         }
         return chatbotDocumentMapper.toChatbotDocumentResponse(chatbotDocument);
     }

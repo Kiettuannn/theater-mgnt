@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.theatermgnt.theatermgnt.chatbotInternal.constant.Sender;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatMessageResponse;
+import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.SourceInfo;
 import com.theatermgnt.theatermgnt.chatbotInternal.entity.ChatbotDocument;
 import com.theatermgnt.theatermgnt.chatbotInternal.entity.DocumentInfo;
 import com.theatermgnt.theatermgnt.chatbotInternal.repository.ChatbotDocumentRepository;
@@ -76,47 +77,51 @@ public class ChatService {
             }
 
 
-            // Filter by validity and active status
-//            List<Document> validDocs = fil
+            // Sort by priority
+            List<Document> sortedDocs = sortByPriority(similarDocs);
 
-            // Build context
-            String context = similarDocs.stream()
-                    .map(Document::getText).collect(Collectors.joining("\n\n---\n\n"));
+            // LIMIT to top 5
+            similarDocs = sortedDocs.stream().limit(5).collect(Collectors.toList());
 
-            String systemInstruction =
-                    """
-				Bạn là một trợ lý quản lý rạp chiếu phim chuyên nghiệp và hữu ích.
-				Bạn có khả năng ghi nhớ thông tin trong cuộc hội thoại để trả lời các câu hỏi tiếp theo.
+            // Extract source information first
+            List<SourceInfo> sources = extractSourceInfo(similarDocs);
 
-				YÊU CẦU KHI TRẢ LỜI:
-				1. Nếu câu hỏi liên quan đến quy định/chính sách rạp chiếu phim:
-				   - Chỉ trả lời dựa trên thông tin từ tài liệu được cung cấp
-				   - Nếu không tìm thấy thông tin trong tài liệu, hãy nói: "Xin lỗi, tôi không tìm thấy thông tin này trong sổ tay quy định."
-				
-				2. Nếu câu hỏi liên quan đến cuộc hội thoại hiện tại (ví dụ: "tôi tên gì?", "em nói gì vừa rồi?"):
-				   - Sử dụng thông tin từ lịch sử chat để trả lời
-				   - Tham khảo các tin nhắn trước đó trong cuộc trò chuyện
-				
-				3. Định dạng câu trả lời theo Markdown để dễ đọc:
-				   - Sử dụng **in đậm** cho các thuật ngữ quan trọng
-				   - Sử dụng dấu gạch đầu dòng (-) cho danh sách
-				   - Xuống hàng giữa các ý chính
-				   - Sử dụng số thứ tự (1., 2., 3.) cho các bước hoặc quy trình
-				   - Sử dụng > cho lưu ý đặc biệt
-				
-				4. Trả lời ngắn gọn, đúng trọng tâm, văn phong lịch sự.
-				""";
+            // Build structured context with source labels
+            String context = buildStructuredContext(similarDocs);
+            String documentCatalog = buildDocumentCatalogFromSources(sources);
 
-            String userMessageWithContext =
-                    """
-				Dưới đây là các quy định và thông tin nội bộ của rạp có thể liên quan:
-				---------------------
-				%s
-				---------------------
+            String systemInstruction = """
+                Bạn là một trợ lý quản lý rạp chiếu phim chuyên nghiệp và hữu ích.
+                Bạn có khả năng ghi nhớ thông tin trong cuộc hội thoại để trả lời các câu hỏi tiếp theo.
 
-				Câu hỏi: %s
-				"""
-                            .formatted(context, request.getQuery().trim());
+                TÀI LIỆU KHẢ DỤNG:
+                %s
+
+                YÊU CẦU KHI TRẢ LỜI:
+                1. Nếu câu hỏi liên quan đến quy định/chính sách:
+                   - Chỉ trả lời dựa trên thông tin từ tài liệu được cung cấp
+                   - LUÔN trích dẫn nguồn: "Theo **[Tên file]**, ..."
+                   - Nếu không tìm thấy: "Xin lỗi, tôi không tìm thấy thông tin này..."
+                
+                2. Nếu câu hỏi về cuộc hội thoại hiện tại:
+                   - Sử dụng thông tin từ lịch sử chat
+                
+                3. Quy tắc ưu tiên:
+                   - POLICY (Chính sách) > HANDBOOK (Sổ tay) > GUIDELINE > FAQ
+                   - Priority 1 > Priority 2 > Priority 3
+                   - Nếu có mâu thuẫn, ưu tiên nguồn có độ ưu tiên cao và nêu rõ
+                
+                4. Định dạng Markdown để dễ đọc:
+                   - **in đậm** cho thuật ngữ quan trọng
+                   - Dấu gạch đầu dòng (-) cho danh sách
+                   - Số thứ tự (1., 2., 3.) cho quy trình
+                   - > cho lưu ý đặc biệt
+                """.formatted(documentCatalog);
+
+            String contextForAI = """
+                CÁC TÀI LIỆU THAM KHẢO:
+                %s
+                """.formatted(context);
 
             var contextHolder = SecurityContextHolder.getContext();
             String conversationId = contextHolder.getAuthentication().getName(); // AccountId
@@ -126,12 +131,14 @@ public class ChatService {
                             ChatMemory.CONVERSATION_ID, conversationId
                     ))
                     .system(systemInstruction)
-                    .user(userMessageWithContext)
+                    .system(sp -> sp.text(contextForAI)) // Thêm context nhưng không lưu vào memory
+                    .user(request.getQuery().trim()) // Chỉ lưu câu hỏi gốc
                     .call()
                     .content();
 
             return ChatBotInternalResponse.builder()
                     .answer(answer)
+                    .sources(sources)
                     .build();
 
         } catch (Exception e) {
@@ -233,32 +240,68 @@ public class ChatService {
         return builder.toString();
     }
 
-    private String buildDocumentCatalog(List<Document> documents){
-        Map<String, DocumentInfo> uniqueDocs = new HashMap<>();
-        for(Document doc : documents){
-            String fileId = doc.getMetadata().get("fileId").toString();
-            if(fileId != null && !uniqueDocs.containsKey(fileId)){
-                String docId = doc.getMetadata().get("chatbotDocumentId").toString();
-                ChatbotDocument chatbotDocument = docId != null ?
-                        chatbotDocumentRepository.findById(docId).orElse(null) : null;
-
-                uniqueDocs.put(fileId, new DocumentInfo(
-                        doc.getMetadata().get("fileName").toString(),
-                        doc.getMetadata().get("documentType").toString(),
-                        chatbotDocument != null && chatbotDocument.getPriority() != null ?
-                                chatbotDocument.getPriority() : 999
-                ));
-            }
-        }
-        return uniqueDocs.values().stream()
-                .sorted(Comparator.comparing(DocumentInfo::priority))
+    private String buildDocumentCatalogFromSources(List<SourceInfo> sources) {
+        return sources.stream()
                 .map(info -> String.format("- %s (%s) [Priority: %d]",
-                        info.fileName(),
-                        info.docType(),
-                        info.priority()
-
+                        info.getFileName(),
+                        info.getDocumentType(),
+                        info.getPriority()
                 ))
                 .collect(Collectors.joining("\n"));
+    }
+
+    // Extract source information from documents
+    private List<SourceInfo> extractSourceInfo(List<Document> documents) {
+        Map<String, SourceInfo> sourceMap = new LinkedHashMap<>();
+        
+        for (Document doc : documents) {
+            Map<String, Object> metadata = doc.getMetadata();
+            String fileId = metadata.get("fileId") != null ? metadata.get("fileId").toString() : null;
+            
+            if (fileId == null) continue;
+            
+            // Get or create SourceInfo
+            SourceInfo sourceInfo = sourceMap.get(fileId);
+            if (sourceInfo == null) {
+                String chatbotDocId = metadata.get("chatbotDocumentId") != null ? 
+                    metadata.get("chatbotDocumentId").toString() : null;
+                ChatbotDocument chatbotDoc = chatbotDocId != null ? 
+                    chatbotDocumentRepository.findById(chatbotDocId).orElse(null) : null;
+                
+                String fileName = metadata.get("fileName") != null ? 
+                    metadata.get("fileName").toString() : "Unknown";
+                String documentType = metadata.get("documentType") != null ? 
+                    metadata.get("documentType").toString() : "UNKNOWN";
+                Integer priority = chatbotDoc != null && chatbotDoc.getPriority() != null ? 
+                    chatbotDoc.getPriority() : 999;
+                
+                // Get file path from FileMgnt
+                String filePath = null;
+                if (chatbotDoc != null && chatbotDoc.getFileMgnt() != null) {
+                    filePath = chatbotDoc.getFileMgnt().getUrl();
+                }
+                
+                sourceInfo = com.theatermgnt.theatermgnt.chatbotInternal.dto.response.SourceInfo.builder()
+                    .fileId(fileId)
+                    .fileName(fileName)
+                    .filePath(filePath)
+                    .documentType(documentType)
+                    .priority(priority)
+                    .chunkIndices(new HashSet<>())
+                    .build();
+                    
+                sourceMap.put(fileId, sourceInfo);
+            }
+            
+            // Add chunk index
+            Integer chunkIndex = metadata.get("chunkIndex") != null ? 
+                (Integer) metadata.get("chunkIndex") : null;
+            if (chunkIndex != null) {
+                sourceInfo.getChunkIndices().add(chunkIndex + 1); // +1 for human-readable numbering
+            }
+        }
+        
+        return new ArrayList<>(sourceMap.values());
     }
 
 }
