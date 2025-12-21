@@ -3,6 +3,10 @@ package com.theatermgnt.theatermgnt.chatbotInternal.config;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.theatermgnt.theatermgnt.chatbotInternal.entity.ChatbotDocument;
+import com.theatermgnt.theatermgnt.chatbotInternal.enums.DocumentStatus;
+import com.theatermgnt.theatermgnt.chatbotInternal.repository.ChatbotDocumentRepository;
+import com.theatermgnt.theatermgnt.chatbotInternal.service.ChatbotConfigService;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.document.DocumentReader;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
@@ -31,15 +35,36 @@ public class RagConfig {
     Resource handbookFile;
 
     @Bean
-    ApplicationRunner ragApplicationRunner(VectorStore vectorStore, JdbcTemplate jdbcTemplate) {
+    ApplicationRunner ragApplicationRunner(
+            VectorStore vectorStore,
+            JdbcTemplate jdbcTemplate,
+            ChatbotDocumentRepository chatbotDocumentRepository,
+            ChatbotConfigService chatbotConfigService) {
         return args -> {
             Integer count = jdbcTemplate.queryForObject("select count(*) from vector_store", Integer.class);
 
-            if (count != null && count == 0) {
+            if (count == null || count == 0) {
                 log.info("Vector store is empty. Initializing from handbook...");
-                loadDocument(vectorStore, handbookFile);
-            } else {
-                log.info("Vector store already initialized with {} vectors", count);
+
+                // Check if there are active documents to sync
+                List<ChatbotDocument> activeDocuments =
+                        chatbotDocumentRepository.findAllByDocumentStatus(DocumentStatus.ACTIVE);
+
+                if(!activeDocuments.isEmpty()) {
+                    log.info("Syncing {} active documents to vector store", activeDocuments.size());
+                    for(ChatbotDocument doc : activeDocuments) {
+                       try{
+                           chatbotConfigService.syncDocumentToVector(doc.getId()).join();
+                       }catch(Exception e){
+                           log.error("Error while syncing documents to vector store", e);
+                       }
+                    }
+                } else {
+                  // Fallback: Load default handbook file
+                    log.info("No active documents to vector store");
+                    loadDocument(vectorStore, handbookFile);
+                }
+
             }
         };
     }
