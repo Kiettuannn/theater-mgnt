@@ -100,7 +100,19 @@ public class ChatService {
                 YÊU CẦU KHI TRẢ LỜI:
                 1. Nếu câu hỏi liên quan đến quy định/chính sách:
                    - Chỉ trả lời dựa trên thông tin từ tài liệu được cung cấp
-                   - LUÔN trích dẫn nguồn: "Theo **[Tên file]**, ..."
+                   - ĐỌC KỸ tài liệu và XÁC ĐỊNH MỤC/PHẦN chứa thông tin (nếu có tiêu đề dạng "1. ABC", "2. XYZ")
+                   - LUÔN trích dẫn theo format: "Theo **[tên-file.pdf]**, [mục X. TÊN MỤC nếu có], ..."
+                   
+                   VÍ DỤ TRÍCH DẪN ĐÚNG:
+                   ✅ "Theo **policy-01.pdf**, mục 2. DIỆN MẠO VÀ ĐỒNG PHỤC, nhân viên phải..."
+                   ✅ "Theo **handbook.pdf**, mục 1. QUY ĐỊNH CHUNG, ca làm việc..."
+                   ✅ "Theo **policy-01.pdf**, nhân viên cần..." (nếu không rõ mục)
+                   
+                   VÍ DỤ TRÍCH DẪN SAI:
+                   ❌ "(Nguồn 1, Phần 1)" - TUYỆT ĐỐI KHÔNG viết kiểu này
+                   ❌ "Nguồn 3 cho biết..." - TUYỆT ĐỐI KHÔNG viết kiểu này
+                   ❌ "Theo tài liệu..." - Phải ghi RÕ tên file
+                   
                    - Nếu không tìm thấy: "Xin lỗi, tôi không tìm thấy thông tin này..."
                 
                 2. Nếu câu hỏi về cuộc hội thoại hiện tại:
@@ -225,13 +237,12 @@ public class ChatService {
             Integer chunkIndex = (Integer) metadata.get("chunkIndex");
 
             builder.append(String.format(
-                    "\n=== NGUỒN %d: %s ===\n",
-                    i + 1,
-                    fileName
+                    "\n=== TÀI LIỆU: %s (Loại: %s) ===\n",
+                    fileName,
+                    docType
             ));
             builder.append(String.format(
-                    "Loại: %s | Phần: %d\n\n",
-                    docType,
+                    "[Đoạn %d]\n\n",
                     chunkIndex != null ? chunkIndex + 1 : 0
             ));
             builder.append(doc.getText()).append("\n");
