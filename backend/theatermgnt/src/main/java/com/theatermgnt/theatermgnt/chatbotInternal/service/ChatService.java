@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import com.theatermgnt.theatermgnt.chatbotInternal.constant.Sender;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatMessageResponse;
+import com.theatermgnt.theatermgnt.chatbotInternal.repository.ChatbotDocumentRepository;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
@@ -18,6 +19,7 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -34,11 +36,15 @@ import lombok.extern.slf4j.Slf4j;
 public class ChatService {
     ChatClient chatClient;
     VectorStore vectorStore;
+
     JdbcChatMemoryRepository jdbcChatMemoryRepository;
     ChatMemory chatMemory;
 
+    @Autowired
+    ChatbotDocumentRepository chatbotDocumentRepository;
+
     public ChatService(ChatClient.Builder builder, VectorStore vectorStore,
-                       JdbcChatMemoryRepository jdbcChatMemoryRepository) {
+                       JdbcChatMemoryRepository jdbcChatMemoryRepository, ChatbotDocumentRepository chatbotDocumentRepository) {
         this.vectorStore = vectorStore;
         this.jdbcChatMemoryRepository = jdbcChatMemoryRepository;
 
@@ -48,11 +54,11 @@ public class ChatService {
                 .build();
         this.chatClient = builder.defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
                 .build();
+        this.chatbotDocumentRepository = chatbotDocumentRepository;
     }
 
 
     public ChatBotInternalResponse chat(ChatBotInternalRequest request) {
-
         try {
             List<Document> similarDocs = vectorStore.similaritySearch(
                     SearchRequest.builder()

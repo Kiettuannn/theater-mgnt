@@ -3,6 +3,7 @@ package com.theatermgnt.theatermgnt.chatbotInternal.service;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.request.AddDocumentRequest;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.request.SyncFileToVectorStoreRequest;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatbotDocumentResponse;
+import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.HealthCheckResponse;
 import com.theatermgnt.theatermgnt.chatbotInternal.entity.ChatbotDocument;
 import com.theatermgnt.theatermgnt.chatbotInternal.enums.DocumentStatus;
 import com.theatermgnt.theatermgnt.chatbotInternal.mapper.ChatbotDocumentMapper;
@@ -123,4 +124,89 @@ public class ChatbotConfigService {
         return CompletableFuture.completedFuture(null);
     }
 
+    // Resync document: Delete and sync new
+    @Async
+    @Transactional
+    public CompletableFuture<Void> resyncDocument(String documentId) {
+        ChatbotDocument doc = chatbotDocumentRepository.findById(documentId)
+                .orElseThrow(() -> new AppException(ErrorCode.DOCUMENT_NOT_FOUND));
+
+        // Remove old vectors
+        if(doc.getDocumentStatus() == DocumentStatus.ACTIVE){
+            vectorStoreService.deleteFileFromVectorStore(doc.getFileMgnt().getId());
+        }
+
+        // Sync new
+        return syncDocumentToVector(documentId);
+    }
+
+    // Remove document from RAG
+    @Transactional
+    public void removeDocumentFromRag(String documentId) {
+        ChatbotDocument doc = chatbotDocumentRepository.findById(documentId)
+                .orElseThrow(() -> new AppException(ErrorCode.DOCUMENT_NOT_FOUND));
+
+        // Remove vectors if active
+        if(doc.getDocumentStatus() == DocumentStatus.ACTIVE){
+            vectorStoreService.deleteFileFromVectorStore(doc.getFileMgnt().getId());
+        }
+
+        // Remove record
+        chatbotDocumentRepository.deleteById(documentId);
+    }
+
+    // Toggle document status
+    @Transactional
+    public void toggleDocumentStatus(String documentId) {
+        ChatbotDocument doc = chatbotDocumentRepository.findById(documentId)
+                .orElseThrow(() -> new AppException(ErrorCode.DOCUMENT_NOT_FOUND));
+
+        if(doc.getDocumentStatus() == DocumentStatus.ACTIVE){
+            // Deactivate
+            vectorStoreService.deleteFileFromVectorStore(doc.getFileMgnt().getId());
+            doc.setDocumentStatus(DocumentStatus.INACTIVE);
+            chatbotDocumentRepository.save(doc);
+        } else{
+            // Activate
+            syncDocumentToVector(documentId);
+        }
+    }
+
+    // Get all RAG documents
+    public List<ChatbotDocumentResponse> getAllRagDocuments() {
+        return chatbotDocumentRepository.findAll().stream()
+                .map(chatbotDocumentMapper::toChatbotDocumentResponse)
+                .toList();
+    }
+
+    // Get RAG document by ID
+    public ChatbotDocumentResponse getRagDocumentById(String documentId) {
+        ChatbotDocument doc = chatbotDocumentRepository.findById(documentId)
+                .orElseThrow(() -> new AppException(ErrorCode.DOCUMENT_NOT_FOUND));
+        return chatbotDocumentMapper.toChatbotDocumentResponse(doc);
+    }
+
+    // Health check
+    public HealthCheckResponse checkHealth() {
+        List<ChatbotDocument> activeDocs = chatbotDocumentRepository.findAllByDocumentStatus(DocumentStatus.ACTIVE);
+
+        int expectedChunks = activeDocs.stream()
+                .mapToInt(doc -> doc.getChunksCount() != null ? doc.getChunksCount() : 0)
+                .sum();
+
+        Integer actualChunks = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM vector_store",
+                Integer.class
+        );
+        long totalDocs = chatbotDocumentRepository.count();
+        boolean isConsistent = expectedChunks == (actualChunks != null ? actualChunks : 0);
+        return HealthCheckResponse.builder()
+                .isConsistent(isConsistent)
+                .expectedChunks(expectedChunks)
+                .actualChunks(actualChunks)
+                .activeDocuments(activeDocs.size())
+                .totalDocuments((int) totalDocs)
+                .message(isConsistent ? "System healthy" : "Isconsistency issue detected")
+                .build();
+     }
 }
