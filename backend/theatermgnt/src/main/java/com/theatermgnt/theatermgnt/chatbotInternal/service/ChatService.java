@@ -2,12 +2,13 @@ package com.theatermgnt.theatermgnt.chatbotInternal.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.theatermgnt.theatermgnt.chatbotInternal.constant.Sender;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatMessageResponse;
+import com.theatermgnt.theatermgnt.chatbotInternal.entity.ChatbotDocument;
+import com.theatermgnt.theatermgnt.chatbotInternal.entity.DocumentInfo;
 import com.theatermgnt.theatermgnt.chatbotInternal.repository.ChatbotDocumentRepository;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -29,6 +30,8 @@ import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatBotInternalR
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+
+import javax.print.Doc;
 
 @Slf4j
 @Service
@@ -63,7 +66,7 @@ public class ChatService {
             List<Document> similarDocs = vectorStore.similaritySearch(
                     SearchRequest.builder()
                             .query(request.getQuery())
-                            .topK(5)
+                            .topK(10)
                             .build());
 
             if (similarDocs == null || similarDocs.isEmpty()) {
@@ -72,6 +75,9 @@ public class ChatService {
                         .build();
             }
 
+
+            // Filter by validity and active status
+//            List<Document> validDocs = fil
 
             // Build context
             String context = similarDocs.stream()
@@ -163,6 +169,98 @@ public class ChatService {
                         .build()
         ).collect(Collectors.toList());
     }
+
+    // Sort documents by priority and document type
+    private List<Document> sortByPriority(List<Document> documents){
+        return documents.stream()
+                .sorted((d1, d2) -> {
+                    String docId1 = d1.getMetadata().get("chatbotDocumentId").toString();
+                    String docId2 = d2.getMetadata().get("chatbotDocumentId").toString();
+
+                    ChatbotDocument doc1 = docId1 != null ? chatbotDocumentRepository.findById(docId1).orElse(null) : null;
+                    ChatbotDocument doc2 = docId2 != null ?chatbotDocumentRepository.findById(docId2).orElse(null) : null;
+
+                    // Sort by priority (lower number = higher priority)
+                    int priority1 = doc1 != null && doc1.getPriority() != null ? doc1.getPriority() : 999;
+                    int priority2 = doc2 != null && doc2.getPriority() != null ? doc2.getPriority() : 999;
+
+                    if(priority1 != priority2){
+                        return Integer.compare(priority1, priority2);
+                    }
+
+                    // Then by document type
+                    String type1 = d1.getMetadata().getOrDefault("documentType", "FAQ").toString();
+                    String type2 = d2.getMetadata().getOrDefault("documentType", "FAQ").toString();
+                    return getDocumentTypeOrder(type1) - getDocumentTypeOrder(type2);
+                })
+                .toList();
+    }
+    private int getDocumentTypeOrder(String type) {
+        return switch (type) {
+            case "POLICY" -> 1;
+            case "HANDBOOK" -> 2;
+            case "GUIDELINE" -> 3;
+            case "FAQ" -> 4;
+            default -> 5;
+        };
+    }
+
+    // Build structured context with source labels
+    private String buildStructuredContext(List<Document> documents){
+        StringBuilder builder = new StringBuilder();
+
+        for(int i = 0; i < documents.size(); i++){
+            Document doc = documents.get(i);
+            Map<String, Object> metadata = doc.getMetadata();
+
+            String fileName = metadata.getOrDefault("fileName", "Unknown Document").toString();
+            String docType = metadata.getOrDefault("documentType", "POLICY").toString();
+            Integer chunkIndex = (Integer) metadata.get("chunkIndex");
+
+            builder.append(String.format(
+                    "\n=== NGUỒN %d: %s ===\n",
+                    i + 1,
+                    fileName
+            ));
+            builder.append(String.format(
+                    "Loại: %s | Phần: %d\n\n",
+                    docType,
+                    chunkIndex != null ? chunkIndex + 1 : 0
+            ));
+            builder.append(doc.getText()).append("\n");
+            builder.append("=====================================\n");
+        }
+        return builder.toString();
+    }
+
+    private String buildDocumentCatalog(List<Document> documents){
+        Map<String, DocumentInfo> uniqueDocs = new HashMap<>();
+        for(Document doc : documents){
+            String fileId = doc.getMetadata().get("fileId").toString();
+            if(fileId != null && !uniqueDocs.containsKey(fileId)){
+                String docId = doc.getMetadata().get("chatbotDocumentId").toString();
+                ChatbotDocument chatbotDocument = docId != null ?
+                        chatbotDocumentRepository.findById(docId).orElse(null) : null;
+
+                uniqueDocs.put(fileId, new DocumentInfo(
+                        doc.getMetadata().get("fileName").toString(),
+                        doc.getMetadata().get("documentType").toString(),
+                        chatbotDocument != null && chatbotDocument.getPriority() != null ?
+                                chatbotDocument.getPriority() : 999
+                ));
+            }
+        }
+        return uniqueDocs.values().stream()
+                .sorted(Comparator.comparing(DocumentInfo::priority))
+                .map(info -> String.format("- %s (%s) [Priority: %d]",
+                        info.fileName(),
+                        info.docType(),
+                        info.priority()
+
+                ))
+                .collect(Collectors.joining("\n"));
+    }
+
 }
 
 
