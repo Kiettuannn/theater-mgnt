@@ -1,0 +1,59 @@
+package com.theatermgnt.theatermgnt.screeningSeat.repository;
+
+import com.theatermgnt.theatermgnt.screeningSeat.entity.ScreeningSeat;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.util.List;
+
+public interface ScreeningSeatRepository extends JpaRepository<ScreeningSeat,String> {
+    List<ScreeningSeat> findByScreeningId(String screeningId);
+    List<ScreeningSeat> findBySeatId(String seatId);
+//    List<ScreeningSeat> findByBookingId(String bookingId);
+    boolean existsByScreeningIdAndSeatId(String screeningId, String seatId);
+    void deleteByScreeningId(String screeningId);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE ScreeningSeat s SET s.deleted = true WHERE s.screening.id = :screeningId")
+    void softDeleteByScreeningId(String screeningId);
+
+    @Query("SELECT COUNT(s) > 0 FROM ScreeningSeat s WHERE s.screening.id = :screeningId AND s.status = 'SOLD'")
+    boolean existsSoldSeat(String screeningId);
+
+
+    @Modifying
+    @Query("""
+        UPDATE ScreeningSeat ss
+        SET ss.status = 'LOCKED'
+        WHERE ss.screening.id = :screeningId
+          AND ss.status = 'AVAILABLE'
+    """)
+    void lockAvailableSeatsByScreening(String screeningId);
+
+
+    @Modifying
+    @Query("""
+        UPDATE ScreeningSeat s
+        SET s.status = 'LOCKED',
+            s.lockUntil = :lockUntil
+        WHERE s.id IN :ids
+          AND s.status = 'AVAILABLE'
+    """)
+    int lockSeats(List<String> ids, Instant lockUntil);
+
+    List<ScreeningSeat> findByBooking(String bookingId);
+
+    @Modifying
+    @Query("""
+        UPDATE ScreeningSeat s
+        SET s.status = 'AVAILABLE',
+            s.lockUntil = null,
+            s.booking = null
+        WHERE s.booking = :bookingId
+    """)
+    void releaseSeatsByBooking(String bookingId);
+}
