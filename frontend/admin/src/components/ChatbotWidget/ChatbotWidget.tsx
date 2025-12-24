@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { MessageCircle, X, Send, Trash2 } from "lucide-react";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useChatbot } from "@/hooks/useChatbot";
@@ -8,6 +8,7 @@ import remarkGfm from "remark-gfm";
 
 export const ChatbotWidget = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const [hasModalOpen, setHasModalOpen] = useState(false);
 
   const {
     isOpen,
@@ -36,7 +37,28 @@ export const ChatbotWidget = () => {
     }
   }, [isOpen, loadChatHistory]);
 
+  // Detect when preview modal is open (backdrop exists)
+  useEffect(() => {
+    const checkModal = () => {
+      const backdrop = document.querySelector(
+        '.fixed.bg-black\\/50, [class*="backdrop"]'
+      );
+      setHasModalOpen(!!backdrop);
+    };
+
+    checkModal();
+    const observer = new MutationObserver(checkModal);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    return () => observer.disconnect();
+  }, []);
+
   if (!isAuthenticated) {
+    return null;
+  }
+
+  // Hide widget when modal is open
+  if (hasModalOpen) {
     return null;
   }
 
@@ -52,10 +74,11 @@ export const ChatbotWidget = () => {
         cancelText="Huỷ"
         variant={confirmDialog.variant || "destructive"}
       />
-      <div className="fixed bottom-6 right-6 z-50">
+
+      <div className="fixed bottom-4 right-4 z-50 sm:bottom-6 sm:right-6">
         {/* Chat Window */}
         {isOpen && (
-          <div className="mb-4 w-[380px] h-[500px] bg-white rounded-lg shadow-2xl flex flex-col border border-gray-200">
+          <div className="mb-4 w-[calc(100vw-32px)] sm:w-[360px] h-[60vh] max-h-[500px] min-h-[300px] bg-white rounded-lg shadow-2xl flex flex-col border border-gray-200">
             {/* Header */}
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-t-lg flex justify-between items-center">
               <div className="flex items-center gap-2">
@@ -80,7 +103,7 @@ export const ChatbotWidget = () => {
                 </button>
                 <button
                   onClick={toggleChat}
-                  className="hover:bg-blue-400 rounded-full p-1.5 transition-colors"
+                  className="hover:bg-blue-400 rounded-full p-1.5 transition-colors cursor-pointer"
                 >
                   <X size={20} />
                 </button>
