@@ -53,6 +53,18 @@ export const ChatbotWidget = () => {
     return () => observer.disconnect();
   }, []);
 
+  // Close chat with ESC key
+  useEffect(() => {
+    const handleEscapeKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isOpen) {
+        toggleChat();
+      }
+    };
+
+    window.addEventListener("keydown", handleEscapeKey);
+    return () => window.removeEventListener("keydown", handleEscapeKey);
+  }, [isOpen, toggleChat]);
+
   if (!isAuthenticated) {
     return null;
   }
