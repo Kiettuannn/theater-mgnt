@@ -1,54 +1,37 @@
 package com.theatermgnt.theatermgnt.chatbotInternal.service;
 
-import com.theatermgnt.theatermgnt.chatbotInternal.constant.Sender;
-import com.theatermgnt.theatermgnt.chatbotInternal.dto.request.ChatBotInternalRequest;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.request.SyncFileToVectorStoreRequest;
-import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatBotInternalResponse;
-import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatMessageResponse;
+
+import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.SectionInfo;
 import com.theatermgnt.theatermgnt.chatbotInternal.entity.VectorDocument;
 import com.theatermgnt.theatermgnt.chatbotInternal.repository.VectorDocumentRepository;
+import com.theatermgnt.theatermgnt.chatbotInternal.util.DocumentSectionTracker;
 import com.theatermgnt.theatermgnt.common.exception.AppException;
 import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
-import org.springframework.ai.chat.memory.ChatMemory;
-import org.springframework.ai.chat.memory.MessageWindowChatMemory;
-import org.springframework.ai.chat.memory.repository.jdbc.JdbcChatMemoryRepository;
-import org.springframework.ai.chat.messages.Message;
-import org.springframework.ai.chat.messages.UserMessage;
+
 import org.springframework.ai.document.Document;
 import org.springframework.ai.document.DocumentReader;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.transformer.splitter.TextSplitter;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
-import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -73,6 +56,11 @@ public class VectorStoreService {
                throw new AppException(ErrorCode.DOCUMENT_PARSING_FAILED);
            }
 
+           // Track sections
+           String fullText = documents.get(0).getText();
+           DocumentSectionTracker sectionTracker = new DocumentSectionTracker(fullText);
+
+
            // Split into chunks
            TextSplitter textSplitter = new TokenTextSplitter(800, 350, 10, 5000, true);
            List<Document> splitDocuments = textSplitter.apply(documents);
@@ -92,6 +80,19 @@ public class VectorStoreService {
                metadata.put("totalChunks", splitDocuments.size());
                metadata.put("syncedAt", LocalDateTime.now().toString());
 
+               if(sectionTracker.hasSections()){
+                   try{
+                       SectionInfo sectionInfo = sectionTracker.getSectionFromText(doc.getText());
+
+                       if(sectionInfo != null){
+                           metadata.put("sectionNumber", sectionInfo.getSectionNumber());
+                           metadata.put("sectionTitle", sectionInfo.getSectionTitle());
+                           metadata.put("sectionFullTitle", sectionInfo.getFullTitle());
+                       }
+                   }catch(Exception e){
+                       log.warn("Could not map section for chunk {}: {}", i, e.getMessage());
+                   }
+               }
                enrichedDocuments.add(doc);
            }
 
@@ -166,7 +167,6 @@ public class VectorStoreService {
             throw new AppException(ErrorCode.FILE_DOWNLOAD_FAILED);
         }
     }
-
 }
 
 

@@ -9,7 +9,6 @@ import com.theatermgnt.theatermgnt.chatbotInternal.constant.Sender;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatMessageResponse;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.SourceInfo;
 import com.theatermgnt.theatermgnt.chatbotInternal.entity.ChatbotDocument;
-import com.theatermgnt.theatermgnt.chatbotInternal.entity.DocumentInfo;
 import com.theatermgnt.theatermgnt.chatbotInternal.repository.ChatbotDocumentRepository;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
@@ -235,12 +234,20 @@ public class ChatService {
             String fileName = metadata.getOrDefault("fileName", "Unknown Document").toString();
             String docType = metadata.getOrDefault("documentType", "POLICY").toString();
             Integer chunkIndex = (Integer) metadata.get("chunkIndex");
+            String sectionFullTitle = metadata.get("sectionFullTitle") != null ?
+                metadata.get("sectionFullTitle").toString() : null;
 
             builder.append(String.format(
                     "\n=== TÀI LIỆU: %s (Loại: %s) ===\n",
                     fileName,
                     docType
             ));
+            if(sectionFullTitle != null){
+                builder.append(String.format(
+                        "Mục: %s\n",
+                        sectionFullTitle
+                ));
+            }
             builder.append(String.format(
                     "[Đoạn %d]\n\n",
                     chunkIndex != null ? chunkIndex + 1 : 0
@@ -299,6 +306,7 @@ public class ChatService {
                     .documentType(documentType)
                     .priority(priority)
                     .chunkIndices(new HashSet<>())
+                    .sectionTitles(new HashSet<>())
                     .build();
                     
                 sourceMap.put(fileId, sourceInfo);
@@ -309,6 +317,13 @@ public class ChatService {
                 (Integer) metadata.get("chunkIndex") : null;
             if (chunkIndex != null) {
                 sourceInfo.getChunkIndices().add(chunkIndex + 1); // +1 for human-readable numbering
+            }
+
+            // Add section
+            String sectionFullTitle = metadata.get("sectionFullTitle") != null ?
+                metadata.get("sectionFullTitle").toString() : null;
+            if(sectionFullTitle != null){
+                sourceInfo.getSectionTitles().add(sectionFullTitle);
             }
         }
         

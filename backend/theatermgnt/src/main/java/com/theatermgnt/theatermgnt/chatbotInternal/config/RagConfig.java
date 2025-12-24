@@ -47,7 +47,7 @@ public class RagConfig {
                         }
                     }
                 } else {
-                    log.warn("No active documents found. Please add documents via API: POST /api/internal/chatbot/documents");
+                    log.warn("No active documents found. Please add documents via API: POST /chatbot/documents");
                 }
             } else {
                 log.info("Vector store already initialized with {} vectors", count);

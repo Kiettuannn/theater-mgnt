@@ -5,6 +5,7 @@ import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatbotDocumentR
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.HealthCheckResponse;
 import com.theatermgnt.theatermgnt.chatbotInternal.service.ChatbotConfigService;
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,7 +23,7 @@ public class ChatbotConfigController {
     ChatbotConfigService chatbotConfigService;
 
     @PostMapping
-    public ApiResponse<ChatbotDocumentResponse> addDocument(@RequestBody AddDocumentRequest request) {
+    public ApiResponse<ChatbotDocumentResponse> addDocument(@RequestBody @Valid AddDocumentRequest request) {
         return ApiResponse.<ChatbotDocumentResponse>builder()
                 .result(chatbotConfigService.addDocumentToRag(request))
                 .build();

@@ -17,4 +17,5 @@ public class SourceInfo {
     String documentType;
     Integer priority;
     Set<Integer> chunkIndices;
+    Set<String> sectionTitles;
 }

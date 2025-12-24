@@ -13,6 +13,7 @@ import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
 import com.theatermgnt.theatermgnt.file.entity.FileMgnt;
 import com.theatermgnt.theatermgnt.file.mapper.FileMgntMapper;
 import com.theatermgnt.theatermgnt.file.repository.FileMgntRepository;
+import com.theatermgnt.theatermgnt.staff.repository.StaffRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -43,6 +44,7 @@ public class ChatbotConfigService {
     VectorStoreService vectorStoreService;
     ChatbotDocumentMapper chatbotDocumentMapper;
     JdbcTemplate jdbcTemplate;
+    StaffRepository staffRepository;
 
     // Add document to chatbot config
     @Transactional
@@ -63,6 +65,7 @@ public class ChatbotConfigService {
 
         // Create chatbot document
         String accountId = SecurityContextHolder.getContext().getAuthentication().getName();
+        String syncedBy = buildSyncedBy(accountId);
 
         ChatbotDocument chatbotDocument = ChatbotDocument.builder()
                 .fileMgnt(file)
@@ -70,7 +73,7 @@ public class ChatbotConfigService {
                 .documentStatus(DocumentStatus.INACTIVE)
                 .description(request.getDescription())
                 .priority(request.getPriority())
-                .syncedBy(accountId)
+                .syncedBy(syncedBy)
                 .build();
         chatbotDocument = chatbotDocumentRepository.save(chatbotDocument);
 
@@ -81,6 +84,11 @@ public class ChatbotConfigService {
         return chatbotDocumentMapper.toChatbotDocumentResponse(chatbotDocument);
     }
 
+    private String buildSyncedBy(String accountId) {
+        var staff = staffRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return staff.getFirstName() + " " + staff.getLastName();
+    }
     // Sync document to vector store
     @Async
     @Transactional
@@ -210,5 +218,5 @@ public class ChatbotConfigService {
                 .totalDocuments((int) totalDocs)
                 .message(isConsistent ? "System healthy" : "Isconsistency issue detected")
                 .build();
-     }
+    }
 }

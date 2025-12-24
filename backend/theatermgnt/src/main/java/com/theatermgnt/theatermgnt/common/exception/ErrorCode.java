@@ -90,6 +90,8 @@ public enum ErrorCode {
     DOCUMENT_NOT_FOUND(5008, "Document not found", HttpStatus.NOT_FOUND),
     DOCUMENT_ALREADY_PROCESSING(5009, "Document is already being processed", HttpStatus.BAD_REQUEST),
 
+    // CHATBOT DOCUMENT;
+    PRIORITY_INVALID(6001, "Priority must be between {min} and {max}", HttpStatus.BAD_REQUEST)
     ;
     private int code;
     private String message;
