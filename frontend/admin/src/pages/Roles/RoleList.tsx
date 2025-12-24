@@ -71,10 +71,6 @@ export function RoleList() {
     }
   };
 
-  if (loading) {
-    return <LoadingSpinner message="Loading roles..." />;
-  }
-
   return (
     <div className="space-y-6">
       <PageHeader
@@ -104,60 +100,72 @@ export function RoleList() {
       </Button>
 
       {/* Roles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredRoles.map((role) => (
-          <Card
-            key={role.name}
-            className="p-6 hover:shadow-lg transition-shadow"
-          >
-            <div className="space-y-4">
-              {/* Header */}
-              <div className="flex items-start justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Shield className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">{role.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {role.description}
-                    </p>
+      {loading ? (
+        <div className="bg-white rounded-lg border border-gray-200 p-12">
+          <LoadingSpinner
+            message="Loading roles..."
+            size="lg"
+            fullScreen={false}
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredRoles.map((role) => (
+            <Card
+              key={role.name}
+              className="p-6 hover:shadow-lg transition-shadow"
+            >
+              <div className="space-y-4">
+                {/* Header */}
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg">{role.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {role.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Permissions Count */}
-              <div className="flex items-center gap-2 text-sm">
-                <div className="px-3 py-1 bg-muted rounded-full">
-                  {role.permissions.length} permissions
+                {/* Permissions Count */}
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="px-3 py-1 bg-muted rounded-full">
+                    {role.permissions.length} permissions
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex items-center gap-2 pt-2 border-t">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex-1 gap-2"
+                    onClick={() => handleOpenEditDialog(role)}
+                  >
+                    <Pencil className="w-3 h-3" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="flex-1 gap-2"
+                    onClick={() =>
+                      handleDeleteRole(role.name, role.description)
+                    }
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Delete
+                  </Button>
                 </div>
               </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-2 pt-2 border-t">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1 gap-2"
-                  onClick={() => handleOpenEditDialog(role)}
-                >
-                  <Pencil className="w-3 h-3" />
-                  Edit
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="flex-1 gap-2"
-                  onClick={() => handleDeleteRole(role.name, role.description)}
-                >
-                  <Trash2 className="w-3 h-3" />
-                  Delete
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Empty State */}
       {filteredRoles.length === 0 && (

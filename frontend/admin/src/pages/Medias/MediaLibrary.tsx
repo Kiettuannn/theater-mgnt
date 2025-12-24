@@ -1,16 +1,8 @@
 import { useState, useEffect } from "react";
-import {
-  Search,
-  Grid3x3,
-  List,
-  Upload,
-  ChevronDown,
-  Loader2,
-  Filter,
-  Image,
-} from "lucide-react";
+import { Grid3x3, List, ChevronDown, Filter, Image } from "lucide-react";
 import { SearchAddBar } from "@/components/ui/SearchAddBar";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import type { MediaFile, ViewMode, SortBy } from "@/types/media.types";
 import { getAllMediaFiles, deleteMediaFile } from "@/services/mediaService";
 import { FileGridView } from "@/components/media/FileGridView";
@@ -208,9 +200,11 @@ export default function MediaLibrary() {
       <div className="bg-white rounded-lg border border-gray-200">
         <div className="p-6">
           {loading ? (
-            <div className="flex items-center justify-center h-64">
-              <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-            </div>
+            <LoadingSpinner
+              message="Loading files..."
+              size="lg"
+              fullScreen={false}
+            />
           ) : viewMode === "grid" ? (
             <FileGridView files={filteredFiles} onPreview={setSelectedFile} />
           ) : (

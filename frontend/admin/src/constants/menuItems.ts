@@ -13,6 +13,7 @@ import {
   BarChart3,
   DoorOpen,
   Image,
+  MessageSquare,
 } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { PERMISSIONS } from "@/constants/permissions";
@@ -123,5 +124,11 @@ export const MENU_ITEMS: MenuItem[] = [
     label: "Media Library",
     icon: Image,
     path: ROUTES.MEDIA,
+  },
+  {
+    id: "chatbot-config",
+    label: "Chatbot Config",
+    icon: MessageSquare,
+    path: ROUTES.CHATBOT_CONFIG,
   },
 ];

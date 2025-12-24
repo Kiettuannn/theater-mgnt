@@ -94,10 +94,6 @@ export const StaffList = () => {
     handleDeleteStaff(staff.staffId, `${staff.firstName} ${staff.lastName}`);
   };
 
-  if (loading) {
-    return <LoadingSpinner message="Loading staffs..." />;
-  }
-
   return (
     <div className="space-y-6">
       <PageHeader
@@ -119,7 +115,15 @@ export const StaffList = () => {
       />
 
       {/* Staff Table */}
-      {searchQuery.trim() && filteredStaffs.length === 0 && !loading ? (
+      {loading ? (
+        <div className="bg-white rounded-lg border border-gray-200 p-12">
+          <LoadingSpinner
+            message="Loading staffs..."
+            size="lg"
+            fullScreen={false}
+          />
+        </div>
+      ) : searchQuery.trim() && filteredStaffs.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <Search className="w-12 h-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">
