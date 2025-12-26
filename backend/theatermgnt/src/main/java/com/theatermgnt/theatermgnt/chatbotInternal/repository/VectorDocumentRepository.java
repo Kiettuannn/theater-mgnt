@@ -11,9 +11,6 @@ import java.util.List;
 public interface VectorDocumentRepository extends JpaRepository<VectorDocument, String> {
     List<VectorDocument> findByFileId(String fileId);
 
-    List<VectorDocument> findByChatbotDocumentId(String chatbotDocumentId);
-
     void deleteByFileId(String fileId);
 
-    void deleteByChatbotDocumentId(String chatbotDocumentId);
 }

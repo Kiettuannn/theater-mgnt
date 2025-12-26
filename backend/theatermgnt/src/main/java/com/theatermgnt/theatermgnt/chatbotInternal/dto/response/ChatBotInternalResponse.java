@@ -12,5 +12,5 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChatBotInternalResponse {
     String answer;
-    List<SourceInfo> sources; // Danh sách nguồn tài liệu tham khảo
+    List<SourceInfo> sources;
 }

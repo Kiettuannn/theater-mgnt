@@ -13,19 +13,16 @@ import java.util.regex.Pattern;
 public class DocumentSectionTracker {
     private final List<SectionInfo> sections = new ArrayList<>();
 
-    // Pattern 1: CHƯƠNG I, CHƯƠNG II, ... (số La Mã)
     private static final Pattern CHAPTER_PATTERN = Pattern.compile(
             "^\\s*(CHƯƠNG\\s+[IVXLCDM]+)[:\\s]+(.{3,150})$",
             Pattern.MULTILINE | Pattern.UNICODE_CASE
     );
 
-    // Pattern 2: 1.1., 1.2., 2.1., ... (số thập phân)
     private static final Pattern SUBSECTION_PATTERN = Pattern.compile(
             "^\\s*(\\d+\\.\\d+)\\.?\\s+([A-Za-zÀ-ỹĐđ][^\\n\\r]{2,150})$",
             Pattern.MULTILINE | Pattern.UNICODE_CASE
     );
 
-    // Pattern 3: 1., 2., 3., ... (số đơn giản - fallback)
     private static final Pattern SIMPLE_SECTION_PATTERN = Pattern.compile(
             "^\\s*(\\d+)\\.\\s+([A-Za-zÀ-ỹĐđ][^\\n\\r]{2,150})$",
             Pattern.MULTILINE | Pattern.UNICODE_CASE
@@ -48,8 +45,7 @@ public class DocumentSectionTracker {
             String escapedNumber = Pattern.quote(section.getSectionNumber());
             String escapedTitle = Pattern.quote(section.getSectionTitle());
             
-            // Tạo pattern linh hoạt hơn
-            String sectionPattern = escapedNumber + "[:\\s\\.]+.*?" + 
+            String sectionPattern = escapedNumber + "[:\\s\\.]+.*?" +
                 escapedTitle.substring(0, Math.min(20, escapedTitle.length()));
             
             try {
@@ -78,11 +74,9 @@ public class DocumentSectionTracker {
 
 
     private void parseDocument(String fullText){
-        // Debug: log 500 ký tự đầu để xem format thực tế
         String preview = fullText.length() > 500 ? fullText.substring(0, 500) : fullText;
         log.debug("Document preview (first 500 chars):\n{}", preview);
         
-        // Parse CHƯƠNG (chapters)
         Matcher chapterMatcher = CHAPTER_PATTERN.matcher(fullText);
         while(chapterMatcher.find()){
             int startPos = chapterMatcher.start();
@@ -112,7 +106,7 @@ public class DocumentSectionTracker {
                     .build());
         }
 
-        // Fallback: Parse simple sections (1., 2., etc.) - chỉ khi chưa có gì
+        // Fallback: Parse simple sections (1., 2., etc.)
         if (sections.isEmpty()) {
             Matcher simpleMatcher = SIMPLE_SECTION_PATTERN.matcher(fullText);
             while(simpleMatcher.find()){

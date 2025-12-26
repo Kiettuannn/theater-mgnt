@@ -84,11 +84,7 @@ public class ChatbotConfigService {
         return chatbotDocumentMapper.toChatbotDocumentResponse(chatbotDocument);
     }
 
-    private String buildSyncedBy(String accountId) {
-        var staff = staffRepository.findByAccountId(accountId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        return staff.getFirstName() + " " + staff.getLastName();
-    }
+
     // Sync document to vector store
     @Async
     @Transactional
@@ -218,5 +214,10 @@ public class ChatbotConfigService {
                 .totalDocuments((int) totalDocs)
                 .message(isConsistent ? "System healthy" : "Isconsistency issue detected")
                 .build();
+    }
+    private String buildSyncedBy(String accountId) {
+        var staff = staffRepository.findByAccountId(accountId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return staff.getFirstName() + " " + staff.getLastName();
     }
 }
