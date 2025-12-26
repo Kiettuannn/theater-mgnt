@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { MessageCircle, X, Send, Trash2 } from "lucide-react";
+import { MessageCircle, X, Send, Trash2, FileText } from "lucide-react";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useChatbot } from "@/hooks/useChatbot";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import type { SourceInfo } from "@/services/chatService";
 
 export const ChatbotWidget = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -83,7 +84,7 @@ export const ChatbotWidget = () => {
         title={confirmDialog.title}
         description={confirmDialog.description}
         confirmText={confirmDialog.confirmText || "Confirm"}
-        cancelText="Huỷ"
+        cancelText="Cancel"
         variant={confirmDialog.variant || "destructive"}
       />
 
@@ -96,9 +97,9 @@ export const ChatbotWidget = () => {
               <div className="flex items-center gap-2">
                 <MessageCircle size={24} />
                 <div>
-                  <h3 className="font-semibold">Trợ lý ảo</h3>
+                  <h3 className="font-semibold">AI Assistant</h3>
                   <p className="text-xs text-blue-100">
-                    Luôn sẵn sàng hỗ trợ bạn!
+                    Always ready to assist you!
                   </p>
                 </div>
               </div>
@@ -110,7 +111,7 @@ export const ChatbotWidget = () => {
                 >
                   <div className="flex items-center gap-2">
                     <Trash2 size={20} />
-                    <span>Xoá lịch sử</span>
+                    <span>Clear</span>
                   </div>
                 </button>
                 <button
@@ -177,6 +178,64 @@ export const ChatbotWidget = () => {
                         {message.text}
                       </ReactMarkdown>
                     </div>
+
+                    {/* Display sources if available */}
+                    {message.sender === "bot" &&
+                      message.sources &&
+                      message.sources.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-gray-200">
+                          <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
+                            <FileText size={12} />
+                            <span className="font-semibold">Sources:</span>
+                          </div>
+                          <div className="space-y-1">
+                            {message.sources.map(
+                              (source: SourceInfo, index: number) => (
+                                <div
+                                  key={`${source.fileId}-${index}`}
+                                  className="text-xs bg-gray-50 rounded p-2 hover:bg-gray-100 transition-colors"
+                                >
+                                  <div className="flex items-start gap-2">
+                                    <span className="text-blue-600 font-medium min-w-[20px]">
+                                      [{index + 1}]
+                                    </span>
+                                    <div className="flex-1">
+                                      <div className="font-medium text-gray-700">
+                                        {source.fileName}
+                                      </div>
+                                      <div className="text-gray-500 mt-0.5">
+                                        {source.documentType} • Priority:{" "}
+                                        {source.priority}
+                                      </div>
+                                      {source.sectionTitles &&
+                                        source.sectionTitles.length > 0 && (
+                                          <div className="text-gray-600 mt-1 italic">
+                                            {source.sectionTitles
+                                              .slice(0, 2)
+                                              .join(", ")}
+                                            {source.sectionTitles.length > 2 &&
+                                              "..."}
+                                          </div>
+                                        )}
+                                      {source.filePath && (
+                                        <a
+                                          href={source.filePath}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 hover:text-blue-800 underline mt-1 inline-block"
+                                        >
+                                          View document
+                                        </a>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
+
                     <span
                       className={`text-xs mt-1 block ${
                         message.sender === "user"
@@ -223,7 +282,7 @@ export const ChatbotWidget = () => {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Nhập tin nhắn..."
+                  placeholder="Input message..."
                   disabled={isLoading}
                   className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
                 />

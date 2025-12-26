@@ -2,11 +2,14 @@ import { useState, useCallback, useRef } from "react";
 import { chatService } from "@/services/chatService";
 import { useConfirmDialog } from "./useConfirmDialog";
 
+import type { SourceInfo } from "@/services/chatService";
+
 export interface Message {
   id: string;
   text: string;
   sender: "user" | "bot";
   timestamp: Date;
+  sources?: SourceInfo[];
 }
 
 const WELCOME_MESSAGE: Message = {
@@ -73,13 +76,14 @@ export function useChatbot() {
         text: response.answer,
         sender: "bot",
         timestamp: new Date(),
+        sources: response.sources || [],
       };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
       console.error("Chat error:", error);
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.",
+        text: "Xin lỗi, đã có lỗi xảy ra khi xử lý yêu cầu của bạn.",
         sender: "bot",
         timestamp: new Date(),
       };
@@ -100,25 +104,11 @@ export function useChatbot() {
   );
 
   // Clear chat history with confirmation
-  const handleClearChat = useCallback(() => {
-    showConfirmDialog({
-      title: "Xoá lịch sử chat",
-      description:
-        "Bạn có chắc chắn muốn xoá toàn bộ lịch sử trò chuyện? Hành động này không thể hoàn tác.",
-      confirmText: "Xoá",
-      variant: "destructive",
-      onConfirm: async () => {
-        try {
-          await chatService.clearConversation();
-          setMessages([WELCOME_MESSAGE]);
-          closeConfirmDialog();
-        } catch (error) {
-          console.error("Error clearing conversation:", error);
-        }
-      },
-    });
-  }, [showConfirmDialog, closeConfirmDialog]);
-
+  const handleClearChat = async () => {
+    await chatService.clearHistory();
+    setMessages([WELCOME_MESSAGE]);
+  }
+   
   // Toggle chat window
   const toggleChat = useCallback(() => {
     setIsOpen((prev) => !prev);

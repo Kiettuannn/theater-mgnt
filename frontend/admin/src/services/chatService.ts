@@ -1,13 +1,24 @@
+import { handleApiResponse } from "@/utils/apiResponse";
+import type { ApiResponse } from "@/utils/apiResponse";
 import httpClient from "../configurations/httpClient";
 
 export interface ChatRequest {
   query: string;
-  // Không cần conversationId và userId nữa - backend tự lấy từ SecurityContext
+}
+
+export interface SourceInfo {
+  fileId: string;
+  fileName: string;
+  filePath: string;
+  documentType: string;
+  priority: number;
+  chunkIndices: number[];
+  sectionTitles: string[];
 }
 
 export interface ChatResponse {
   answer: string;
-  // Không cần conversationId trong response
+  sources: SourceInfo[];
 }
 
 export interface ChatMessage {
@@ -15,32 +26,32 @@ export interface ChatMessage {
   text: string;
   sender: "user" | "bot";
   timestamp: Date;
+  sources?: SourceInfo[];
 }
 
 export const chatService = {
-  /**
-   * Gửi tin nhắn đến chatbot
-   */
+
   sendMessage: async (request: ChatRequest): Promise<ChatResponse> => {
-    const response = await httpClient.post<ChatResponse>("/chat", request);
-    return response.data;
+    return handleApiResponse<ChatResponse>(
+      httpClient.post<ApiResponse<ChatResponse>>("/chatbot/chat", request)
+    );
   },
 
-  /**
-   * Xóa lịch sử chat của user hiện tại
-   */
-  clearConversation: async (): Promise<void> => {
-    await httpClient.delete("/chat/conversation");
+  clearHistory: async (): Promise<void> => {
+    return handleApiResponse<void>(
+      httpClient.delete<ApiResponse<void>>("/chatbot/history")
+    );
   },
 
   getChatHistory: async (): Promise<ChatMessage[]> => {
-    const response = await httpClient.get<ChatMessage[]>("/chat/history");
-    
-    // Convert timestamp string sang Date object
-    return response.data.map((msg, index) => ({
-      ...msg,
-      id: `history-${index}`,
-      timestamp: new Date(msg.timestamp),
-    }));
+    return handleApiResponse<ChatMessage[]>(
+      httpClient.get<ApiResponse<ChatMessage[]>>("/chatbot/history")
+    ).then(messages => 
+      messages.map((msg, index) => ({
+        ...msg,
+        id: `history-${index}`,
+        timestamp: new Date(msg.timestamp),
+      }))
+    );
   },
 };

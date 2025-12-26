@@ -1,11 +1,9 @@
-import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import {
-  RefreshCw,
   RefreshCcw,
   Upload,
   Trash2,
@@ -14,178 +12,83 @@ import {
   Eye,
   Star,
 } from "lucide-react";
-import { useNotificationStore } from "@/stores/useNotificationStore";
-import {
-  chatbotConfigService,
-  type ChatbotDocument,
-} from "@/services/chatbotConfigService";
 import { DOCUMENT_TYPES, STATUS_CONFIG } from "@/constants/chatbot";
 import { AddDocumentModal } from "./AddDocumentModal";
 import { DocumentDetailModal } from "./DocumentDetailModal";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 import { SearchAddBar } from "@/components/ui/SearchAddBar";
+import {
+  useChatbotDocuments,
+  useChatbotSync,
+  useChatbotFilters,
+  useChatbotModals,
+} from "../../hooks/chatbotDocumentHooks";
 
 export default function ChatbotConfig() {
-  const [documents, setDocuments] = useState<ChatbotDocument[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<string>("all");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
-  const [selectedDocument, setSelectedDocument] =
-    useState<ChatbotDocument | null>(null);
-  const [syncingIds, setSyncingIds] = useState<Set<string>>(new Set());
-  const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
-  const [deleting, setDeleting] = useState(false);
-  const [syncDialogOpen, setSyncDialogOpen] = useState(false);
-  const [resyncDialogOpen, setResyncDialogOpen] = useState(false);
-  const [pendingSyncId, setPendingSyncId] = useState<string | null>(null);
-
-  const { addNotification } = useNotificationStore();
-
-  useEffect(() => {
-    loadDocuments();
-  }, []);
-
-  const loadDocuments = async () => {
-    try {
-      setLoading(true);
-      const data = await chatbotConfigService.getAllDocuments();
-      console.log("Fetched documents:", data);
-      setDocuments(data);
-    } catch (error) {
-      addNotification({
-        type: "error",
-        title: "Error",
-        message: "Failed to load documents",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSync = async (documentId: string) => {
-    try {
-      setSyncingIds((prev) => new Set([...prev, documentId]));
-      await chatbotConfigService.syncDocument(documentId);
-      addNotification({
-        type: "success",
-        title: "Success",
-        message: "Document sync started",
-      });
-      setTimeout(loadDocuments, 1000);
-    } catch (error) {
-      addNotification({
-        type: "error",
-        title: "Error",
-        message: "Failed to sync document",
-      });
-    } finally {
-      setSyncingIds((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(documentId);
-        return newSet;
-      });
-    }
-  };
-
-  const handleResync = async (documentId: string) => {
-    try {
-      setSyncingIds((prev) => new Set([...prev, documentId]));
-      await chatbotConfigService.resyncDocument(documentId);
-      addNotification({
-        type: "success",
-        title: "Success",
-        message: "Document re-sync started",
-      });
-      setTimeout(loadDocuments, 1000);
-    } catch (error) {
-      addNotification({
-        type: "error",
-        title: "Error",
-        message: "Failed to re-sync document",
-      });
-    } finally {
-      setSyncingIds((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(documentId);
-        return newSet;
-      });
-    }
-  };
-
-  const handleToggleStatus = async (documentId: string) => {
-    try {
-      setTogglingIds((prev) => new Set([...prev, documentId]));
-      await chatbotConfigService.toggleDocumentStatus(documentId);
-      addNotification({
-        type: "success",
-        title: "Success",
-        message: "Document status updated",
-      });
-      loadDocuments();
-    } catch (error) {
-      addNotification({
-        type: "error",
-        title: "Error",
-        message: "Failed to update status",
-      });
-    } finally {
-      setTogglingIds((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(documentId);
-        return newSet;
-      });
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!selectedDocId) return;
-    try {
-      setDeleting(true);
-      await chatbotConfigService.deleteDocument(selectedDocId);
-      addNotification({
-        type: "success",
-        title: "Success",
-        message: "Document deleted successfully",
-      });
-      setDeleteDialogOpen(false);
-      setSelectedDocId(null);
-      loadDocuments();
-    } catch (error) {
-      addNotification({
-        type: "error",
-        title: "Error",
-        message: "Failed to delete document",
-      });
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  const filteredDocuments = documents.filter((doc) => {
-    const matchSearch =
-      doc.file?.originalFileName
-        ?.toLowerCase()
-        ?.includes(searchQuery.toLowerCase()) ||
-      doc.description?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchType = filterType === "all" || doc.documentType === filterType;
-    const matchStatus =
-      filterStatus === "all" || doc.documentStatus === filterStatus;
-    return matchSearch && matchType && matchStatus;
-  });
+  // Custom hooks
+  const {
+    documents,
+    loading,
+    deleting,
+    loadDocuments,
+    handleDelete,
+    handleToggleStatus,
+  } = useChatbotDocuments();
+  const { syncingIds, handleSync, handleResync } =
+    useChatbotSync(loadDocuments);
+  const {
+    searchQuery,
+    setSearchQuery,
+    filterType,
+    setFilterType,
+    filterStatus,
+    setFilterStatus,
+    filteredDocuments,
+  } = useChatbotFilters(documents);
+  const {
+    isAddModalOpen,
+    openAddModal,
+    closeAddModal,
+    isDetailModalOpen,
+    selectedDocument,
+    openDetailModal,
+    closeDetailModal,
+    deleteDialogOpen,
+    selectedDocId,
+    openDeleteDialog,
+    closeDeleteDialog,
+    syncDialogOpen,
+    pendingSyncId,
+    openSyncDialog,
+    closeSyncDialog,
+    resyncDialogOpen,
+    openResyncDialog,
+    closeResyncDialog,
+    togglingIds,
+    setTogglingIds,
+  } = useChatbotModals();
 
   const getDocumentTypeConfig = (type: string) => {
     return DOCUMENT_TYPES.find((t) => t.value === type) || DOCUMENT_TYPES[0];
   };
 
-  const handleViewDetail = (doc: ChatbotDocument) => {
-    setSelectedDocument(doc);
-    setIsDetailModalOpen(true);
+  const handleToggleStatusWithLoading = async (documentId: string) => {
+    setTogglingIds((prev) => new Set([...prev, documentId]));
+    await handleToggleStatus(documentId);
+    setTogglingIds((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(documentId);
+      return newSet;
+    });
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedDocId) return;
+    const success = await handleDelete(selectedDocId);
+    if (success) {
+      closeDeleteDialog();
+    }
   };
 
   return (
@@ -205,7 +108,7 @@ export default function ChatbotConfig() {
         icon={<FileText className="w-4 h-4" />}
         label="documents"
         buttonText="Add Document"
-        onAddClick={() => setIsAddModalOpen(true)}
+        onAddClick={openAddModal}
       />
 
       {/* Filters Bar */}
@@ -355,7 +258,7 @@ export default function ChatbotConfig() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => handleViewDetail(doc)}
+                          onClick={() => openDetailModal(doc)}
                           title="View Details"
                         >
                           <Eye className="w-4 h-4" />
@@ -366,10 +269,7 @@ export default function ChatbotConfig() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => {
-                              setPendingSyncId(doc.id);
-                              setSyncDialogOpen(true);
-                            }}
+                            onClick={() => openSyncDialog(doc.id)}
                             disabled={syncingIds.has(doc.id)}
                             title="Sync to Vector Store"
                             className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
@@ -388,10 +288,7 @@ export default function ChatbotConfig() {
                           <Button
                             size="sm"
                             variant="ghost"
-                            onClick={() => {
-                              setPendingSyncId(doc.id);
-                              setResyncDialogOpen(true);
-                            }}
+                            onClick={() => openResyncDialog(doc.id)}
                             disabled={syncingIds.has(doc.id)}
                             title={
                               doc.documentStatus === "FAILED"
@@ -426,7 +323,7 @@ export default function ChatbotConfig() {
                               <Switch
                                 checked={doc.documentStatus === "ACTIVE"}
                                 onCheckedChange={() =>
-                                  handleToggleStatus(doc.id)
+                                  handleToggleStatusWithLoading(doc.id)
                                 }
                                 disabled={togglingIds.has(doc.id)}
                               />
@@ -438,10 +335,7 @@ export default function ChatbotConfig() {
                         <Button
                           size="sm"
                           variant="ghost"
-                          onClick={() => {
-                            setSelectedDocId(doc.id);
-                            setDeleteDialogOpen(true);
-                          }}
+                          onClick={() => openDeleteDialog(doc.id)}
                           className="text-destructive hover:text-destructive hover:bg-destructive/10"
                           title="Delete"
                         >
@@ -460,9 +354,9 @@ export default function ChatbotConfig() {
       {/* Add Document Modal */}
       <AddDocumentModal
         open={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={closeAddModal}
         onSuccess={() => {
-          setIsAddModalOpen(false);
+          closeAddModal();
           loadDocuments();
         }}
       />
@@ -470,21 +364,15 @@ export default function ChatbotConfig() {
       {/* Document Detail Modal */}
       <DocumentDetailModal
         open={isDetailModalOpen}
-        onClose={() => {
-          setIsDetailModalOpen(false);
-          setSelectedDocument(null);
-        }}
+        onClose={closeDetailModal}
         document={selectedDocument}
       />
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={deleteDialogOpen}
-        onClose={() => {
-          setDeleteDialogOpen(false);
-          setSelectedDocId(null);
-        }}
-        onConfirm={handleDelete}
+        onClose={closeDeleteDialog}
+        onConfirm={handleDeleteConfirm}
         title="Delete Document"
         description="Are you sure you want to delete this document? This action cannot be undone."
         confirmText="Delete"
@@ -495,16 +383,12 @@ export default function ChatbotConfig() {
       {/* Sync Confirmation Dialog */}
       <ConfirmDialog
         isOpen={syncDialogOpen}
-        onClose={() => {
-          setSyncDialogOpen(false);
-          setPendingSyncId(null);
-        }}
+        onClose={closeSyncDialog}
         onConfirm={() => {
           if (pendingSyncId) {
             handleSync(pendingSyncId);
           }
-          setSyncDialogOpen(false);
-          setPendingSyncId(null);
+          closeSyncDialog();
         }}
         title="Sync Document"
         description="Are you sure you want to sync this document to the vector store? This will process the document and make it available for the chatbot."
@@ -516,16 +400,12 @@ export default function ChatbotConfig() {
       {/* Re-sync Confirmation Dialog */}
       <ConfirmDialog
         isOpen={resyncDialogOpen}
-        onClose={() => {
-          setResyncDialogOpen(false);
-          setPendingSyncId(null);
-        }}
+        onClose={closeResyncDialog}
         onConfirm={() => {
           if (pendingSyncId) {
             handleResync(pendingSyncId);
           }
-          setResyncDialogOpen(false);
-          setPendingSyncId(null);
+          closeResyncDialog();
         }}
         title="Re-sync Document"
         description="Are you sure you want to re-sync this document? This will reprocess the document and update the vector store."
