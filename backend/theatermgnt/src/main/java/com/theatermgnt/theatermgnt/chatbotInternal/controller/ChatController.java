@@ -1,6 +1,8 @@
 package com.theatermgnt.theatermgnt.chatbotInternal.controller;
 
+import com.cloudinary.Api;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatMessageResponse;
+import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.request.ChatBotInternalRequest;
@@ -23,17 +25,24 @@ public class ChatController {
     ChatService chatService;
 
     @PostMapping("/chat")
-    public ChatBotInternalResponse chat(@RequestBody ChatBotInternalRequest request) {
-        return chatService.chat(request);
+    public ApiResponse<ChatBotInternalResponse> chat(@RequestBody ChatBotInternalRequest request) {
+        return ApiResponse.<ChatBotInternalResponse>builder()
+                .result(chatService.chat(request))
+                .build();
     }
 
     @GetMapping("/history")
-    public List<ChatMessageResponse> getChatHistory(){
-        return chatService.getChatHistory();
+    public ApiResponse<List<ChatMessageResponse>> getChatHistory(){
+        return ApiResponse.<List<ChatMessageResponse>>builder()
+                .result(chatService.getChatHistory())
+                .build();
     }
 
-    @DeleteMapping("/conversation")
-    public void clearConversation() {
+    @DeleteMapping("/history")
+    public ApiResponse<Void> clearConversation() {
         chatService.clearCurrentUserConversation();
+        return ApiResponse.<Void>builder()
+                .message("Conversation cleared successfully")
+                .build();
     }
 }
