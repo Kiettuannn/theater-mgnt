@@ -1,6 +1,7 @@
 package com.theatermgnt.theatermgnt.account.service;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -59,24 +60,31 @@ public class RegistrationService {
 
     @Transactional
     public Account registerOAuthCustomer(OAuthCustomerCreationRequest request) {
-        return accountRepository.findByEmail(request.getEmail()).orElseGet(() -> {
-            ;
+        // Find or create account
+        Account account = accountRepository.findByEmail(request.getEmail()).orElseGet(() -> {
             Account newAccount = Account.builder()
                     .email(request.getEmail())
                     .username(request.getEmail())
                     .accountType(AccountType.CUSTOMER)
                     .isActive(true)
                     .build();
-            Account savedAccount = accountRepository.save(newAccount);
+            return accountRepository.save(newAccount);
+        });
 
+        // Check if customer profile exists for this account
+        Optional<Customer> existingCustomer = customerRepository.findByAccountId(account.getId());
+
+        if (existingCustomer.isEmpty()) {
+            // Create customer profile if it doesn't exist
             Customer newCustomer = Customer.builder()
                     .firstName(request.getFirstName())
                     .lastName(request.getLastName())
-                    .account(savedAccount)
+                    .account(account)
                     .build();
             customerRepository.save(newCustomer);
-            return savedAccount;
-        });
+        }
+
+        return account;
     }
 
     /// Create staff account

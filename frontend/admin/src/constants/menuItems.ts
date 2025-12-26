@@ -12,6 +12,7 @@ import {
   Receipt,
   BarChart3,
   DoorOpen,
+  MessageSquare,
   Image,
   MessageSquare,
 } from "lucide-react";
@@ -41,6 +42,13 @@ export const MENU_ITEMS: MenuItem[] = [
     icon: Film,
     path: ROUTES.MOVIES,
     requiredPermissions: [PERMISSIONS.MOVIE_READ],
+  },
+  {
+    id: "reviews",
+    label: "Reviews",
+    icon: MessageSquare,
+    path: ROUTES.REVIEWS,
+    requiredPermissions: [PERMISSIONS.REVIEW_READ],
   },
   {
     id: "cinemas",

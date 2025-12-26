@@ -40,9 +40,21 @@ httpClient.interceptors.response.use(
   },
   (error: AxiosError<ApiResponse>) => {
     // Handle HTTP errors (4xx, 5xx)
+    console.error("🔥 HTTP Error Response:", {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      headers: error.response?.headers,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        params: error.config?.params,
+      }
+    });
+
     if (error.response?.data) {
       const data = error.response.data;
-      
+
       // If backend returns standard format even in error response
       if (typeof data.code !== 'undefined') {
         const apiError = new ApiError(

@@ -28,12 +28,6 @@ export function Header() {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (mounted) {
-      console.log("[v0] Theme changed to:", resolvedTheme);
-    }
-  }, [resolvedTheme, mounted]);
-
   // Handle scroll to section when navigating with hash
   useEffect(() => {
     if (pathname === "/" && window.location.hash) {
@@ -106,7 +100,6 @@ export function Header() {
 
   const handleThemeToggle = () => {
     const newTheme = resolvedTheme === "dark" ? "light" : "dark";
-    console.log("[v0] Toggling theme to:", newTheme);
     setTheme(newTheme);
   };
 

@@ -6,8 +6,9 @@ import { Login } from "@/pages/Login/Login";
 import { Profile } from "@/pages/Profile/StaffProfile";
 import { PermissionList } from "@/pages/Permissions";
 import { RoleList } from "@/pages/Roles";
-import { MovieList } from "@/pages/Movies";
+import { MovieList, CreateMovie, EditMovie } from "@/pages/Movies";
 import { ShowtimeList } from "@/pages/Showtimes";
+import { ReviewList } from "@/pages/Reviews";
 import { TheaterList } from "@/pages/Cinemas";
 import { RoomList, CreateRoom, EditRoom } from "@/pages/Rooms";
 import { TicketList } from "@/pages/Tickets";
@@ -63,6 +64,34 @@ export const routes = [
               {
                 index: true,
                 element: <MovieList />,
+              },
+              {
+                path: "create",
+                element: (
+                  <ProtectedRoute
+                    requiredPermissions={[PERMISSIONS.MOVIE_CREATE]}
+                  />
+                ),
+                children: [
+                  {
+                    index: true,
+                    element: <CreateMovie />,
+                  },
+                ],
+              },
+              {
+                path: "edit/:id",
+                element: (
+                  <ProtectedRoute
+                    requiredPermissions={[PERMISSIONS.MOVIE_UPDATE]}
+                  />
+                ),
+                children: [
+                  {
+                    index: true,
+                    element: <EditMovie />,
+                  },
+                ],
               },
             ],
           },
@@ -247,6 +276,18 @@ export const routes = [
               {
                 index: true,
                 element: <ReportList />,
+              },
+            ],
+          },
+          {
+            path: `${ROUTES.REVIEWS}`,
+            element: (
+              <ProtectedRoute requiredPermissions={[PERMISSIONS.REVIEW_READ]} />
+            ),
+            children: [
+              {
+                index: true,
+                element: <ReviewList />,
               },
             ],
           },

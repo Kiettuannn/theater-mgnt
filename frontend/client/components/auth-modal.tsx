@@ -35,7 +35,6 @@ export function AuthModal({ mode, onClose, onSwitchMode }: AuthModalProps) {
       if (isLogin) {
         const loginIdentifier = formData.get("loginIdentifier") as string;
         const response = await login({ loginIdentifier, password });
-        console.log("Login successful:", response);
 
         // Update auth context
         authLogin();
@@ -78,7 +77,6 @@ export function AuthModal({ mode, onClose, onSwitchMode }: AuthModalProps) {
           lastName,
           dob,
         });
-        console.log("Registration successful:", response);
 
         // Update auth context
         authLogin();
@@ -101,7 +99,7 @@ export function AuthModal({ mode, onClose, onSwitchMode }: AuthModalProps) {
   };
 
   const handleGoogleSignIn = () => {
-    console.log("Initiating Google sign in from modal");
+    // Google sign in handled by GoogleSignInButton component
   };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {

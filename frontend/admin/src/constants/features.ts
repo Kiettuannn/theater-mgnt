@@ -13,6 +13,7 @@ import {
   BarChart3,
   TicketCheck,
   DoorOpen,
+  MessageSquare,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -34,6 +35,14 @@ export const FEATURES: readonly Feature[] = [
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
   },
+ {
+    id: "REVIEW",
+    label: "Review Management",
+    icon: MessageSquare,
+    description: "Manage reviews by customer",
+    color: "text-blue-500",
+    bgColor: "bg-blue-500/10",
+ },
   {
     id: "CINEMAS",
     label: "Cinemas Management",

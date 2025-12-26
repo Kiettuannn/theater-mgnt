@@ -15,8 +15,6 @@ export default function Authenticate() {
   const login = useAuthStore((state) => state.login);
 
   useEffect(() => {
-    console.log(window.location.href);
-
     const authCodeRegex = /code=([^&]+)/;
     const isMatch = window.location.href.match(authCodeRegex);
 
@@ -33,15 +31,12 @@ export default function Authenticate() {
           return response.json();
         })
         .then(async (data) => {
-          console.log(data);
-
           setToken(data.result?.token);
           login(); // Cập nhật auth store để Header re-render
 
           // Fetch user info to check noPassword
           try {
             const userInfo = await getMyInfo();
-            console.log("User info:", userInfo);
 
             if (userInfo.noPassword === true) {
               // Show create password modal
@@ -74,7 +69,6 @@ export default function Authenticate() {
   ) => {
     try {
       await createPassword(password, confirmPassword);
-      console.log("Password created successfully");
       setShowCreatePassword(false);
       setIsLoggedin(true);
     } catch (error) {

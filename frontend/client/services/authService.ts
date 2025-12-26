@@ -69,13 +69,12 @@ export const authenticateWithGoogle = async (code: string): Promise<GoogleAuthRe
     const response = await httpClient.post<GoogleAuthResponse>(
       `${API.GOOGLE_AUTH}?code=${code}`
     );
-    console.log("Google Auth Response:", response);
-    
+
     if (response.data.result?.token) {
       setToken(response.data.result.token);
       setUserInfo(response.data.result.user);
     }
-    
+
     return response.data;
   } catch (error) {
     console.error("Google authentication failed:", error);

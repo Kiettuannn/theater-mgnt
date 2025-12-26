@@ -28,8 +28,6 @@ public class SeatTypeController {
 
     @PostMapping
     ApiResponse<SeatTypeResponse> createSeatType(@RequestBody @Valid SeatTypeCreationRequest request) {
-        log.info("in controller here");
-
         return ApiResponse.<SeatTypeResponse>builder()
                 .result(seatTypeService.createSeatType(request))
                 .build();

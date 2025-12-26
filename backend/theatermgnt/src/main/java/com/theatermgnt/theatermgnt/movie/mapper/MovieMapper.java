@@ -19,12 +19,15 @@ public interface MovieMapper {
 
     @Mapping(target = "ageRating", ignore = true)
     @Mapping(target = "genres", ignore = true)
+    @Mapping(source = "cast", target = "castMembers")
     Movie toMovie(CreateMovieRequest request);
 
     @Mapping(target = "ageRating", ignore = true)
     @Mapping(target = "genres", ignore = true)
+    @Mapping(source = "cast", target = "castMembers")
     void updateMovieFromRequest(UpdateMovieRequest request, @MappingTarget Movie movie);
 
+    @Mapping(source = "castMembers", target = "cast")
     MovieResponse toMovieResponse(Movie movie);
 
     @Mapping(source = "ageRating.code", target = "ageRatingCode")

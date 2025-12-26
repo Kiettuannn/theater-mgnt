@@ -1,3 +1,2 @@
-// Export all stores
-export { useAuthStore } from "./auth-store";
-export { useAuthModalStore } from "./auth-modal-store";
+export { useAuthStore } from './auth-store';
+export { useAuthModalStore } from './auth-modal-store';

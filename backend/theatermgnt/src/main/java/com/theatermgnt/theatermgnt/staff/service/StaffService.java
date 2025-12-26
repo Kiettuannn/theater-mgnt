@@ -93,7 +93,6 @@ public class StaffService {
 
         staffMapper.updateStaffProfile(staffToUpdate, request);
         if (isCallerAdmin && request.getRoles() != null) {
-            log.info("Updating roles for staff: {}", staffId);
             var roles = roleRepository.findAllById(request.getRoles());
             staffToUpdate.setRoles(new HashSet<>(roles));
         }

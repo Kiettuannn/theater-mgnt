@@ -43,7 +43,6 @@ public class CustomJwtDecoder implements JwtDecoder {
                     .macAlgorithm(MacAlgorithm.HS512)
                     .build();
         }
-        System.out.println(nimbusJwtDecoder.decode(token));
 
         return nimbusJwtDecoder.decode(token);
     }

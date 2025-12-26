@@ -30,4 +30,8 @@ public interface MovieRepository extends JpaRepository<Movie, String> {
     List<Movie> findByGenreId(@Param("genreId") String genreId);
 
     List<Movie> findByDirectorContainingIgnoreCase(String director);
+
+    boolean existsByAgeRatingId(String ageRatingId);
+
+    List<Movie> findByAgeRatingId(String ageRatingId);
 }

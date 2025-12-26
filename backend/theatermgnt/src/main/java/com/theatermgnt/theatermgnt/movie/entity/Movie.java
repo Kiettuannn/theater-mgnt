@@ -20,6 +20,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "movies")
+@org.hibernate.annotations.SQLDelete(sql = "UPDATE movies SET deleted = true WHERE id = ?")
+@org.hibernate.annotations.Where(clause = "deleted = false")
 public class Movie extends BaseEntity {
     String title;
     String description;
