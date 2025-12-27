@@ -1,5 +1,11 @@
 package com.theatermgnt.theatermgnt.screeningSeat.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.theatermgnt.theatermgnt.common.exception.AppException;
 import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
 import com.theatermgnt.theatermgnt.screening.entity.Screening;
@@ -13,15 +19,11 @@ import com.theatermgnt.theatermgnt.screeningSeat.mapper.ScreeningSeatMapper;
 import com.theatermgnt.theatermgnt.screeningSeat.repository.ScreeningSeatRepository;
 import com.theatermgnt.theatermgnt.seat.entity.Seat;
 import com.theatermgnt.theatermgnt.seat.repository.SeatRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Slf4j
 @Service
@@ -35,10 +37,12 @@ public class ScreeningSeatService {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public ScreeningSeatResponse createScreeningSeat(ScreeningSeatCreationRequest request) {
-        Screening screening = screeningRepository.findById(request.getScreeningId())
+        Screening screening = screeningRepository
+                .findById(request.getScreeningId())
                 .orElseThrow(() -> new AppException(ErrorCode.SCREENING_NOT_EXISTED));
 
-        Seat seat = seatRepository.findById(request.getSeatId())
+        Seat seat = seatRepository
+                .findById(request.getSeatId())
                 .orElseThrow(() -> new AppException(ErrorCode.SEAT_NOT_EXISTED));
 
         if (screeningSeatRepository.existsByScreeningIdAndSeatId(request.getScreeningId(), request.getSeatId()))
@@ -74,17 +78,19 @@ public class ScreeningSeatService {
     }
 
     public ScreeningSeatResponse getScreeningSeat(String screeningSeatId) {
-        ScreeningSeat screeningSeat = screeningSeatRepository.findById(screeningSeatId)
+        ScreeningSeat screeningSeat = screeningSeatRepository
+                .findById(screeningSeatId)
                 .orElseThrow(() -> new AppException(ErrorCode.SCREENING_SEAT_NOT_EXISTED));
         return screeningSeatMapper.toScreeningSeatResponse(screeningSeat);
     }
 
     public ScreeningSeatResponse updateScreeningSeat(String screeningSeatId, ScreeningSeatUpdateRequest request) {
-        ScreeningSeat screeningSeat = screeningSeatRepository.findById(screeningSeatId)
+        ScreeningSeat screeningSeat = screeningSeatRepository
+                .findById(screeningSeatId)
                 .orElseThrow(() -> new AppException(ErrorCode.SCREENING_SEAT_NOT_EXISTED));
 
-        if (screeningSeat.getStatus() == ScreeningSeatStatus.SOLD &&
-                request.getStatus() == ScreeningSeatStatus.AVAILABLE) {
+        if (screeningSeat.getStatus() == ScreeningSeatStatus.SOLD
+                && request.getStatus() == ScreeningSeatStatus.AVAILABLE) {
             throw new AppException(ErrorCode.SCREENING_SEAT_INVALID_STATUS_CHANGE);
         }
 
@@ -93,10 +99,10 @@ public class ScreeningSeatService {
     }
 
     public void deleteScreeningSeat(String screeningSeatId) {
-        ScreeningSeat ss = screeningSeatRepository.findById(screeningSeatId)
+        ScreeningSeat ss = screeningSeatRepository
+                .findById(screeningSeatId)
                 .orElseThrow(() -> new AppException(ErrorCode.SCREENING_SEAT_NOT_EXISTED));
-        if (ss.getStatus() == ScreeningSeatStatus.SOLD)
-            throw new AppException(ErrorCode.SCREENING_SEAT_CANNOT_DELETE);
+        if (ss.getStatus() == ScreeningSeatStatus.SOLD) throw new AppException(ErrorCode.SCREENING_SEAT_CANNOT_DELETE);
         screeningSeatRepository.deleteById(screeningSeatId);
     }
 }

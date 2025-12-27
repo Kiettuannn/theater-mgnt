@@ -1,7 +1,9 @@
 package com.theatermgnt.theatermgnt.screeningSeat.dto.request;
 
-import com.theatermgnt.theatermgnt.screeningSeat.enums.ScreeningSeatStatus;
 import jakarta.validation.constraints.NotNull;
+
+import com.theatermgnt.theatermgnt.screeningSeat.enums.ScreeningSeatStatus;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

@@ -12,6 +12,8 @@ import {
   Receipt,
   BarChart3,
   DoorOpen,
+  MessageSquare,
+  Image,
 } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { PERMISSIONS } from "@/constants/permissions";
@@ -39,6 +41,13 @@ export const MENU_ITEMS: MenuItem[] = [
     icon: Film,
     path: ROUTES.MOVIES,
     requiredPermissions: [PERMISSIONS.MOVIE_READ],
+  },
+  {
+    id: "reviews",
+    label: "Reviews",
+    icon: MessageSquare,
+    path: ROUTES.REVIEWS,
+    requiredPermissions: [PERMISSIONS.REVIEW_READ],
   },
   {
     id: "cinemas",
@@ -116,5 +125,17 @@ export const MENU_ITEMS: MenuItem[] = [
     icon: BarChart3,
     path: ROUTES.REPORTS,
     requiredPermissions: [PERMISSIONS.REPORT_READ],
+  },
+  {
+    id: "media",
+    label: "Media Library",
+    icon: Image,
+    path: ROUTES.MEDIA,
+  },
+  {
+    id: "chatbot-config",
+    label: "Chatbot Config",
+    icon: MessageSquare,
+    path: ROUTES.CHATBOT_CONFIG,
   },
 ];

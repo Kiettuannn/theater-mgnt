@@ -1,13 +1,13 @@
 package com.theatermgnt.theatermgnt.screeningSeat.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import com.theatermgnt.theatermgnt.screeningSeat.dto.request.ScreeningSeatCreationRequest;
 import com.theatermgnt.theatermgnt.screeningSeat.dto.request.ScreeningSeatUpdateRequest;
 import com.theatermgnt.theatermgnt.screeningSeat.dto.response.ScreeningSeatResponse;
 import com.theatermgnt.theatermgnt.screeningSeat.entity.ScreeningSeat;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ScreeningSeatMapper {

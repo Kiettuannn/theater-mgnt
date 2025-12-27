@@ -1,10 +1,11 @@
 package com.theatermgnt.theatermgnt.screening.dto.request;
 
+import java.time.LocalDateTime;
+
 import jakarta.validation.constraints.NotNull;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDateTime;
 
 @Data
 @Builder

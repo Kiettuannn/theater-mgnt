@@ -7,6 +7,7 @@ import { ChevronLeft, Clock } from "lucide-react"
 import { showtimes } from "@/lib/mock-data"
 import type { Showtime } from "@/lib/types"
 import { getMovieById, mapMovieForDisplay } from "@/lib/api-movie"
+import { ReviewsSection } from "./reviews-section"
 
 export default function MovieDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -20,16 +21,10 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
     const fetchMovie = async () => {
       try {
         setLoading(true)
-        console.log('🎬 Fetching movie ID:', id)
-
-
         const data = await getMovieById(id)
-
-        console.log('📦 Raw data:', data)
 
         if (data) {
           const mappedMovie = mapMovieForDisplay(data)
-          console.log('✅ Mapped movie:', mappedMovie)
           setMovie(mappedMovie)
         } else {
           console.error('❌ No data returned')
@@ -242,6 +237,11 @@ export default function MovieDetailPage({ params }: { params: Promise<{ id: stri
             </p>
           </div>
         )}
+      </div>
+
+      {/* Reviews & Ratings Section */}
+      <div className="container-max px-4 md:px-8 py-12 border-t border-border dark:border-slate-800">
+        <ReviewsSection movieId={id} movieStatus={movie.status} />
       </div>
     </div>
   )

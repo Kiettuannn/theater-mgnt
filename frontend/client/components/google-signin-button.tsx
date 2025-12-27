@@ -21,7 +21,6 @@ export function GoogleSignInButton({ onClick }: GoogleSignInButtonProps) {
       callbackUrl
     )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`;
 
-    console.log("Redirecting to Google OAuth URL:", targetUrl);
     window.location.href = targetUrl;
   };
 

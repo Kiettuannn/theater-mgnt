@@ -1,11 +1,11 @@
-import { type ReactNode } from "react";
+import { type ReactNode, useState } from "react";
 import { X, AlertTriangle } from "lucide-react";
 import { Button } from "./button";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   title: string;
   description: string | ReactNode;
   confirmText?: string;
@@ -23,13 +23,24 @@ export function ConfirmDialog({
   confirmText = "Confirm",
   cancelText = "Cancel",
   variant = "default",
-  loading = false,
+  loading: externalLoading = false,
 }: ConfirmDialogProps) {
+  const [internalLoading, setInternalLoading] = useState(false);
+  const loading = externalLoading || internalLoading;
+
   if (!isOpen) return null;
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (loading) return;
-    onConfirm();
+
+    try {
+      setInternalLoading(true);
+      await onConfirm();
+    } catch (error) {
+      console.error("Error in confirm action:", error);
+    } finally {
+      setInternalLoading(false);
+    }
   };
 
   return (

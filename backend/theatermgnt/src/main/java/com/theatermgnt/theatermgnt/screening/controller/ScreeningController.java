@@ -1,18 +1,21 @@
 package com.theatermgnt.theatermgnt.screening.controller;
 
+import java.util.List;
+
+import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
 import com.theatermgnt.theatermgnt.screening.dto.request.ScreeningCreationRequest;
 import com.theatermgnt.theatermgnt.screening.dto.request.ScreeningUpdateRequest;
 import com.theatermgnt.theatermgnt.screening.dto.response.ScreeningResponse;
 import com.theatermgnt.theatermgnt.screening.service.ScreeningService;
-import jakarta.validation.Valid;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/screenings")
@@ -58,8 +61,8 @@ public class ScreeningController {
     }
 
     @PutMapping("/{screeningId}")
-    ApiResponse<ScreeningResponse> updateScreening(@PathVariable String screeningId,
-                                         @RequestBody @Valid ScreeningUpdateRequest request) {
+    ApiResponse<ScreeningResponse> updateScreening(
+            @PathVariable String screeningId, @RequestBody @Valid ScreeningUpdateRequest request) {
         return ApiResponse.<ScreeningResponse>builder()
                 .result(screeningService.updateScreening(screeningId, request))
                 .build();

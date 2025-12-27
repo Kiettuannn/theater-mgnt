@@ -21,7 +21,33 @@ spring:
         jdbc:
           batch_size: 50
         order_inserts: true
-        order_updates: true
+  ai:
+    openai:
+      api-key: ${GEMINI_KEY}
+      base-url: https://generativelanguage.googleapis.com
+
+      chat:
+        completions-path: v1beta/openai/chat/completions
+        options:
+          model: gemini-2.5-flash
+      embedding:
+        embeddings-path: v1beta/openai/embeddings
+        options:
+          model: text-embedding-004
+    vectorstore:
+      pgvector:
+        dimension: 768
+        index-type: HNSW
+        initialize-schema: true
+    chat:
+      memory:
+        repository:
+          jdbc:
+            initialize-schema: always
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 outbound:
   identity:
@@ -38,3 +64,13 @@ otp:
 
 brevo:
   apiKey: ${BREVO_API_KEY}
+
+cloudinary:
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
+
+
+logging:
+  level:
+    com.theatermgnt.theatermgnt.chatbotInternal.util.DocumentSectionTracker: DEBUG

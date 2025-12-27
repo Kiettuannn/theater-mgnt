@@ -1,18 +1,21 @@
 package com.theatermgnt.theatermgnt.screeningSeat.controller;
 
+import java.util.List;
+
+import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
 import com.theatermgnt.theatermgnt.screeningSeat.dto.request.ScreeningSeatCreationRequest;
 import com.theatermgnt.theatermgnt.screeningSeat.dto.request.ScreeningSeatUpdateRequest;
 import com.theatermgnt.theatermgnt.screeningSeat.dto.response.ScreeningSeatResponse;
 import com.theatermgnt.theatermgnt.screeningSeat.service.ScreeningSeatService;
-import jakarta.validation.Valid;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/screeningSeats")
@@ -58,8 +61,8 @@ public class ScreeningSeatController {
     }
 
     @PutMapping("/{screeningSeatId}")
-    ApiResponse<ScreeningSeatResponse> updateScreeningSeat(@PathVariable String screeningSeatId,
-                                         @RequestBody @Valid ScreeningSeatUpdateRequest request) {
+    ApiResponse<ScreeningSeatResponse> updateScreeningSeat(
+            @PathVariable String screeningSeatId, @RequestBody @Valid ScreeningSeatUpdateRequest request) {
         return ApiResponse.<ScreeningSeatResponse>builder()
                 .result(screeningSeatService.updateScreeningSeat(screeningSeatId, request))
                 .build();

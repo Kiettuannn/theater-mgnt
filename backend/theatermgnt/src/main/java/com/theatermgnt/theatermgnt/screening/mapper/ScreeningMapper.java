@@ -1,13 +1,13 @@
 package com.theatermgnt.theatermgnt.screening.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import com.theatermgnt.theatermgnt.screening.dto.request.ScreeningCreationRequest;
 import com.theatermgnt.theatermgnt.screening.dto.request.ScreeningUpdateRequest;
 import com.theatermgnt.theatermgnt.screening.dto.response.ScreeningResponse;
 import com.theatermgnt.theatermgnt.screening.entity.Screening;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ScreeningMapper {

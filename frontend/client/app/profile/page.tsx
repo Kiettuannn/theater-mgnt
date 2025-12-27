@@ -14,7 +14,6 @@ export default function ProfilePage() {
   useEffect(() => {
     const fetchUserInfo = async () => {
       const token = getToken();
-      console.log("Token:", token);
 
       if (!token) {
         router.push("/");

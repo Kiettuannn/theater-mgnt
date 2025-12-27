@@ -61,10 +61,6 @@ export function RoomList() {
     room.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading) {
-    return <LoadingSpinner message="Loading rooms..." />;
-  }
-
   return (
     <div className="space-y-6">
       <PageHeader
@@ -93,15 +89,27 @@ export function RoomList() {
       />
 
       {/* Rooms Grid */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {filteredRooms.map((room) => (
-          <RoomCard
-            key={room.id}
-            room={room}
-            onEdit={handleEdit}
-            onViewSchedule={handleViewSchedule}
-          />
-        ))}
+      <div>
+        {loading ? (
+          <div className="bg-white rounded-lg border border-gray-200 p-12">
+            <LoadingSpinner
+              message="Loading rooms..."
+              size="lg"
+              fullScreen={false}
+            />
+          </div>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredRooms.map((room) => (
+              <RoomCard
+                key={room.id}
+                room={room}
+                onEdit={handleEdit}
+                onViewSchedule={handleViewSchedule}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

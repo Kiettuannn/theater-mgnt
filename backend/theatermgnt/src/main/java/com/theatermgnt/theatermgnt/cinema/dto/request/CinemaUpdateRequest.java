@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CinemaUpdateRequest {
+
     @Size(min = 3, message = "CINEMA_NAME_INVALID")
     String name;
 

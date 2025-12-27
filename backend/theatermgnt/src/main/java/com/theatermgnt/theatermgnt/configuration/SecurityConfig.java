@@ -34,6 +34,7 @@ public class SecurityConfig {
         "/movies/**",
         "/genres/**",
         "/showtimes/**",
+        "/reviews/**",
     };
 
     @Autowired
@@ -43,7 +44,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
                 .permitAll()
-                .requestMatchers(HttpMethod.GET, "/movies/**", "/genres/**", "/showtimes/**")
+                .requestMatchers(HttpMethod.GET, "/movies/**", "/genres/**", "/showtimes/**", "/reviews/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.PUT, "/reviews/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.PATCH, "/reviews/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/reviews/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated());

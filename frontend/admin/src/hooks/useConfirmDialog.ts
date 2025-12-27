@@ -4,7 +4,7 @@ export interface ConfirmDialogState {
   isOpen: boolean;
   title: string;
   description: string;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   variant?: "default" | "destructive";
   confirmText?: string;
 }
@@ -30,10 +30,10 @@ export function useConfirmDialog() {
     setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
   }, []);
 
-  const confirmAndClose = useCallback((callback: () => void) => {
-    return () => {
+  const confirmAndClose = useCallback((callback: () => void | Promise<void>) => {
+    return async () => {
       setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
-      callback();
+      await callback();
     };
   }, []);
 
