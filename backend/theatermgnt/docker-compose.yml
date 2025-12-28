@@ -3,7 +3,7 @@ version: "3.9"
 services:
   postgres:
     container_name: theater-postgres
-    image: postgres:17.5
+    image: pgvector/pgvector:pg17
     restart: always
     environment:
       POSTGRES_USER: postgres

@@ -12,6 +12,7 @@ import com.theatermgnt.theatermgnt.common.exception.AppException;
 import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
 import com.theatermgnt.theatermgnt.customer.dto.request.CustomerAccountCreationRequest;
 import com.theatermgnt.theatermgnt.customer.dto.request.CustomerProfileUpdateRequest;
+import com.theatermgnt.theatermgnt.customer.dto.request.SearchCustomerRequest;
 import com.theatermgnt.theatermgnt.customer.dto.response.CustomerResponse;
 import com.theatermgnt.theatermgnt.customer.entity.Customer;
 import com.theatermgnt.theatermgnt.customer.mapper.CustomerMapper;
@@ -72,7 +73,28 @@ public class CustomerService {
 
         Customer customerToUpdate =
                 customerRepository.findById(customerId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // Update customer profile fields
         customerMapper.updateCustomerProfile(customerToUpdate, request);
+
+        // Update phone number in Account entity if provided
+        if (request.getPhoneNumber() != null) {
+            Account account = customerToUpdate.getAccount();
+            account.setPhoneNumber(request.getPhoneNumber());
+        }
+
         return customerMapper.toCustomerResponse(customerRepository.save(customerToUpdate));
+    }
+
+    /// SEARCH CUSTOMERS
+    public List<CustomerResponse> searchCustomer(SearchCustomerRequest request) {
+        List<Customer> customers = customerRepository.findAllByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCase(
+                request.getKeyword(), request.getKeyword());
+        return customers.stream().map(customerMapper::toCustomerResponse).toList();
+    }
+
+    /// DELETE CUSTOMER
+    public void deleteCustomer(String customerId) {
+        customerRepository.deleteById(customerId);
     }
 }

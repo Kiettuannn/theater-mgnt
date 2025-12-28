@@ -15,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 public class CustomerProfileUpdateRequest {
     String firstName;
     String lastName;
+    String phoneNumber;
     String address;
     String avatarUrl;
     Gender gender;

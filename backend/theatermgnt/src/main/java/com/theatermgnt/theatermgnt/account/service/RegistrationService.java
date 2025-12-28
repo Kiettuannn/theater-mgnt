@@ -53,6 +53,9 @@ public class RegistrationService {
     public CustomerResponse registerCustomerAccount(CustomerAccountCreationRequest request) {
         Account savedAccount = accountService.createAccount(request);
         savedAccount.setAccountType(AccountType.CUSTOMER);
+        savedAccount.setIsActive(true);
+        // Save account again to persist accountType and ensure isActive is set
+        savedAccount = accountRepository.save(savedAccount);
 
         Customer savedCustomer = customerService.createCustomerProfile(request, savedAccount);
         return customerMapper.toCustomerResponse(savedCustomer);

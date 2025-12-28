@@ -80,8 +80,21 @@ public class AuthenticationService {
                         request.getLoginIdentifier(), request.getLoginIdentifier(), request.getLoginIdentifier())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        // DEBUG LOGS
+        log.info("=== LOGIN DEBUG ===");
+        log.info("Login Identifier: {}", request.getLoginIdentifier());
+        log.info("Account found - Username: {}, Email: {}, AccountType: {}, IsActive: {}",
+                account.getUsername(), account.getEmail(), account.getAccountType(), account.getIsActive());
+        log.info("Password from DB is null: {}", account.getPassword() == null);
+        log.info("Password from DB length: {}", account.getPassword() != null ? account.getPassword().length() : 0);
+
         boolean authenticated = passwordEncoder.matches(request.getPassword(), account.getPassword());
-        if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
+        log.info("Password authenticated: {}", authenticated);
+
+        if (!authenticated) {
+            log.warn("Authentication failed for user: {}", request.getLoginIdentifier());
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
 
         var token = tokenService.generateToken(account);
         return AuthenticationResponse.builder().authenticated(true).token(token).build();
