@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Mail, Phone, Briefcase } from "lucide-react";
+import { Pencil, Trash2, Mail, Phone, Briefcase, Shield } from "lucide-react";
 import type { StaffProfile } from "@/types/StaffType/StaffProfile";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -55,6 +55,9 @@ export function StaffTable({
               <th className="text-left font-semibold text-sm p-3 min-w-[180px]">
                 Position
               </th>
+              <th className="text-left font-semibold text-sm p-3 min-w-[150px]">
+                Role(s)
+              </th>
               <th className="text-left font-semibold text-sm p-3 min-w-[200px]">
                 Email
               </th>
@@ -98,6 +101,35 @@ export function StaffTable({
                     <span className="text-sm text-foreground">
                       {staff.jobTitle}
                     </span>
+                  </div>
+                </td>
+
+                {/* Roles */}
+                <td className="p-3">
+                  <div className="flex flex-wrap gap-1">
+                    {staff.roles && staff.roles.length > 0 ? (
+                      staff.roles.map((role) => (
+                        <span
+                          key={role.name}
+                          className={cn(
+                            "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium",
+                            role.name === "ADMIN" &&
+                              "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
+                            role.name === "MANAGER" &&
+                              "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+                            role.name === "STAFF" &&
+                              "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                          )}
+                        >
+                          <Shield className="w-3 h-3" />
+                          {role.name}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-xs text-muted-foreground">
+                        No roles
+                      </span>
+                    )}
                   </div>
                 </td>
 

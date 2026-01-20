@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/Modal";
 import type { StaffProfile } from "@/types/StaffType/StaffProfile";
 import type { StaffRequest } from "@/services/staffService";
+import { getAllCinemas, type Cinema } from "@/services/cinemaService";
+import { getAllRoles, type Role } from "@/services/roleService";
 
 interface StaffFormDialogProps {
   isOpen: boolean;
@@ -32,12 +34,44 @@ export function StaffFormDialog({
     username: "",
     password: "",
     cinemaId: "",
+    roles: [],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [cinemas, setCinemas] = useState<Cinema[]>([]);
+  const [loadingCinemas, setLoadingCinemas] = useState(false);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [loadingRoles, setLoadingRoles] = useState(false);
+
+  // Load cinemas and roles when dialog opens
+  useEffect(() => {
+    const loadData = async () => {
+      if (isOpen) {
+        try {
+          setLoadingCinemas(true);
+          setLoadingRoles(true);
+          const [cinemasData, rolesData] = await Promise.all([
+            getAllCinemas(),
+            getAllRoles(),
+          ]);
+          setCinemas(cinemasData);
+          setRoles(rolesData);
+        } catch (error) {
+          console.error("Failed to load data:", error);
+        } finally {
+          setLoadingCinemas(false);
+          setLoadingRoles(false);
+        }
+      }
+    };
+    loadData();
+  }, [isOpen]);
 
   useEffect(() => {
     if (staff) {
+      const staffRoleNames = staff.roles?.map((r) => r.name) || [];
+      setSelectedRoles(staffRoleNames);
       setFormData({
         firstName: staff.firstName,
         lastName: staff.lastName,
@@ -50,8 +84,10 @@ export function StaffFormDialog({
         username: staff.username,
         password: "", // Reset password when editing
         cinemaId: staff.cinemaId || "",
+        roles: staffRoleNames,
       });
     } else {
+      setSelectedRoles(["STAFF"]); // Default to STAFF role
       setFormData({
         firstName: "",
         lastName: "",
@@ -64,6 +100,7 @@ export function StaffFormDialog({
         username: "",
         password: "",
         cinemaId: "",
+        roles: ["STAFF"],
       });
     }
     setErrors({});
@@ -106,7 +143,7 @@ export function StaffFormDialog({
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -121,6 +158,22 @@ export function StaffFormDialog({
         return newErrors;
       });
     }
+  };
+
+  const handleRoleToggle = (roleName: string) => {
+    setSelectedRoles((prev) => {
+      const newRoles = prev.includes(roleName)
+        ? prev.filter((r) => r !== roleName)
+        : [...prev, roleName];
+
+      // Update formData with new roles
+      setFormData((prevData) => ({
+        ...prevData,
+        roles: newRoles,
+      }));
+
+      return newRoles;
+    });
   };
 
   return (
@@ -256,17 +309,26 @@ export function StaffFormDialog({
 
           <div>
             <label className="block text-sm font-medium mb-1.5 text-foreground">
-              Cinema ID
+              Cinema
             </label>
-            <Input
-              type="text"
+            <select
               name="cinemaId"
               value={formData.cinemaId || ""}
               onChange={handleChange}
-              placeholder="Enter cinema ID"
-              disabled={saving}
-              className={errors.cinemaId ? "border-destructive" : ""}
-            />
+              disabled={saving || loadingCinemas}
+              className={`w-full px-3 py-2 border border-input rounded-md bg-background text-foreground ${
+                errors.cinemaId ? "border-destructive" : ""
+              }`}
+            >
+              <option value="">
+                {loadingCinemas ? "Loading cinemas..." : "Select a cinema"}
+              </option>
+              {cinemas.map((cinema) => (
+                <option key={cinema.id} value={cinema.id}>
+                  {cinema.name} - {cinema.city}
+                </option>
+              ))}
+            </select>
             {errors.cinemaId && (
               <p className="text-xs text-destructive mt-1">{errors.cinemaId}</p>
             )}
@@ -353,6 +415,45 @@ export function StaffFormDialog({
             </div>
           </div>
         )}
+
+        {/* Role Selection */}
+        <div>
+          <label className="block text-sm font-medium mb-2 text-foreground">
+            Role(s)
+            {!staff && (
+              <span className="text-xs text-muted-foreground ml-2">
+                (Select at least one role)
+              </span>
+            )}
+          </label>
+          {loadingRoles ? (
+            <p className="text-sm text-muted-foreground">Loading roles...</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {roles.map((role) => (
+                <button
+                  key={role.name}
+                  type="button"
+                  onClick={() => handleRoleToggle(role.name)}
+                  disabled={saving}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    selectedRoles.includes(role.name)
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  title={role.description}
+                >
+                  {role.name}
+                </button>
+              ))}
+            </div>
+          )}
+          {selectedRoles.length === 0 && (
+            <p className="text-xs text-destructive mt-2">
+              Please select at least one role.
+            </p>
+          )}
+        </div>
 
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-6 border-t">

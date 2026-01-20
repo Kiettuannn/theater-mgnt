@@ -21,7 +21,7 @@ export function Login() {
   const navigate = useNavigate();
   const isAuthenticated = useAuthStore(selectIsAuthenticated);
   const addNotification = useNotificationStore(
-    (state) => state.addNotification
+    (state) => state.addNotification,
   );
 
   useEffect(() => {
@@ -42,7 +42,7 @@ export function Login() {
 
     try {
       const response = await login(username, password);
-      console.log("Login successful:", response);
+      // console.log("Login successful:", response);
 
       addNotification({
         type: "success",

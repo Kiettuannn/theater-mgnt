@@ -12,8 +12,13 @@ import {
   Receipt,
   BarChart3,
   DoorOpen,
+  CalendarClock,
+  Wrench,
   MessageSquare,
   Image,
+  Bell,
+  FileText,
+  History,
 } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { PERMISSIONS } from "@/constants/permissions";
@@ -24,7 +29,8 @@ export interface MenuItem {
   id: string;
   label: string;
   icon: LucideIcon;
-  path: string;
+  path?: string;
+  children?: MenuItem[];
   requiredPermissions?: PermissionType[];
 }
 
@@ -42,7 +48,7 @@ export const MENU_ITEMS: MenuItem[] = [
     path: ROUTES.MOVIES,
     requiredPermissions: [PERMISSIONS.MOVIE_READ],
   },
-  {
+    {
     id: "reviews",
     label: "Reviews",
     icon: MessageSquare,
@@ -76,6 +82,63 @@ export const MENU_ITEMS: MenuItem[] = [
     icon: UserCog,
     path: ROUTES.STAFF,
     requiredPermissions: [PERMISSIONS.STAFF_READ],
+  },
+  {
+    id: "notifications",
+    label: "Notifications",
+    icon: Bell,
+    requiredPermissions: [PERMISSIONS.STAFF_READ],
+    children: [
+      {
+        id: "notifications-list",
+        label: "Notifications",
+        icon: Bell,
+        path: ROUTES.NOTIFICATIONS_LIST,
+        requiredPermissions: [PERMISSIONS.STAFF_READ],
+      },
+      {
+        id: "notifications-templates",
+        label: "Templates",
+        icon: FileText,
+        path: ROUTES.NOTIFICATIONS_TEMPLATES,
+        requiredPermissions: [PERMISSIONS.STAFF_READ],
+      },
+      {
+        id: "notifications-logs",
+        label: "Logs",
+        icon: History,
+        path: ROUTES.NOTIFICATIONS_LOGS,
+        requiredPermissions: [PERMISSIONS.STAFF_READ],
+      },
+    ],
+  },
+  {
+    id: "work",
+    label: "Work",
+    icon: CalendarClock,
+    children: [
+      {
+        id: "work-schedules",
+        label: "Work Schedules",
+        icon: CalendarClock,
+        path: ROUTES.WORK_SCHEDULES,
+        requiredPermissions: [PERMISSIONS.WORK_SCHEDULE_READ],
+      },
+      {
+        id: "shift-types",
+        label: "Shift Types",
+        icon: CalendarClock,
+        path: ROUTES.SHIFT_TYPES,
+        requiredPermissions: [PERMISSIONS.WORK_SCHEDULE_CREATE],
+      },
+    ],
+  },
+  {
+    id: "equipment",
+    label: "Equipment",
+    icon: Wrench,
+    path: ROUTES.EQUIPMENT,
+    requiredPermissions: [PERMISSIONS.EQUIPMENT_READ],
   },
   {
     id: "showtimes",
@@ -126,7 +189,7 @@ export const MENU_ITEMS: MenuItem[] = [
     path: ROUTES.REPORTS,
     requiredPermissions: [PERMISSIONS.REPORT_READ],
   },
-  {
+    {
     id: "media",
     label: "Media Library",
     icon: Image,

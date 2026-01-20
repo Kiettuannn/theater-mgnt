@@ -13,7 +13,8 @@ import {
   BarChart3,
   TicketCheck,
   DoorOpen,
-  MessageSquare,
+  Wrench,
+  CalendarClock,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -35,14 +36,6 @@ export const FEATURES: readonly Feature[] = [
     color: "text-blue-500",
     bgColor: "bg-blue-500/10",
   },
- {
-    id: "REVIEW",
-    label: "Review Management",
-    icon: MessageSquare,
-    description: "Manage reviews by customer",
-    color: "text-blue-500",
-    bgColor: "bg-blue-500/10",
- },
   {
     id: "CINEMAS",
     label: "Cinemas Management",
@@ -146,6 +139,22 @@ export const FEATURES: readonly Feature[] = [
     description: "Manage system settings",
     color: "text-gray-500",
     bgColor: "bg-gray-500/10",
+  },
+  {
+    id: "EQUIPMENT",
+    label: "Equipment Management",
+    icon: Wrench,
+    description: "Manage cinema equipment",
+    color: "text-yellow-500",
+    bgColor: "bg-yellow-500/10",
+  },
+  {
+    id: "WORK_SCHEDULE",
+    label: "Work Schedule Management",
+    icon: CalendarClock,
+    description: "Manage staff work schedules",
+    color: "text-lime-500",
+    bgColor: "bg-lime-500/10",
   },
 ] as const;
 

@@ -73,6 +73,20 @@ export const extractUserIdFromToken = (token: string): string | null => {
   }
 };
 
+
+/**
+ * Extract cinema ID from token
+ */
+export const extractCinemaIdFromToken = (token: string): string | null => {
+  try {
+    const decoded = decodeToken(token);
+    return decoded?.cinemaId || null;
+  } catch (error) {
+    console.error('Failed to extract cinema ID from token:', error);
+    return null;
+  }
+};
+
 /**
  * Check if token is expired
  * Returns true if token is expired or invalid

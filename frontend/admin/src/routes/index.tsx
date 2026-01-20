@@ -6,14 +6,27 @@ import { Login } from "@/pages/Login/Login";
 import { Profile } from "@/pages/Profile/StaffProfile";
 import { PermissionList } from "@/pages/Permissions";
 import { RoleList } from "@/pages/Roles";
-import { MovieList, CreateMovie, EditMovie } from "@/pages/Movies";
-import { ShowtimeList } from "@/pages/Showtimes";
-import { ReviewList } from "@/pages/Reviews";
+import { PriceConfigList } from "@/pages/PriceConfigs";
+import { CreateMovie, EditMovie, MovieList } from "@/pages/Movies";
+import {
+  ShowtimeList,
+  CreateShowtime,
+  ShowtimeCalendarPage,
+} from "@/pages/Showtimes";
 import { TheaterList } from "@/pages/Cinemas";
 import { RoomList, CreateRoom, EditRoom } from "@/pages/Rooms";
 import { TicketList } from "@/pages/Tickets";
 import { CustomerList } from "@/pages/Customers";
 import { StaffList } from "@/pages/Staff";
+import {
+  NotificationList,
+  SendNotification,
+  ViewNotification,
+  AddTemplate,
+  EditTemplate,
+  TemplateList,
+  LogList,
+} from "@/pages/Notification";
 import { BookingList } from "@/pages/Bookings";
 import { ComboList } from "@/pages/Combos";
 import { InvoiceList } from "@/pages/Invoices";
@@ -24,13 +37,23 @@ import { PERMISSIONS } from "@/constants/permissions";
 import { ROUTES } from "@/constants/routes";
 import { Navigate } from "react-router-dom";
 import { TicketBookingPage } from "@/pages/TicketBooking/TickKetBookingPage";
+import { WorkSchedulePage } from "@/pages/WorkSchedules/WorkSchedulePage";
+import { ShiftTypesPage } from "@/pages/WorkSchedules/ShiftTypesPage";
+import { EquipmentList } from "@/pages/Equipment/EquipmentList";
+import { ReviewList } from "@/pages/Reviews";
 import MediaLibrary from "@/pages/Medias/MediaLibrary";
 import { ChatbotConfig } from "@/pages/ChatbotConfig";
+import { ForgotPassword } from "@/pages/ForgotPassword";
+import { BufferSettings } from "@/pages/Settings/BufferSettings";
 
 export const routes = [
   {
     path: ROUTES.LOGIN,
     element: <Login />,
+  },
+  {
+    path: ROUTES.FORGOT_PASSWORD,
+    element: <ForgotPassword />,
   },
   {
     path: `${ROUTES.FORBIDDEN}`,
@@ -54,6 +77,10 @@ export const routes = [
           {
             path: `${ROUTES.SETTINGS_PROFILE}`,
             element: <Profile />,
+          },
+          {
+            path: `${ROUTES.SETTINGS_BUFFER}`,
+            element: <BufferSettings />,
           },
           {
             path: `${ROUTES.MOVIES}`,
@@ -105,7 +132,25 @@ export const routes = [
             children: [
               {
                 index: true,
+                element: <ShowtimeCalendarPage />,
+              },
+              {
+                path: "list",
                 element: <ShowtimeList />,
+              },
+              {
+                path: "create",
+                element: (
+                  <ProtectedRoute
+                    requiredPermissions={[PERMISSIONS.SHOWTIME_CREATE]}
+                  />
+                ),
+                children: [
+                  {
+                    index: true,
+                    element: <CreateShowtime />,
+                  },
+                ],
               },
             ],
           },
@@ -176,6 +221,20 @@ export const routes = [
             ],
           },
           {
+            path: `${ROUTES.EQUIPMENT}`,
+            element: (
+              <ProtectedRoute
+                requiredPermissions={[PERMISSIONS.EQUIPMENT_READ]}
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <EquipmentList />,
+              },
+            ],
+          },
+          {
             path: `${ROUTES.ROLES}`,
             element: (
               <ProtectedRoute requiredPermissions={[PERMISSIONS.ROLE_READ]} />
@@ -200,6 +259,10 @@ export const routes = [
                 element: <PermissionList />,
               },
             ],
+          },
+          {
+            path: `${ROUTES.SEAT_PRICES}`,
+            element: <PriceConfigList />,
           },
           {
             path: `${ROUTES.CUSTOMERS}`,
@@ -228,6 +291,34 @@ export const routes = [
             ],
           },
           {
+            path: `${ROUTES.WORK_SCHEDULES}`,
+            element: (
+              <ProtectedRoute
+                requiredPermissions={[PERMISSIONS.WORK_SCHEDULE_READ]}
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <WorkSchedulePage />,
+              },
+            ],
+          },
+          {
+            path: `${ROUTES.SHIFT_TYPES}`,
+            element: (
+              <ProtectedRoute
+                requiredPermissions={[PERMISSIONS.WORK_SCHEDULE_READ]}
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <ShiftTypesPage />,
+              },
+            ],
+          },
+          {
             path: `${ROUTES.BOOKINGS}`,
             element: (
               <ProtectedRoute
@@ -238,6 +329,46 @@ export const routes = [
               {
                 index: true,
                 element: <BookingList />,
+              },
+            ],
+          },
+          {
+            path: `${ROUTES.NOTIFICATIONS}`,
+            element: (
+              <ProtectedRoute requiredPermissions={[PERMISSIONS.STAFF_READ]} />
+            ),
+            children: [
+              {
+                index: true,
+                element: <Navigate to={ROUTES.NOTIFICATIONS_LIST} replace />,
+              },
+              {
+                path: "list",
+                element: <NotificationList />,
+              },
+              {
+                path: "templates",
+                element: <TemplateList />,
+              },
+              {
+                path: "logs",
+                element: <LogList />,
+              },
+              {
+                path: "send",
+                element: <SendNotification />,
+              },
+              {
+                path: "view/:id",
+                element: <ViewNotification />,
+              },
+              {
+                path: "templates/add",
+                element: <AddTemplate />,
+              },
+              {
+                path: "templates/edit/:id",
+                element: <EditTemplate />,
               },
             ],
           },
@@ -280,6 +411,20 @@ export const routes = [
             ],
           },
           {
+            path: `${ROUTES.TICKET_BOOKING}`,
+            element: (
+              <ProtectedRoute
+                requiredPermissions={[PERMISSIONS.TICKET_BOOKING_READ]}
+              />
+            ),
+            children: [
+              {
+                index: true,
+                element: <TicketBookingPage />,
+              },
+            ],
+          },
+          {
             path: `${ROUTES.REVIEWS}`,
             element: (
               <ProtectedRoute requiredPermissions={[PERMISSIONS.REVIEW_READ]} />
@@ -298,20 +443,6 @@ export const routes = [
           {
             path: `${ROUTES.CHATBOT_CONFIG}`,
             element: <ChatbotConfig />,
-          },
-          {
-            path: `${ROUTES.TICKET_BOOKING}`,
-            element: (
-              <ProtectedRoute
-                requiredPermissions={[PERMISSIONS.TICKET_BOOKING_READ]}
-              />
-            ),
-            children: [
-              {
-                index: true,
-                element: <TicketBookingPage />,
-              },
-            ],
           },
         ],
       },

@@ -5,11 +5,12 @@ interface AuthState {
   // State
   token: string | null;
   userId: string | null;
+  cinemaId: string | null;
   permissions: string[]; // List of permission codes from JWT scope
   isAuthenticated: boolean;
   
   // Actions
-  setAuth: (token: string, userId: string, permissions: string[]) => void;
+  setAuth: (token: string, userId: string, cinemaId: string | null, permissions: string[]) => void;
   clearAuth: () => void;
   hasPermission: (permission: string) => boolean;
   hasAnyPermission: (permissions: string[]) => boolean;
@@ -22,14 +23,16 @@ export const useAuthStore = create<AuthState>()(
       // Initial state
       token: null,
       userId: null,
+      cinemaId: null,
       permissions: [],
       isAuthenticated: false,
       
       // Actions
-      setAuth: (token, userId, permissions) => {
+      setAuth: (token, userId, cinemaId, permissions) => {
         set({
           token,
           userId,
+          cinemaId,
           permissions,
           isAuthenticated: true,
         });
@@ -39,6 +42,7 @@ export const useAuthStore = create<AuthState>()(
         set({
           token: null,
           userId: null,
+          cinemaId: null,
           permissions: [],
           isAuthenticated: false,
         });
@@ -62,6 +66,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         token: state.token,
         userId: state.userId,
+        cinemaId: state.cinemaId,
         permissions: state.permissions,
         isAuthenticated: state.isAuthenticated,
       }),
@@ -73,4 +78,5 @@ export const useAuthStore = create<AuthState>()(
 export const selectIsAuthenticated = (state: AuthState) => state.isAuthenticated;
 export const selectToken = (state: AuthState) => state.token;
 export const selectUserId = (state: AuthState) => state.userId;
+export const selectCinemaId = (state: AuthState) => state.cinemaId;
 export const selectPermissions = (state: AuthState) => state.permissions;

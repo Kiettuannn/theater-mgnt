@@ -1,8 +1,21 @@
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Calendar, Film, Clock } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  Calendar,
+  Film,
+  Clock,
+  AlertTriangle,
+} from "lucide-react";
 import type { MovieSimple } from "@/types/MovieType/Movie";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 
 interface MovieTableProps {
   movies: MovieSimple[];
@@ -19,7 +32,8 @@ const statusLabels = {
 };
 
 const statusColors = {
-  now_showing: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+  now_showing:
+    "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
   coming_soon: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
   archived: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
 };
@@ -105,7 +119,8 @@ export function MovieTable({
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
-                        target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='64' viewBox='0 0 48 64'%3E%3Crect width='48' height='64' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-family='Arial' font-size='12'%3ENo Image%3C/text%3E%3C/svg%3E";
+                        target.src =
+                          "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='64' viewBox='0 0 48 64'%3E%3Crect width='48' height='64' fill='%23e5e7eb'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%239ca3af' font-family='Arial' font-size='12'%3ENo Image%3C/text%3E%3C/svg%3E";
                       }}
                     />
                   </div>
@@ -113,10 +128,25 @@ export function MovieTable({
 
                 {/* Title */}
                 <td className="p-3">
-                  <div className="space-y-1">
+                  <div className="flex items-center gap-2">
                     <p className="font-medium text-foreground line-clamp-2">
                       {movie.title}
                     </p>
+                    {movie.needsArchiveWarning && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900/30 flex-shrink-0">
+                            <AlertTriangle className="w-3 h-3 text-amber-700 dark:text-amber-400" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>
+                            No screenings in the next 7 days. Consider
+                            archiving.
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
                   </div>
                 </td>
 

@@ -17,6 +17,7 @@ export interface StaffRequest {
   username: string;
   password?: string;
   cinemaId?: string;
+  roles?: string[];
 }
 
 // export const getMyInfo = async () => {
@@ -85,5 +86,19 @@ export const searchStaffs = async (keyword: string): Promise<StaffProfile[]> => 
     httpClient.get<ApiResponse<StaffProfile[]>>(`${BASE_URL}/search`, {
       params: { keyword },
     })
+  );
+};
+
+export const getStaffsByCinemaWithRoleStaff = async (cinemaId: string) => {
+  return handleApiResponse<StaffProfile[]>(
+    httpClient.get<ApiResponse<StaffProfile[]>>(
+      `/staffs/cinema/${cinemaId}/staff-role`
+    )
+  );
+};
+
+export const getAvailableManagers = async (): Promise<StaffProfile[]> => {
+  return handleApiResponse<StaffProfile[]>(
+    httpClient.get<ApiResponse<StaffProfile[]>>(`${BASE_URL}/available-managers`)
   );
 };

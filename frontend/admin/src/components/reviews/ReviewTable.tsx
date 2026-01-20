@@ -102,7 +102,7 @@ export function ReviewTable({
                 key={review.id}
                 className={cn(
                   "border-b border-border hover:bg-accent/50 transition-colors",
-                  index === reviews.length - 1 && "border-b-0"
+                  index === reviews.length - 1 && "border-b-0",
                 )}
               >
                 {/* Customer */}

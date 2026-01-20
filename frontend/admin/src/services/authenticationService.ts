@@ -8,7 +8,7 @@ import {
   API
 } from "../configurations/configuration";
 import { useAuthStore } from "@/stores";
-import { extractPermissionsFromToken, extractUserIdFromToken, isTokenExpired } from "@/utils/jwtUtils";
+import { extractCinemaIdFromToken, extractPermissionsFromToken, extractUserIdFromToken, isTokenExpired } from "@/utils/jwtUtils";
 
 export const login = async (loginIdentifier: string, password: string) => {
   const response = await httpClient.post(API.LOGIN, {
@@ -27,6 +27,7 @@ export const login = async (loginIdentifier: string, password: string) => {
     // Extract userId and permissions from token
     const userId = extractUserIdFromToken(token);
     const permissions = extractPermissionsFromToken(token);
+    const cinemaId = extractCinemaIdFromToken(token);
 
     if (!userId) {
       throw new Error('Invalid token: missing user ID');
@@ -36,7 +37,7 @@ export const login = async (loginIdentifier: string, password: string) => {
     setToken(token);
 
     // Update auth store with minimal required data
-    useAuthStore.getState().setAuth(token, userId, permissions);
+    useAuthStore.getState().setAuth(token, userId, cinemaId, permissions);
   }
 
   return response;
@@ -50,4 +51,24 @@ export const logOut = () => {
 
 export const isAuthenticated = () => {
   return getToken();
+};
+
+export const forgotPassword = async (loginIdentifier: string) => {
+  const response = await httpClient.post(API.FORGOT_PASSWORD, {
+    loginIdentifier: loginIdentifier,
+  });
+  return response.data;
+};
+
+export const resetPassword = async (
+  loginIdentifier: string,
+  otpCode: string,
+  newPassword: string
+) => {
+  const response = await httpClient.post(API.RESET_PASSWORD, {
+    loginIdentifier: loginIdentifier,
+    otpCode: otpCode,
+    newPassword: newPassword,
+  });
+  return response.data;
 };

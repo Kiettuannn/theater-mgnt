@@ -10,3 +10,13 @@ export const getAllSeatTypes = async () : Promise<SeatType[]> => {
     httpClient.get<ApiResponse<SeatType[]>>("/seatTypes")
   )
 }
+
+// Update seat type
+export const updateSeatType = async (
+  id: string,
+  data: { typeName: string; basePriceModifier: number }
+): Promise<SeatType> => {
+  return handleApiResponse<SeatType>(
+    httpClient.put<ApiResponse<SeatType>>(`/seatTypes/${id}`, data)
+  );
+};

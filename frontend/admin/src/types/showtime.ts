@@ -13,4 +13,5 @@ export interface ShowtimeFilters {
   room?: string;
   date?: string;
   searchQuery?: string;
+  sortBy?: 'startTime-asc' | 'startTime-desc' | 'created';
 }

@@ -2,7 +2,9 @@ export const CONFIG = {
   API: "http://localhost:8080/api/theater-mgnt",
 }
 export const API = {
-  LOGIN: "/auth/token",
+  LOGIN: "/auth/admin/login",
+  FORGOT_PASSWORD: "/auth/forgot-password",
+  RESET_PASSWORD: "/auth/reset-password",
   MY_INFO: "staffs/myInfo",
   UPDATE_STAFF: "/staffs/${staffId}",
 }
