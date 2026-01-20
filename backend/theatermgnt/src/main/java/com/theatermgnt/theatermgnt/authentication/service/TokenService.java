@@ -47,6 +47,7 @@ public class TokenService {
         JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS512);
 
         String scope = "";
+        String cinemaId = null;
         if (account.getAccountType() == AccountType.INTERNAL) {
             Staff staff = staffRepository
                     .findByAccountId(account.getId())
@@ -57,19 +58,24 @@ public class TokenService {
             } else {
                 log.warn("Account {} has USER type but no matching User profile found.", account.getId());
             }
+            cinemaId = staff.getCinemaId();
         } else {
             scope = "ROLE_" + PredefinedRole.CUSTOMER_ROLE;
         }
 
-        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+        JWTClaimsSet.Builder builder = new JWTClaimsSet.Builder()
                 .issuer("theater-mgnt.com")
                 .subject(account.getId())
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
-                .claim("scope", scope)
-                .build();
+                .claim("scope", scope);
+        if (cinemaId != null) {
+            builder.claim("cinemaId", cinemaId);
+        }
+
+        JWTClaimsSet jwtClaimsSet = builder.build();
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(jwsHeader, payload);
 
