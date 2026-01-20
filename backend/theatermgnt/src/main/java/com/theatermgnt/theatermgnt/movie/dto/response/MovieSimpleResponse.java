@@ -35,4 +35,16 @@ public class MovieSimpleResponse {
     MovieStatus status;
     String ageRatingCode;
     String director;
+    Set<GenreInfo> genres;
+    Boolean needsArchiveWarning;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class GenreInfo {
+        String id;
+        String name;
+    }
 }

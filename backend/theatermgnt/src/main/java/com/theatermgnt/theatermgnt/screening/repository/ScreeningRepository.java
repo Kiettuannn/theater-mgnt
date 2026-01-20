@@ -16,6 +16,10 @@ public interface ScreeningRepository extends JpaRepository<Screening, String> {
 
     boolean existsByMovieIdAndRoomIdAndStartTime(String movieId, String roomId, LocalDateTime startTime);
 
+    boolean existsByMovieIdAndStartTimeBetween(String movieId, LocalDateTime startDate, LocalDateTime endDate);
+
+    boolean existsByMovieIdAndStatus(String movieId, ScreeningStatus status);
+
     List<Screening> findByStatusAndStartTimeLessThanEqual(ScreeningStatus status, LocalDateTime startTime);
 
     List<Screening> findByStatusAndEndTimeLessThanEqual(ScreeningStatus status, LocalDateTime endTime);

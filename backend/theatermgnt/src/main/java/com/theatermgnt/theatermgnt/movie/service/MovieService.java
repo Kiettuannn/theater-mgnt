@@ -123,7 +123,7 @@ public class MovieService {
     public MovieResponse updateMovie(String id, UpdateMovieRequest request) {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
 
-        if (request.getStatus() == MovieStatus.archived
+ if (request.getStatus() == MovieStatus.archived
                 && screeningRepository.existsByMovieIdAndStatus(id, ScreeningStatus.SCHEDULED)) {
             throw new AppException(ErrorCode.MOVIE_HAS_SCHEDULED_SCREENINGS);
         }
@@ -155,10 +155,27 @@ public class MovieService {
 
     public MovieResponse archiveMovie(String id) {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+
+        if (screeningRepository.existsByMovieIdAndStatus(id, ScreeningStatus.SCHEDULED)) {
+            throw new AppException(ErrorCode.MOVIE_HAS_SCHEDULED_SCREENINGS);
+        }
+
         movie.setStatus(MovieStatus.archived);
         Movie archivedMovie = movieRepository.save(movie);
         log.info("Archived movie with id: {}", archivedMovie.getId());
         return movieMapper.toMovieResponse(archivedMovie);
+    }
+
+    private boolean shouldShowArchiveWarning(Movie movie) {
+        if (movie.getStatus() != MovieStatus.now_showing) {
+            return false;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime sevenDaysLater = now.plusDays(7);
+
+        return !screeningRepository.existsByMovieIdAndStartTimeBetween(
+                movie.getId(), now, sevenDaysLater);
     }
 
     // ========== DELETE ==========

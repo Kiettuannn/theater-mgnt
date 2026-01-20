@@ -107,7 +107,7 @@ export function MovieTable({
                 key={movie.id}
                 className={cn(
                   "border-b border-border hover:bg-accent/50 transition-colors",
-                  index === movies.length - 1 && "border-b-0"
+                  index === movies.length - 1 && "border-b-0",
                 )}
               >
                 {/* Poster */}
@@ -185,7 +185,7 @@ export function MovieTable({
                   <span
                     className={cn(
                       "inline-flex items-center px-2 py-1 rounded-full text-xs font-medium",
-                      statusColors[movie.status]
+                      statusColors[movie.status],
                     )}
                   >
                     {statusLabels[movie.status]}
