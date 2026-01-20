@@ -34,7 +34,11 @@ public class EmailTemplateFactory {
                     case RESET_PASSWORD -> "email/reset-password";
                     case WELCOME_STAFF -> "email/welcome-staff";
                     case NOTIFICATION_EMAIL -> "email/notification-email";
+                    case TICKET_ISSUE -> "email/ticket-issue";
+                    case WELCOME_CUSTOMER -> "email/welcome-customer";
+                    case REFUND_NOTIFICATION -> "email/refund-notification";
                 };
         return templateEngine.process(templateName, context);
+      
     }
 }

@@ -1,6 +1,7 @@
 package com.theatermgnt.theatermgnt.movie.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 import com.theatermgnt.theatermgnt.common.entity.BaseEntity;
 

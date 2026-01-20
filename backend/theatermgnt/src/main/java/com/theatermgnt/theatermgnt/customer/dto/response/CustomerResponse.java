@@ -14,5 +14,6 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 public class CustomerResponse extends BaseUserResponse {
     String customerId;
+    Integer loyaltyPoints;
     Boolean noPassword;
 }

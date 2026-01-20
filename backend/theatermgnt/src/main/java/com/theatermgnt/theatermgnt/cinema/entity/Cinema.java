@@ -1,5 +1,6 @@
 package com.theatermgnt.theatermgnt.cinema.entity;
 
+import com.theatermgnt.theatermgnt.staff.entity.Staff;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.SQLDelete;
@@ -25,5 +26,7 @@ public class Cinema extends BaseEntity {
     String address;
     String city;
     String phoneNumber;
-    String managerId;
+    @OneToOne
+    @JoinColumn(name = "managerId", referencedColumnName = "id")
+    Staff manager;
 }

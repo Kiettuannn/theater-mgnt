@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
 import com.theatermgnt.theatermgnt.movie.dto.request.CreateAgeRatingRequest;
 import com.theatermgnt.theatermgnt.movie.dto.response.AgeRatingResponse;
-import com.theatermgnt.theatermgnt.movie.dto.response.MovieSimpleResponse;
 import com.theatermgnt.theatermgnt.movie.service.AgeRatingService;
 
 import lombok.AccessLevel;
@@ -51,21 +50,6 @@ public class AgeRatingController {
     ApiResponse<AgeRatingResponse> getAgeRatingByCode(@PathVariable("code") String code) {
         return ApiResponse.<AgeRatingResponse>builder()
                 .result(ageRatingService.getAgeRatingByCode(code))
-                .build();
-    }
-
-    @GetMapping("/{id}/movies")
-    ApiResponse<List<MovieSimpleResponse>> getMoviesUsingAgeRating(@PathVariable("id") String id) {
-        return ApiResponse.<List<MovieSimpleResponse>>builder()
-                .result(ageRatingService.getMoviesUsingAgeRating(id))
-                .build();
-    }
-
-    @DeleteMapping("/{id}")
-    ApiResponse<String> deleteAgeRating(@PathVariable("id") String id) {
-        ageRatingService.deleteAgeRating(id);
-        return ApiResponse.<String>builder()
-                .result("Age rating deleted successfully")
                 .build();
     }
 }

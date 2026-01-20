@@ -2,6 +2,10 @@ package com.theatermgnt.theatermgnt.customer.controller;
 
 import java.util.List;
 
+import com.theatermgnt.theatermgnt.account.service.RegistrationService;
+import com.theatermgnt.theatermgnt.customer.dto.request.CustomerAccountCreationRequest;
+import com.theatermgnt.theatermgnt.customer.dto.request.StaffCreateCustomerAccountRequest;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
@@ -21,6 +25,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CustomerController {
     CustomerService customerService;
+    RegistrationService registrationService;
+
+
+    @PostMapping
+    public ApiResponse<CustomerResponse> staffCreateCustomerAccount(
+            @Valid @RequestBody StaffCreateCustomerAccountRequest request) {
+        return ApiResponse.<CustomerResponse>builder()
+                .result(registrationService.StaffCreateCustomerAccount(request))
+                .build();
+    }
+
 
     @GetMapping("/{customerId}")
     ApiResponse<CustomerResponse> getCustomerProfile(@PathVariable String customerId) {
@@ -45,9 +60,22 @@ public class CustomerController {
 
     @PutMapping("/{customerId}")
     ApiResponse<CustomerResponse> updateCustomerProfile(
-            @PathVariable String customerId, @RequestBody CustomerProfileUpdateRequest request) {
+            @PathVariable String customerId, @Valid @RequestBody CustomerProfileUpdateRequest request) {
         return ApiResponse.<CustomerResponse>builder()
                 .result(customerService.updateCustomerProfile(customerId, request))
                 .build();
+    }
+
+//    @GetMapping("/{customerId}/loyalty-points")
+//    ApiResponse<CustomerLoyaltyPointsResponse> getLoyaltyPoints(@PathVariable String customerId) {
+//        return ApiResponse.<CustomerLoyaltyPointsResponse>builder()
+//                .result(customerService.getLoyaltyPoints(customerId))
+//                .build();
+//    }
+
+    @DeleteMapping("/{customerId}" )
+    ApiResponse<Void> deleteCustomerProfile(@PathVariable String customerId) {
+        customerService.deleteCustomer(customerId);
+        return ApiResponse.<Void>builder().build();
     }
 }

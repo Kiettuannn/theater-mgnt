@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
 import com.theatermgnt.theatermgnt.movie.dto.request.CreateGenreRequest;
 import com.theatermgnt.theatermgnt.movie.dto.response.GenreResponse;
-import com.theatermgnt.theatermgnt.movie.dto.response.MovieSimpleResponse;
 import com.theatermgnt.theatermgnt.movie.service.GenreService;
 
 import lombok.AccessLevel;
@@ -51,21 +50,6 @@ public class GenreController {
     ApiResponse<GenreResponse> getGenreByName(@PathVariable("name") String name) {
         return ApiResponse.<GenreResponse>builder()
                 .result(genreService.getGenreByName(name))
-                .build();
-    }
-
-    @GetMapping("/{id}/movies")
-    ApiResponse<List<MovieSimpleResponse>> getMoviesUsingGenre(@PathVariable("id") String id) {
-        return ApiResponse.<List<MovieSimpleResponse>>builder()
-                .result(genreService.getMoviesUsingGenre(id))
-                .build();
-    }
-
-    @DeleteMapping("/{id}")
-    ApiResponse<String> deleteGenre(@PathVariable("id") String id) {
-        genreService.deleteGenre(id);
-        return ApiResponse.<String>builder()
-                .result("Genre deleted successfully")
                 .build();
     }
 }

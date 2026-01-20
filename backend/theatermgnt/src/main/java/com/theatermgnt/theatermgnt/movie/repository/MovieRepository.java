@@ -15,10 +15,10 @@ public interface MovieRepository extends JpaRepository<Movie, String> {
 
     List<Movie> findByStatus(MovieStatus status);
 
-    @Query("SELECT DISTINCT m FROM Movie m LEFT JOIN FETCH m.genres LEFT JOIN FETCH m.ageRating WHERE m.status = :status")
+    @Query("SELECT m FROM Movie m WHERE m.status = :status")
     List<Movie> findNowShowingMovies(@Param("status") MovieStatus status);
 
-    @Query("SELECT DISTINCT m FROM Movie m LEFT JOIN FETCH m.genres LEFT JOIN FETCH m.ageRating WHERE m.status = :status")
+    @Query("SELECT m FROM Movie m WHERE m.status = :status")
     List<Movie> findComingSoonMovies(@Param("status") MovieStatus status);
 
     @Query("SELECT DISTINCT m FROM Movie m LEFT JOIN FETCH m.genres LEFT JOIN FETCH m.ageRating")
@@ -30,8 +30,4 @@ public interface MovieRepository extends JpaRepository<Movie, String> {
     List<Movie> findByGenreId(@Param("genreId") String genreId);
 
     List<Movie> findByDirectorContainingIgnoreCase(String director);
-
-    boolean existsByAgeRatingId(String ageRatingId);
-
-    List<Movie> findByAgeRatingId(String ageRatingId);
 }

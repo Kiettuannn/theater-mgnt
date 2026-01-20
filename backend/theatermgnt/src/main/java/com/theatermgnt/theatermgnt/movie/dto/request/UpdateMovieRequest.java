@@ -3,7 +3,10 @@ package com.theatermgnt.theatermgnt.movie.dto.request;
 import java.time.LocalDate;
 import java.util.Set;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import com.theatermgnt.theatermgnt.common.enums.MovieStatus;
 
@@ -31,7 +34,7 @@ public class UpdateMovieRequest {
     String director;
 
     @Size(max = 2000, message = "INVALID_MOVIE_CAST")
-    String cast;
+    String castMembers;
 
     @Pattern(regexp = "^https?://.*", message = "INVALID_POSTER_URL")
     String posterUrl;

@@ -23,7 +23,8 @@ public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {
         "/register",
         "/users",
-        "/auth/token",
+        "/auth/admin/login",
+        "/auth/customer/login",
         "/auth/introspect",
         "/auth/logout",
         "/auth/refresh",
@@ -33,8 +34,10 @@ public class SecurityConfig {
         "/auth/outbound/authenticate",
         "/movies/**",
         "/genres/**",
-        "/showtimes/**",
+        "/screenings/**",
+        "/payment/**",
         "/reviews/**",
+        "/cinemas/**"
     };
 
     @Autowired
@@ -44,13 +47,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
                 .permitAll()
-                .requestMatchers(HttpMethod.GET, "/movies/**", "/genres/**", "/showtimes/**", "/reviews/**")
-                .permitAll()
-                .requestMatchers(HttpMethod.PUT, "/reviews/**")
-                .permitAll()
-                .requestMatchers(HttpMethod.PATCH, "/reviews/**")
-                .permitAll()
-                .requestMatchers(HttpMethod.DELETE, "/reviews/**")
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/movies/**",
+                        "/genres/**",
+                        "/screenings/**",
+                        "/payment/**",
+                        "/reviews/**",
+                        "/cinemas")
                 .permitAll()
                 .anyRequest()
                 .authenticated());

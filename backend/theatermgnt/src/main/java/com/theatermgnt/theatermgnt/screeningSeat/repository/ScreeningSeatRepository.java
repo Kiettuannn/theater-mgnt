@@ -27,6 +27,9 @@ public interface ScreeningSeatRepository extends JpaRepository<ScreeningSeat, St
     @Query("SELECT COUNT(s) > 0 FROM ScreeningSeat s WHERE s.screening.id = :screeningId AND s.status = 'SOLD'")
     boolean existsSoldSeat(String screeningId);
 
+    @Query("SELECT COUNT(s) FROM ScreeningSeat s WHERE s.screening.id = :screeningId AND s.status = 'SOLD'")
+    Integer countBookedSeats(String screeningId);
+
     @Modifying
     @Query(
             """
@@ -37,7 +40,7 @@ public interface ScreeningSeatRepository extends JpaRepository<ScreeningSeat, St
 	""")
     void lockAvailableSeatsByScreening(String screeningId);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(
             """
 		UPDATE ScreeningSeat s
@@ -50,6 +53,8 @@ public interface ScreeningSeatRepository extends JpaRepository<ScreeningSeat, St
 
     List<ScreeningSeat> findByBooking(String bookingId);
 
+    long countByBooking(String bookingId);
+
     @Modifying
     @Query(
             """
@@ -60,4 +65,14 @@ public interface ScreeningSeatRepository extends JpaRepository<ScreeningSeat, St
 		WHERE s.booking = :bookingId
 	""")
     void releaseSeatsByBooking(String bookingId);
+
+    @Modifying
+    @Query(
+            """
+		UPDATE ScreeningSeat s
+		SET s.status = 'SOLD',
+			s.lockUntil = null
+		WHERE s.booking = :bookingId
+	""")
+    void markSeatsAsSoldByBooking(String bookingId);
 }

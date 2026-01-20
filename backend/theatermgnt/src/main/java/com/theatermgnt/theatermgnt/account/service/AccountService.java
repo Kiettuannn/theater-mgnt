@@ -29,25 +29,37 @@ public class AccountService {
     PasswordEncoder passwordEncoder;
 
     public Account createAccount(BaseAccountCreationRequest request) {
-        if (accountRepository.existsByUsername(request.getUsername())) {
+        if (accountRepository.existsByUsernameAndDeletedFalse(request.getUsername())) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-        if (accountRepository.existsByEmail(request.getEmail())) {
+        if (accountRepository.existsByEmailAndDeletedFalse(request.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }
-        //        if(accountRepository.existsByPhoneNumber(request.getPhoneNumber())) {
-        //            throw new AppException(ErrorCode.PHONE_NUMBER_EXISTED);
-        //        }
+
         Account account = accountMapper.toAccount(request);
         account.setPassword(passwordEncoder.encode(request.getPassword()));
         return accountRepository.save(account);
     }
 
+    // Consider
     public void updateAccount(Account account, IAccountUpdateRequest request) {
-        if (accountRepository.existsByUsername(request.getPhoneNumber())) {
+        if (accountRepository.existsByUsernameAndDeletedFalse(request.getPhoneNumber())) {
             throw new AppException(ErrorCode.PHONE_NUMBER_EXISTED);
         }
         accountMapper.updateAccount(account, request);
+        accountRepository.save(account);
+    }
+
+    public void deleteAccount(String accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        String suffix = "_deleted_" + System.currentTimeMillis();
+        account.setUsername(account.getUsername() + suffix);
+        account.setEmail(account.getEmail() + suffix);
+
+        account.setDeleted(true);
+        account.setIsActive(false);
         accountRepository.save(account);
     }
 

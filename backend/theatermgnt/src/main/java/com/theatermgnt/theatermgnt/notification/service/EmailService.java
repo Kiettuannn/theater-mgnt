@@ -30,15 +30,19 @@ public class EmailService {
     protected String apiKey;
 
     public EmailResponse sendEmail(SendEmailRequest request) {
-        EmailRequest emailRequest = EmailRequest.builder()
+        EmailRequest.EmailRequestBuilder builder = EmailRequest.builder()
                 .sender(Sender.builder()
                         .name("Cifastar")
                         .email("theonlytruth25012005@gmail.com")
                         .build())
                 .to(List.of(request.getTo()))
                 .subject(request.getSubject())
-                .htmlContent(request.getHtmlContent())
-                .build();
+                .htmlContent(request.getHtmlContent());
+
+        if (request.getAttachments() != null && !request.getAttachments().isEmpty()) {
+            builder.attachment(request.getAttachments());
+        }
+        EmailRequest emailRequest = builder.build();
         try {
             return emailClient.sendEmail(apiKey, emailRequest);
         } catch (FeignException e) {

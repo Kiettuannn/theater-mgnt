@@ -11,6 +11,7 @@ import com.theatermgnt.theatermgnt.authentication.dto.request.LogoutRequest;
 import com.theatermgnt.theatermgnt.authentication.dto.request.RefreshTokenRequest;
 import com.theatermgnt.theatermgnt.authentication.dto.response.AuthenticationResponse;
 import com.theatermgnt.theatermgnt.authentication.dto.response.IntrospectResponse;
+import com.theatermgnt.theatermgnt.authentication.enums.AccountType;
 import com.theatermgnt.theatermgnt.authentication.service.AuthenticationService;
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
 
@@ -27,9 +28,17 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthenticationController {
     AuthenticationService authenticationService;
 
-    @PostMapping("/token")
-    ApiResponse<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest request) {
-        var result = authenticationService.authenticate(request);
+    @PostMapping("/admin/login")
+    ApiResponse<AuthenticationResponse> adminLogin(@RequestBody AuthenticationRequest request) {
+        log.info("Admin login attempt for: {}", request.getLoginIdentifier());
+        var result = authenticationService.authenticate(request, AccountType.INTERNAL);
+        return ApiResponse.<AuthenticationResponse>builder().result(result).build();
+    }
+
+    @PostMapping("/customer/login")
+    ApiResponse<AuthenticationResponse> customerLogin(@RequestBody AuthenticationRequest request) {
+        log.info("Customer login attempt for: {}", request.getLoginIdentifier());
+        var result = authenticationService.authenticate(request, AccountType.CUSTOMER);
         return ApiResponse.<AuthenticationResponse>builder().result(result).build();
     }
 

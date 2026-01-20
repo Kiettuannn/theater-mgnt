@@ -49,23 +49,30 @@ public class ChatbotConfigService {
     // Add document to chatbot config
     @Transactional
     public ChatbotDocumentResponse addDocumentToRag(AddDocumentRequest request) {
+        log.info("Adding document to RAG - fileId: {}, documentType: {}", request.getFileId(), request.getDocumentType());
+        
         // Validate file exists
         FileMgnt file = fileMgntRepository.findById(request.getFileId())
                 .orElseThrow(() -> new AppException(ErrorCode.FILE_NOT_FOUND));
+        
 
         // Validate file type
         if(!ALLOWED_FILE_TYPES.contains(file.getContentType())) {
+            log.error("Invalid file type: {}", file.getContentType());
             throw new AppException(ErrorCode.INVALID_FILE_TYPE);
         }
 
         // Check already added
         if(chatbotDocumentRepository.existsByFileMgntId(file.getId())) {
+            log.error("Document already exists for file: {}", file.getId());
             throw new AppException(ErrorCode.DOCUMENT_ALREADY_EXISTS);
         }
 
         // Create chatbot document
         String accountId = SecurityContextHolder.getContext().getAuthentication().getName();
         String syncedBy = buildSyncedBy(accountId);
+        
+        log.info("Creating chatbot document - syncedBy: {}", syncedBy);
 
         ChatbotDocument chatbotDocument = ChatbotDocument.builder()
                 .fileMgnt(file)
@@ -76,9 +83,12 @@ public class ChatbotConfigService {
                 .syncedBy(syncedBy)
                 .build();
         chatbotDocument = chatbotDocumentRepository.save(chatbotDocument);
+        
+        log.info("Chatbot document created with ID: {}", chatbotDocument.getId());
 
         // Sync immediately if requested
         if(request.isSyncImmediately()){
+            log.info("Syncing document immediately: {}", chatbotDocument.getId());
             syncDocumentToVector(chatbotDocument.getId());
         }
         return chatbotDocumentMapper.toChatbotDocumentResponse(chatbotDocument);

@@ -1,5 +1,7 @@
 package com.theatermgnt.theatermgnt.screeningSeat.dto.response;
 
+import java.math.BigDecimal;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,6 +14,9 @@ public class ScreeningSeatResponse {
     String id;
     String screeningId;
     String seatId;
+    String seatNumber;
+    String seatType;
+    BigDecimal price;
     String bookingId;
     String status;
 }

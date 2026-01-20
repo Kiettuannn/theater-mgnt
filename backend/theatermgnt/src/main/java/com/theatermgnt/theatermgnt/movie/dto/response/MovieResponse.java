@@ -22,7 +22,7 @@ public class MovieResponse {
     String description;
     Integer durationMinutes;
     String director;
-    String cast;
+    String castMembers;
     String posterUrl;
     String trailerUrl;
 

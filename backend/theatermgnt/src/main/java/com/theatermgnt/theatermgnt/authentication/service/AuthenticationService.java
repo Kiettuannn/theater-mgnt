@@ -6,11 +6,13 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
+import com.theatermgnt.theatermgnt.authentication.enums.AccountType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -71,17 +73,26 @@ public class AuthenticationService {
         }
         return IntrospectResponse.builder().valid(isValid).build();
     }
-    /// AUTHENTICATE
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+
+
+    /// AUTHENTICATE WITH ACCOUNT TYPE VALIDATION
+    public AuthenticationResponse authenticate(AuthenticationRequest request, AccountType requiredAccountType) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
         var account = accountRepository
-                .findByUsernameOrEmailOrPhoneNumber(
-                        request.getLoginIdentifier(), request.getLoginIdentifier(), request.getLoginIdentifier())
+                .findByUsernameOrEmail(
+                        request.getLoginIdentifier(), request.getLoginIdentifier())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), account.getPassword());
         if (!authenticated) throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        // Validate account type
+        if (account.getAccountType() != requiredAccountType) {
+            log.warn("Account type mismatch: {} tried to login with {} account type",
+                    account.getUsername(), requiredAccountType);
+            throw new AppException(ErrorCode.WRONG_ACCOUNT_TYPE);
+        }
 
         var token = tokenService.generateToken(account);
         return AuthenticationResponse.builder().authenticated(true).token(token).build();
@@ -125,9 +136,11 @@ public class AuthenticationService {
     }
 
     /// FORGOT PASSWORD
+    @Transactional
     public void forgotPassword(ForgotPasswordRequest request) {
-        var account = accountRepository.findByUsernameOrEmailOrPhoneNumber(
-                request.getLoginIdentifier(), request.getLoginIdentifier(), request.getLoginIdentifier());
+
+        var account = accountRepository.findByUsernameOrEmail(
+                request.getLoginIdentifier(), request.getLoginIdentifier());
 
         // Does not throw exception if not found
         if (account.isEmpty()) {
@@ -136,11 +149,17 @@ public class AuthenticationService {
         }
 
         Account acc = account.get();
-        otpTokenRepository.findByAccount(acc).ifPresent(otpTokenRepository::delete);
+
+        // Delete old OTP and flush immediately to avoid constraint violation
+        otpTokenRepository.findByAccount(acc).ifPresent(oldToken -> {
+            otpTokenRepository.delete(oldToken);
+            otpTokenRepository.flush(); // Force immediate delete
+        });
 
         // Generate otp code
         String otpCode = generateOtpCode();
         Instant expiryTime = Instant.now().plus(OTP_VALID_DURATION, ChronoUnit.MINUTES);
+
 
         // Save OTP into database
         OtpToken newOtpToken = OtpToken.builder()
@@ -149,15 +168,16 @@ public class AuthenticationService {
                 .expiryTime(expiryTime)
                 .build();
         otpTokenRepository.save(newOtpToken);
+        otpTokenRepository.flush(); // Force immediate save
 
         // Publish event to send email
         try {
             eventPublisher.publishEvent(new PasswordResetEvent(account.get(), otpCode));
-            log.info("Password reset requested for account: {}", account.get().getEmail());
         } catch (Exception e) {
             // Log error but do not throw to avoid user enumeration
-            log.error("Error publishing password reset event: {}", e.getMessage());
+            log.error("Error publishing password reset event: {}", e.getMessage(), e);
         }
+
     }
 
     /// RESET PASSWORD
@@ -165,8 +185,8 @@ public class AuthenticationService {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
         var account = accountRepository
-                .findByUsernameOrEmailOrPhoneNumber(
-                        request.getLoginIdentifier(), request.getLoginIdentifier(), request.getLoginIdentifier())
+                .findByUsernameOrEmail(
+                        request.getLoginIdentifier(), request.getLoginIdentifier())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         // Get saved OTP from database
@@ -199,11 +219,11 @@ public class AuthenticationService {
 
         Date expiryTime = (isRefreshToken)
                 ? new Date(signedJWT
-                        .getJWTClaimsSet()
-                        .getIssueTime()
-                        .toInstant()
-                        .plus(REFRESHABLE_DURATION, ChronoUnit.MILLIS)
-                        .toEpochMilli())
+                .getJWTClaimsSet()
+                .getIssueTime()
+                .toInstant()
+                .plus(REFRESHABLE_DURATION, ChronoUnit.MILLIS)
+                .toEpochMilli())
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
 
         var verified = signedJWT.verify(verifier);

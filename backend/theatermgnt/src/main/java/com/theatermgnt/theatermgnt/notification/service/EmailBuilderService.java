@@ -2,7 +2,9 @@ package com.theatermgnt.theatermgnt.notification.service;
 
 import org.springframework.stereotype.Service;
 
-import com.theatermgnt.theatermgnt.notification.dto.request.*;
+import com.theatermgnt.theatermgnt.notification.dto.request.EmailBuilderRequest;
+import com.theatermgnt.theatermgnt.notification.dto.request.Recipient;
+import com.theatermgnt.theatermgnt.notification.dto.request.SendEmailRequest;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class EmailBuilderService {
                 .to(recipient)
                 .subject(request.getSubject())
                 .htmlContent(request.getHtmlContent())
+                .attachments(request.getAttachments())
                 .build();
 
         // 3. Send email
