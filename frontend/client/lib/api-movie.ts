@@ -176,10 +176,10 @@ export function mapScreeningToShowtime(screening: any) {
   if (!screening) return null
 
   const startTime = new Date(screening.startTime)
-  const timeStr = startTime.toLocaleTimeString('en-US', { 
-    hour: '2-digit', 
+  const timeStr = startTime.toLocaleTimeString('en-US', {
+    hour: '2-digit',
     minute: '2-digit',
-    hour12: false 
+    hour12: true
   })
   const dateStr = startTime.toISOString().split('T')[0]
 

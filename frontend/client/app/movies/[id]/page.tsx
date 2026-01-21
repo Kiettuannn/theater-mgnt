@@ -534,11 +534,11 @@ export default function MovieDetailPage({
                   <div className="text-sm text-slate-600 dark:text-slate-400 space-y-1 mb-4 text-left">
                     <p className="flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
-                      {showtime.roomName ? `${showtime.roomName}` : "N/A"}
+                      Room name: {showtime.roomName ? `${showtime.roomName}` : "N/A"}
                     </p>
                     <p className="flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-                      {showtime.cinemaName ? `${showtime.cinemaName}` : "N/A"}
+                      Cinema name: {showtime.cinemaName ? `${showtime.cinemaName}` : "N/A"}
                     </p>
                   </div>
                   {showtime.price !== undefined && (
