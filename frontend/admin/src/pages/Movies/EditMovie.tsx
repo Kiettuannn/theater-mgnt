@@ -13,7 +13,11 @@ import { Label } from "@/components/ui";
 import { Save, ArrowLeft } from "lucide-react";
 import { useNotificationStore } from "@/stores";
 import { ROUTES } from "@/constants/routes";
-import type { CreateMovieRequest, Genre, AgeRating } from "@/types/MovieType/Movie";
+import type {
+  CreateMovieRequest,
+  Genre,
+  AgeRating,
+} from "@/types/MovieType/Movie";
 import { getAllGenres } from "@/services/genreService";
 import { getAllAgeRatings } from "@/services/ageRatingService";
 import { getMovieById, updateMovie } from "@/services/movieService";
@@ -23,7 +27,7 @@ export function EditMovie() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const addNotification = useNotificationStore(
-    (state) => state.addNotification
+    (state) => state.addNotification,
   );
 
   const [formData, setFormData] = useState<CreateMovieRequest>({
@@ -31,7 +35,7 @@ export function EditMovie() {
     description: "",
     durationMinutes: 90,
     director: "",
-    cast: "",
+    castMembers: "",
     posterUrl: "",
     trailerUrl: "",
     releaseDate: "",
@@ -72,7 +76,7 @@ export function EditMovie() {
           description: movieData.description,
           durationMinutes: movieData.durationMinutes,
           director: movieData.director,
-          cast: movieData.cast,
+          castMembers: movieData.castMembers,
           posterUrl: movieData.posterUrl,
           trailerUrl: movieData.trailerUrl,
           releaseDate: movieData.releaseDate,
@@ -85,7 +89,8 @@ export function EditMovie() {
         addNotification({
           type: "error",
           title: "Error",
-          message: error?.response?.data?.message || "Failed to load movie data",
+          message:
+            error?.response?.data?.message || "Failed to load movie data",
         });
         navigate(ROUTES.MOVIES);
       } finally {
@@ -122,10 +127,10 @@ export function EditMovie() {
       newErrors.director = "Director must not exceed 255 characters";
     }
 
-    if (!formData.cast || !formData.cast.trim()) {
-      newErrors.cast = "Cast is required";
-    } else if (formData.cast.length > 2000) {
-      newErrors.cast = "Cast must not exceed 2000 characters";
+    if (!formData.castMembers || !formData.castMembers.trim()) {
+      newErrors.castMembers = "Cast is required";
+    } else if (formData.castMembers.length > 2000) {
+      newErrors.castMembers = "Cast must not exceed 2000 characters";
     }
 
     if (!formData.posterUrl || !formData.posterUrl.trim()) {
@@ -202,15 +207,24 @@ export function EditMovie() {
   };
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { name, value } = e.target;
 
     let processedValue = value;
 
-    if ((name === "posterUrl" || name === "trailerUrl") && value && !value.match(/^https?:\/\//)) {
+    if (
+      (name === "posterUrl" || name === "trailerUrl") &&
+      value &&
+      !value.match(/^https?:\/\//)
+    ) {
       if (value.includes(".")) {
-        if (value.startsWith("www.") || value.match(/^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/)) {
+        if (
+          value.startsWith("www.") ||
+          value.match(/^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/)
+        ) {
           processedValue = `https://${value}`;
         }
       }
@@ -218,7 +232,10 @@ export function EditMovie() {
 
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "durationMinutes" ? parseInt(processedValue) || 0 : processedValue,
+      [name]:
+        name === "durationMinutes"
+          ? parseInt(processedValue) || 0
+          : processedValue,
     }));
 
     if (errors[name]) {
@@ -269,9 +286,7 @@ export function EditMovie() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-3xl font-bold text-foreground">
-            Edit Movie
-          </h1>
+          <h1 className="text-3xl font-bold text-foreground">Edit Movie</h1>
           <p className="text-muted-foreground mt-1">
             Update movie information.
           </p>
@@ -326,7 +341,9 @@ export function EditMovie() {
                   }`}
                 />
                 {errors.description && (
-                  <p className="text-xs text-destructive">{errors.description}</p>
+                  <p className="text-xs text-destructive">
+                    {errors.description}
+                  </p>
                 )}
               </div>
 
@@ -345,7 +362,9 @@ export function EditMovie() {
                     className={errors.director ? "border-destructive" : ""}
                   />
                   {errors.director && (
-                    <p className="text-xs text-destructive">{errors.director}</p>
+                    <p className="text-xs text-destructive">
+                      {errors.director}
+                    </p>
                   )}
                 </div>
 
@@ -360,10 +379,14 @@ export function EditMovie() {
                     placeholder="90"
                     disabled={loading}
                     min="1"
-                    className={errors.durationMinutes ? "border-destructive" : ""}
+                    className={
+                      errors.durationMinutes ? "border-destructive" : ""
+                    }
                   />
                   {errors.durationMinutes && (
-                    <p className="text-xs text-destructive">{errors.durationMinutes}</p>
+                    <p className="text-xs text-destructive">
+                      {errors.durationMinutes}
+                    </p>
                   )}
                 </div>
               </div>
@@ -374,12 +397,12 @@ export function EditMovie() {
                 <Input
                   id="cast"
                   type="text"
-                  name="cast"
-                  value={formData.cast}
+                  name="castMembers"
+                  value={formData.castMembers}
                   onChange={handleChange}
                   placeholder="Actor 1, Actor 2, Actor 3"
                   disabled={loading}
-                  className={errors.cast ? "border-destructive" : ""}
+                  className={errors.castMembers ? "border-destructive" : ""}
                 />
                 {errors.cast && (
                   <p className="text-xs text-destructive">{errors.cast}</p>
@@ -401,9 +424,13 @@ export function EditMovie() {
                     className={errors.posterUrl ? "border-destructive" : ""}
                   />
                   {errors.posterUrl ? (
-                    <p className="text-xs text-destructive">{errors.posterUrl}</p>
+                    <p className="text-xs text-destructive">
+                      {errors.posterUrl}
+                    </p>
                   ) : (
-                    <p className="text-xs text-muted-foreground">Must start with http:// or https://</p>
+                    <p className="text-xs text-muted-foreground">
+                      Must start with http:// or https://
+                    </p>
                   )}
                 </div>
 
@@ -420,9 +447,13 @@ export function EditMovie() {
                     className={errors.trailerUrl ? "border-destructive" : ""}
                   />
                   {errors.trailerUrl ? (
-                    <p className="text-xs text-destructive">{errors.trailerUrl}</p>
+                    <p className="text-xs text-destructive">
+                      {errors.trailerUrl}
+                    </p>
                   ) : (
-                    <p className="text-xs text-muted-foreground">Must start with http:// or https://</p>
+                    <p className="text-xs text-muted-foreground">
+                      Must start with http:// or https://
+                    </p>
                   )}
                 </div>
               </div>
@@ -441,7 +472,9 @@ export function EditMovie() {
                     className={errors.releaseDate ? "border-destructive" : ""}
                   />
                   {errors.releaseDate && (
-                    <p className="text-xs text-destructive">{errors.releaseDate}</p>
+                    <p className="text-xs text-destructive">
+                      {errors.releaseDate}
+                    </p>
                   )}
                 </div>
 
@@ -500,7 +533,9 @@ export function EditMovie() {
                     ))}
                   </select>
                   {errors.ageRatingId && (
-                    <p className="text-xs text-destructive">{errors.ageRatingId}</p>
+                    <p className="text-xs text-destructive">
+                      {errors.ageRatingId}
+                    </p>
                   )}
                 </div>
               </div>

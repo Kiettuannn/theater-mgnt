@@ -24,7 +24,6 @@ import { Pencil, Trash2 } from "lucide-react";
 import { ROUTES } from "@/constants/routes";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { cn } from "@/lib/utils";
-import { priorityConfig } from "@/constants/notificationConfig";
 
 export const TemplateList = () => {
   const navigate = useNavigate();
@@ -36,7 +35,7 @@ export const TemplateList = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const addNotification = useNotificationStore(
-    (state) => state.addNotification
+    (state) => state.addNotification,
   );
   const {
     confirmDialog,
@@ -149,7 +148,6 @@ export const TemplateList = () => {
                 <TableHead>Code</TableHead>
                 <TableHead>Title Template</TableHead>
                 <TableHead>Content Preview</TableHead>
-                <TableHead>Priority</TableHead>
                 <TableHead>Created At</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -158,7 +156,7 @@ export const TemplateList = () => {
               {filteredTemplates.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={6}
+                    colSpan={5}
                     className="text-center text-muted-foreground"
                   >
                     No templates found
@@ -173,22 +171,6 @@ export const TemplateList = () => {
                     <TableCell>{template.titleTemplate}</TableCell>
                     <TableCell className="max-w-xs truncate">
                       {template.contentTemplate.substring(0, 50)}...
-                    </TableCell>
-                    <TableCell>
-                      {(() => {
-                        const priority =
-                          priorityConfig[
-                            template.priority as keyof typeof priorityConfig
-                          ];
-                        return (
-                          <Badge
-                            variant="secondary"
-                            className={priority.className}
-                          >
-                            {priority.label}
-                          </Badge>
-                        );
-                      })()}
                     </TableCell>
                     <TableCell>
                       {new Date(template.createdAt).toLocaleDateString()}

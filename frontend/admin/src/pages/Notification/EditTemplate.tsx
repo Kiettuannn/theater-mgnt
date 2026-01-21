@@ -18,7 +18,6 @@ import type {
 import { useNotificationStore } from "@/stores";
 import { ROUTES } from "@/constants/routes";
 import { ArrowLeft } from "lucide-react";
-import { priorityOptions } from "@/constants/notificationConfig";
 
 export const EditTemplate = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,14 +26,13 @@ export const EditTemplate = () => {
   const [submitting, setSubmitting] = useState(false);
   const [template, setTemplate] = useState<NotificationTemplate | null>(null);
   const addNotification = useNotificationStore(
-    (state) => state.addNotification
+    (state) => state.addNotification,
   );
 
   const [formData, setFormData] = useState<NotificationTemplateRequest>({
     templateCode: "",
     titleTemplate: "",
     contentTemplate: "",
-    priority: "MEDIUM",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -54,7 +52,6 @@ export const EditTemplate = () => {
           templateCode: data.templateCode,
           titleTemplate: data.titleTemplate,
           contentTemplate: data.contentTemplate,
-          priority: data.priority,
         });
       } catch (error: any) {
         addNotification({
@@ -74,7 +71,7 @@ export const EditTemplate = () => {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -175,26 +172,6 @@ export const EditTemplate = () => {
               <p className="text-xs text-muted-foreground">
                 Unique identifier for this template
               </p>
-            </div>
-
-            {/* Priority */}
-            <div className="space-y-2">
-              <Label htmlFor="priority">
-                Priority <span className="text-destructive">*</span>
-              </Label>
-              <select
-                id="priority"
-                name="priority"
-                value={formData.priority}
-                onChange={handleChange}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {priorityOptions.map((priority) => (
-                  <option key={priority.value} value={priority.value}>
-                    {priority.label}
-                  </option>
-                ))}
-              </select>
             </div>
 
             {/* Title Template */}
