@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import type {
   NotificationRequest,
-  NotificationPriority,
   RecipientType,
 } from "@/types/NotificationType/Notification";
 import { Label } from "@/components/ui/label";
@@ -61,7 +60,7 @@ export const SendNotification = () => {
     useState<NotificationTemplate | null>(null);
   const [sending, setSending] = useState(false);
   const addNotification = useNotificationStore(
-    (state) => state.addNotification
+    (state) => state.addNotification,
   );
 
   // States for users/staffs list
@@ -72,7 +71,7 @@ export const SendNotification = () => {
 
   const [formData, setFormData] = useState<NotificationRequest>({
     templateCode: "",
-    recipientId: "",
+    recipientIds: [], // Changed to array for multi-select
     recipientType: "CUSTOMER",
     category: "BOOKING",
     channels: ["EMAIL", "IN_APP"],
@@ -81,6 +80,9 @@ export const SendNotification = () => {
   });
 
   const [metadataInput, setMetadataInput] = useState("");
+  const [metadataFields, setMetadataFields] = useState<Record<string, string>>(
+    {},
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Load templates from database
@@ -96,9 +98,10 @@ export const SendNotification = () => {
           setFormData((prev) => ({
             ...prev,
             templateCode: data[0].templateCode,
-            priority: data[0].priority as NotificationPriority,
+            // Keep the default priority (HIGH) instead of overwriting with template priority
           }));
           setSelectedTemplate(data[0]);
+          extractTemplateVariables(data[0]);
         }
       } catch (error: any) {
         addNotification({
@@ -113,6 +116,25 @@ export const SendNotification = () => {
 
     loadTemplates();
   }, [addNotification]);
+
+  // Extract variables from template (e.g., {{customerName}}, {{movieName}})
+  const extractTemplateVariables = (template: NotificationTemplate) => {
+    const combined = `${template.titleTemplate} ${template.contentTemplate}`;
+    const regex = /\{\{(\w+)\}\}/g;
+    const variables = new Set<string>();
+    let match;
+
+    while ((match = regex.exec(combined)) !== null) {
+      variables.add(match[1]);
+    }
+
+    // Initialize metadata fields with empty values
+    const fields: Record<string, string> = {};
+    variables.forEach((variable) => {
+      fields[variable] = metadataFields[variable] || "";
+    });
+    setMetadataFields(fields);
+  };
 
   // Load users based on recipient type
   useEffect(() => {
@@ -145,25 +167,27 @@ export const SendNotification = () => {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
 
-    // If template is changed, update selected template and priority
+    // If template is changed, update selected template only (keep user's priority selection)
     if (name === "templateCode") {
       const template = templates.find((t) => t.templateCode === value);
       setSelectedTemplate(template || null);
+      if (template) {
+        extractTemplateVariables(template);
+      }
       setFormData((prev) => ({
         ...prev,
         [name]: value,
-        priority: (template?.priority as NotificationPriority) || prev.priority,
       }));
     } else if (name === "recipientType") {
-      // Clear recipientId when changing recipientType
+      // Clear recipientIds when changing recipientType
       setFormData((prev) => ({
         ...prev,
         recipientType: value as RecipientType,
-        recipientId: "",
+        recipientIds: [],
       }));
     } else {
       setFormData((prev) => ({
@@ -194,22 +218,25 @@ export const SendNotification = () => {
       newErrors.templateCode = "Template is required";
     }
 
-    if (!formData.recipientId.trim()) {
-      newErrors.recipientId = "Recipient ID is required";
+    if (!formData.recipientIds || formData.recipientIds.length === 0) {
+      newErrors.recipientIds = "At least one recipient is required";
+    }
+
+    if (formData.recipientIds && formData.recipientIds.length > 1000) {
+      newErrors.recipientIds =
+        "Cannot send to more than 1000 recipients at once";
     }
 
     if (formData.channels.length === 0) {
       newErrors.channels = "At least one channel must be selected";
     }
 
-    // Validate metadata JSON if provided
-    if (metadataInput.trim()) {
-      try {
-        JSON.parse(metadataInput);
-      } catch {
-        newErrors.metadata = "Invalid JSON format";
+    // Validate metadata fields - check if required fields are filled
+    Object.keys(metadataFields).forEach((key) => {
+      if (!metadataFields[key]?.trim()) {
+        newErrors[`metadata_${key}`] = `${key} is required`;
       }
-    }
+    });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -222,28 +249,26 @@ export const SendNotification = () => {
       return;
     }
 
-    // Parse metadata
-    let metadata = {};
-    if (metadataInput.trim()) {
-      try {
-        metadata = JSON.parse(metadataInput);
-      } catch {
-        setErrors((prev) => ({ ...prev, metadata: "Invalid JSON format" }));
-        return;
-      }
-    }
+    // Convert metadata fields to JSON object
+    const metadata = { ...metadataFields };
+
+    // Prepare request payload
+    const requestPayload = {
+      ...formData,
+      metadata,
+    };
+
+    console.log("Sending notification with payload:", requestPayload);
 
     try {
       setSending(true);
-      await sendNotification({
-        ...formData,
-        metadata,
-      });
+      const results = await sendNotification(requestPayload);
 
+      const count = results.length;
       addNotification({
         type: "success",
         title: "Success",
-        message: "Notification sent successfully",
+        message: `Notification${count > 1 ? "s" : ""} sent successfully to ${count} recipient${count > 1 ? "s" : ""}`,
       });
 
       navigate(ROUTES.NOTIFICATIONS_LIST);
@@ -339,50 +364,83 @@ export const SendNotification = () => {
               </select>
             </div>
 
-            {/* Recipient - Select User with Search */}
+            {/* Recipients - Multi-select with Search */}
             <div className="space-y-2">
-              <Label htmlFor="recipientId">
-                Recipient <span className="text-destructive">*</span>
+              <Label htmlFor="recipientIds">
+                Recipients <span className="text-destructive">*</span>
+                {formData.recipientIds.length > 0 && (
+                  <span className="ml-2 text-xs text-muted-foreground">
+                    ({formData.recipientIds.length} selected)
+                  </span>
+                )}
               </Label>
+
               <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openCombobox}
-                    disabled={loadingUsers}
+                  <div
                     className={cn(
-                      "w-full justify-between",
-                      errors.recipientId && "border-destructive"
+                      "flex min-h-10 w-full items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm cursor-pointer",
+                      errors.recipientIds && "border-destructive",
+                      loadingUsers && "opacity-50 cursor-not-allowed",
                     )}
+                    onClick={(e) => {
+                      // Prevent opening popover when clicking on X icon
+                      const target = e.target as HTMLElement;
+                      if (target.closest("svg")) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
+                      }
+                    }}
                   >
-                    {formData.recipientId
-                      ? formData.recipientType === "CUSTOMER"
-                        ? (() => {
-                            const customer = customers.find(
-                              (c) => c.accountId === formData.recipientId
-                            );
-                            return customer
-                              ? `${customer.firstName} ${customer.lastName} (${customer.email})`
-                              : "Select a customer";
-                          })()
-                        : (() => {
-                            const staff = staffs.find(
-                              (s) => s.accountId === formData.recipientId
-                            );
-                            return staff
-                              ? `${staff.firstName} ${staff.lastName} (${staff.email})`
-                              : "Select a staff";
-                          })()
-                      : loadingUsers
-                      ? "Loading users..."
-                      : formData.recipientType === "CUSTOMER"
-                      ? "Select a customer"
-                      : "Select a staff"}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
+                    {/* Selected recipients badges inside input */}
+                    <div className="flex flex-wrap gap-1.5 flex-1">
+                      {formData.recipientIds.length > 0 ? (
+                        formData.recipientIds.map((recipientId) => {
+                          const user =
+                            formData.recipientType === "CUSTOMER"
+                              ? customers.find(
+                                  (c) => c.accountId === recipientId,
+                                )
+                              : staffs.find((s) => s.accountId === recipientId);
+
+                          return user ? (
+                            <Badge
+                              key={recipientId}
+                              variant="secondary"
+                              className="gap-1 h-6 px-2"
+                            >
+                              <span className="text-xs">{user.email}</span>
+                              <X
+                                className="w-3 h-3 cursor-pointer hover:text-destructive"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  setFormData((prev) => ({
+                                    ...prev,
+                                    recipientIds: prev.recipientIds.filter(
+                                      (id) => id !== recipientId,
+                                    ),
+                                  }));
+                                }}
+                              />
+                            </Badge>
+                          ) : null;
+                        })
+                      ) : (
+                        <span className="text-muted-foreground">
+                          {loadingUsers
+                            ? "Loading users..."
+                            : formData.recipientType === "CUSTOMER"
+                              ? "Select customers..."
+                              : "Select staff..."}
+                        </span>
+                      )}
+                    </div>
+                    <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+                  </div>
                 </PopoverTrigger>
-                <PopoverContent className="w-[400px] p-0">
+                <PopoverContent className="w-full p-0" align="start">
                   <Command>
                     <CommandInput
                       placeholder={
@@ -401,73 +459,93 @@ export const SendNotification = () => {
                       </CommandEmpty>
                       <CommandGroup>
                         {formData.recipientType === "CUSTOMER"
-                          ? customers.map((customer) => (
-                              <CommandItem
-                                key={customer.accountId}
-                                value={`${customer.firstName} ${customer.lastName} ${customer.email}`}
-                                onSelect={() => {
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    recipientId: customer.accountId,
-                                  }));
-                                  if (errors.recipientId) {
-                                    setErrors((prev) => ({
+                          ? customers.map((customer) => {
+                              const isSelected = formData.recipientIds.includes(
+                                customer.accountId,
+                              );
+                              return (
+                                <CommandItem
+                                  key={customer.accountId}
+                                  value={`${customer.firstName} ${customer.lastName} ${customer.email}`}
+                                  onSelect={() => {
+                                    setFormData((prev) => ({
                                       ...prev,
-                                      recipientId: "",
+                                      recipientIds: isSelected
+                                        ? prev.recipientIds.filter(
+                                            (id) => id !== customer.accountId,
+                                          )
+                                        : [
+                                            ...prev.recipientIds,
+                                            customer.accountId,
+                                          ],
                                     }));
-                                  }
-                                  setOpenCombobox(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    formData.recipientId === customer.accountId
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {customer.firstName} {customer.lastName} (
-                                {customer.email})
-                              </CommandItem>
-                            ))
-                          : staffs.map((staff) => (
-                              <CommandItem
-                                key={staff.accountId}
-                                value={`${staff.firstName} ${staff.lastName} ${staff.email}`}
-                                onSelect={() => {
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    recipientId: staff.accountId,
-                                  }));
-                                  if (errors.recipientId) {
-                                    setErrors((prev) => ({
+                                    if (errors.recipientIds) {
+                                      setErrors((prev) => ({
+                                        ...prev,
+                                        recipientIds: "",
+                                      }));
+                                    }
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      isSelected ? "opacity-100" : "opacity-0",
+                                    )}
+                                  />
+                                  {customer.firstName} {customer.lastName} (
+                                  {customer.email})
+                                </CommandItem>
+                              );
+                            })
+                          : staffs.map((staff) => {
+                              const isSelected = formData.recipientIds.includes(
+                                staff.accountId,
+                              );
+                              return (
+                                <CommandItem
+                                  key={staff.accountId}
+                                  value={`${staff.firstName} ${staff.lastName} ${staff.email}`}
+                                  onSelect={() => {
+                                    setFormData((prev) => ({
                                       ...prev,
-                                      recipientId: "",
+                                      recipientIds: isSelected
+                                        ? prev.recipientIds.filter(
+                                            (id) => id !== staff.accountId,
+                                          )
+                                        : [
+                                            ...prev.recipientIds,
+                                            staff.accountId,
+                                          ],
                                     }));
-                                  }
-                                  setOpenCombobox(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4",
-                                    formData.recipientId === staff.accountId
-                                      ? "opacity-100"
-                                      : "opacity-0"
-                                  )}
-                                />
-                                {staff.firstName} {staff.lastName} (
-                                {staff.email})
-                              </CommandItem>
-                            ))}
+                                    if (errors.recipientIds) {
+                                      setErrors((prev) => ({
+                                        ...prev,
+                                        recipientIds: "",
+                                      }));
+                                    }
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      isSelected ? "opacity-100" : "opacity-0",
+                                    )}
+                                  />
+                                  {staff.firstName} {staff.lastName} (
+                                  {staff.email})
+                                </CommandItem>
+                              );
+                            })}
                       </CommandGroup>
                     </CommandList>
                   </Command>
                 </PopoverContent>
               </Popover>
-              {errors.recipientId && (
-                <p className="text-sm text-destructive">{errors.recipientId}</p>
+              {errors.recipientIds && (
+                <p className="text-sm text-destructive">
+                  {errors.recipientIds}
+                </p>
               )}
             </div>
 
@@ -518,21 +596,54 @@ export const SendNotification = () => {
               )}
             </div>
 
-            {/* Metadata (JSON) */}
-            <div className="space-y-2 col-span-2">
-              <Label htmlFor="metadata">Metadata (JSON)</Label>
-              <Textarea
-                id="metadata"
-                value={metadataInput}
-                onChange={(e) => setMetadataInput(e.target.value)}
-                placeholder='{"customerName": "John Doe", "movieName": "Avatar"}'
-                rows={4}
-                className={errors.metadata ? "border-destructive" : ""}
-              />
-              {errors.metadata && (
-                <p className="text-sm text-destructive">{errors.metadata}</p>
-              )}
-            </div>
+            {/* Metadata Fields - Dynamic based on template variables */}
+            {Object.keys(metadataFields).length > 0 && (
+              <div className="space-y-4 col-span-2 p-4 border border-border rounded-lg bg-muted/10">
+                <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                  <FileText className="w-4 h-4" />
+                  Template Variables
+                  <span className="text-xs text-muted-foreground font-normal">
+                    Fill in the values for the template placeholders
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {Object.keys(metadataFields).map((key) => (
+                    <div key={key} className="space-y-2">
+                      <Label htmlFor={`metadata_${key}`}>
+                        {key} <span className="text-destructive">*</span>
+                      </Label>
+                      <input
+                        type="text"
+                        id={`metadata_${key}`}
+                        value={metadataFields[key]}
+                        onChange={(e) => {
+                          setMetadataFields((prev) => ({
+                            ...prev,
+                            [key]: e.target.value,
+                          }));
+                          // Clear error when user starts typing
+                          if (errors[`metadata_${key}`]) {
+                            setErrors((prev) => ({
+                              ...prev,
+                              [`metadata_${key}`]: "",
+                            }));
+                          }
+                        }}
+                        placeholder={`Enter ${key}...`}
+                        className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                          errors[`metadata_${key}`] ? "border-destructive" : ""
+                        }`}
+                      />
+                      {errors[`metadata_${key}`] && (
+                        <p className="text-sm text-destructive">
+                          {errors[`metadata_${key}`]}
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Template Preview */}
             {selectedTemplate && (
@@ -560,12 +671,6 @@ export const SendNotification = () => {
                         __html: selectedTemplate.contentTemplate,
                       }}
                     />
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <p className="text-xs text-muted-foreground">Priority:</p>
-                    <Badge variant="secondary">
-                      {selectedTemplate.priority}
-                    </Badge>
                   </div>
                 </div>
               </div>

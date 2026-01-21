@@ -1,5 +1,5 @@
 export type NotificationStatus = "PENDING" | "SENT" | "FAILED";
-export type NotificationPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT";
+export type NotificationPriority = "URGENT" | "HIGH" | "NORMAL";
 export type NotificationCategory = "BOOKING" | "PROMOTION" | "SYSTEM" | "SECURITY" | "REMINDER";
 export type RecipientType = "CUSTOMER" | "STAFF" | "ADMIN";
 
@@ -32,7 +32,7 @@ export interface Notification {
 
 export interface NotificationRequest {
   templateCode: string;
-  recipientId: string;
+  recipientIds: string[]; // Always an array (1 or more recipients)
   recipientType: RecipientType;
   category: NotificationCategory;
   channels: string[];

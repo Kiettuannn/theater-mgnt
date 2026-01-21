@@ -49,12 +49,12 @@ export const deleteNotificationLog = async (id: string): Promise<void> => {
   );
 };
 
-// Admin: Send notification manually
+// Admin: Send notification(s) to one or multiple recipients
 export const sendNotification = async (
   request: NotificationRequest
-): Promise<Notification> => {
-  return handleApiResponse<Notification>(
-    httpClient.post<ApiResponse<Notification>>(`${BASE_URL}/send`, request)
+): Promise<Notification[]> => {
+  return handleApiResponse<Notification[]>(
+    httpClient.post<ApiResponse<Notification[]>>(`${BASE_URL}/send`, request)
   );
 };
 

@@ -17,7 +17,7 @@ import {
 import { format } from "date-fns";
 import { cn } from "@/utils/cn";
 import type { Notification } from "@/types/NotificationType/Notification";
-import { selectUserId } from "@/stores";
+import { selectToken, selectUserId } from "@/stores";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 export function NotificationBell() {
@@ -25,31 +25,55 @@ export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const currentUserId = useAuthStore(selectUserId);
+  const token = useAuthStore(selectToken);
   const processedIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    // Connect to socket with userId
-    if (currentUserId) {
+    // Connect to Socket.IO with JWT token authentication
+    if (token && currentUserId) {
       const socketUrl =
-        import.meta.env.VITE_SOCKET_URL || "http://localhost:8080";
-      socketService.connect(`${socketUrl}?userId=${currentUserId}`);
+        import.meta.env.VITE_SOCKET_URL || "http://localhost:9092";
+
+      console.log("Connecting to Socket.IO server:", socketUrl);
+      console.log("Current user accountId:", currentUserId);
+      socketService.connect(socketUrl, token);
     }
 
     // Listen for new notifications
-    const handleNewNotification = (notification: Notification) => {
-      console.log("New notification received:", notification);
+    const handleNewNotification = (data: string | Notification) => {
+      console.log("🔔 [NotificationBell] Received raw data:", data);
+      console.log("🔔 Data type:", typeof data);
+
+      // Parse JSON string if backend sends string (like chat-service)
+      let notification: Notification;
+      if (typeof data === "string") {
+        try {
+          notification = JSON.parse(data);
+          console.log("🔔 Parsed notification:", notification);
+        } catch (error) {
+          console.error("❌ Failed to parse notification JSON:", error);
+          return;
+        }
+      } else {
+        notification = data;
+      }
+
+      console.log("🔔 Current userId:", currentUserId);
+      console.log("🔔 Notification recipientId:", notification.recipientId);
 
       // Filter: Only show notifications for current user
       if (notification.recipientId !== currentUserId) {
-        console.log("Notification not for current user, ignoring");
+        console.warn("❌ Notification not for current user, ignoring");
         return;
       }
+
+      console.log("✅ Notification is for current user, processing...");
 
       // Deduplicate using ref to avoid stale closure
       if (processedIdsRef.current.has(notification.id)) {
         console.log(
-          "Duplicate notification detected, ignoring:",
-          notification.id
+          "⚠️ Duplicate notification detected, ignoring:",
+          notification.id,
         );
         return;
       }
@@ -58,10 +82,19 @@ export function NotificationBell() {
       processedIdsRef.current.add(notification.id);
 
       // Add to notifications list
-      setNotifications((prev) => [notification, ...prev]);
+      setNotifications((prev) => {
+        console.log(
+          "📝 Adding notification to list. Previous count:",
+          prev.length,
+        );
+        return [notification, ...prev];
+      });
 
       // Increment unread count
-      setUnreadCount((prev) => prev + 1);
+      setUnreadCount((prev) => {
+        console.log("🔢 Incrementing unread count from", prev, "to", prev + 1);
+        return prev + 1;
+      });
 
       // Show browser notification if permitted
       if (Notification.permission === "granted") {
@@ -72,6 +105,7 @@ export function NotificationBell() {
       }
     };
 
+    console.log("📡 Registering listener for 'notification:new' event");
     socketService.on("notification:new", handleNewNotification);
 
     // Request notification permission
@@ -85,7 +119,7 @@ export function NotificationBell() {
     return () => {
       socketService.off("notification:new", handleNewNotification);
     };
-  }, []);
+  }, [currentUserId, token]);
 
   const loadNotifications = async () => {
     try {
@@ -100,8 +134,8 @@ export function NotificationBell() {
   const markAsRead = async (id: string) => {
     setNotifications((prev) =>
       prev.map((n) =>
-        n.id === id ? { ...n, readAt: new Date().toISOString() } : n
-      )
+        n.id === id ? { ...n, readAt: new Date().toISOString() } : n,
+      ),
     );
     setUnreadCount((prev) => Math.max(0, prev - 1));
 
@@ -192,7 +226,7 @@ export function NotificationBell() {
                     }
                     className={cn(
                       "p-4 hover:bg-accent cursor-pointer transition-colors",
-                      isUnread(notification) && "bg-muted/50"
+                      isUnread(notification) && "bg-muted/50",
                     )}
                   >
                     <div className="flex items-start gap-3">
@@ -201,7 +235,7 @@ export function NotificationBell() {
                           "w-2 h-2 rounded-full mt-2",
                           isUnread(notification)
                             ? "bg-primary"
-                            : "bg-transparent"
+                            : "bg-transparent",
                         )}
                       />
                       <div className="flex-1 space-y-1">
@@ -209,7 +243,7 @@ export function NotificationBell() {
                           <p
                             className={cn(
                               "text-sm font-medium",
-                              isUnread(notification) && "text-foreground"
+                              isUnread(notification) && "text-foreground",
                             )}
                           >
                             {notification.title}
@@ -218,19 +252,22 @@ export function NotificationBell() {
                             variant="secondary"
                             className={cn(
                               "text-xs",
-                              getPriorityColor(notification.priority)
+                              getPriorityColor(notification.priority),
                             )}
                           >
                             {notification.priority}
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground line-clamp-2">
-                          {notification.content}
-                        </p>
+                        <div
+                          className="text-sm text-muted-foreground line-clamp-2 prose prose-sm dark:prose-invert max-w-none"
+                          dangerouslySetInnerHTML={{
+                            __html: notification.content,
+                          }}
+                        />
                         <p className="text-xs text-muted-foreground">
                           {format(
                             new Date(notification.createdAt),
-                            "MMM dd, HH:mm"
+                            "MMM dd, HH:mm",
                           )}
                         </p>
                       </div>
