@@ -52,15 +52,16 @@ public class AdminNotificationController {
     }
 
     /**
-     * Manually send a notification
+     * Manually send notification(s) to one or multiple recipients
      * POST /admin/notifications/send
      */
     @PostMapping("/send")
-    public ApiResponse<NotificationDetailResponse> sendNotification(
+    public ApiResponse<List<NotificationDetailResponse>> sendNotification(
             @RequestBody @Valid CreateNotificationRequest request) {
-        log.info("Admin manually sending notification to recipient: {}", request.getRecipientId());
+        log.info("Admin sending notification(s) to {} recipient(s)", 
+                request.getRecipientIds() != null ? request.getRecipientIds().size() : 0);
 
-        return ApiResponse.<NotificationDetailResponse>builder()
+        return ApiResponse.<List<NotificationDetailResponse>>builder()
                 .result(notificationService.createAndSend(request))
                 .build();
     }

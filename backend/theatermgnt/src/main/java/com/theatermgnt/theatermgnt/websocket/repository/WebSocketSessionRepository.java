@@ -12,7 +12,7 @@ import com.theatermgnt.theatermgnt.websocket.entity.WebSocketSession;
  * WebSocketSessionRepository - Repository for WebSocketSession entity
  */
 @Repository
-public interface WebSocketSessionRepository extends JpaRepository<WebSocketSession, Long> {
+public interface WebSocketSessionRepository extends JpaRepository<WebSocketSession, String> {
     
     /**
      * Find session by socket session ID

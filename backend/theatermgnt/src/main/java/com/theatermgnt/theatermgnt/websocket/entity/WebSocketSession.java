@@ -7,11 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 /**
  * WebSocketSession - Entity for tracking active WebSocket connections
@@ -23,18 +20,19 @@ import lombok.Setter;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class WebSocketSession {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String id;
     
     @Column(name = "socket_session_id", nullable = false, unique = true)
-    private String socketSessionId;
+    String socketSessionId;
     
     @Column(name = "user_id", nullable = false)
-    private String userId;
+    String userId;
     
     @Column(name = "created_at", nullable = false)
-    private Instant createdAt;
+    Instant createdAt;
 }

@@ -2,6 +2,7 @@ package com.theatermgnt.theatermgnt.websocket.controller;
 
 import java.time.Instant;
 
+import com.nimbusds.jwt.SignedJWT;
 import org.springframework.stereotype.Component;
 
 import com.corundumstudio.socketio.SocketIOClient;
@@ -60,26 +61,35 @@ public class SocketHandler {
             if (introspectResponse.isValid()) {
                 log.info("Client connected: {}", client.getSessionId());
                 
-                // Extract userId from token (assuming it's in the token claims)
-                // You may need to adjust this based on your token structure
-                String userId = extractUserIdFromToken(token);
+                // Extract accountId from token (JWT subject field contains accountId)
+                String accountId = extractAccountIdFromToken(token);
                 
-                if (userId != null) {
-                    // Create and save WebSocket session
-                    WebSocketSession session = WebSocketSession.builder()
-                        .socketSessionId(client.getSessionId().toString())
-                        .userId(userId)
-                        .createdAt(Instant.now())
-                        .build();
+                if (accountId != null) {
+                    String socketSessionId = client.getSessionId().toString();
                     
-                    webSocketSessionService.create(session);
+                    // Check if session already exists (idempotent connection handling)
+                    if (!webSocketSessionService.sessionExists(socketSessionId)) {
+                        // Create and save WebSocket session
+                        WebSocketSession session = WebSocketSession.builder()
+                            .socketSessionId(socketSessionId)
+                            .userId(accountId) // userId field stores accountId
+                            .createdAt(Instant.now())
+                            .build();
+                        
+                        webSocketSessionService.create(session);
+                        
+                        log.info("WebSocket session created for account: {}", accountId);
+                    } else {
+                        log.debug("WebSocket session already exists for: {}", socketSessionId);
+                    }
                     
-                    // Join room for targeted messaging
-                    client.joinRoom("user:" + userId);
-                    
-                    log.info("WebSocket session created for user: {}", userId);
+                    // Join room for targeted messaging (using accountId)
+                    // Safe to call multiple times - Socket.IO handles duplicates
+                    String roomName = "user:" + accountId;
+                    client.joinRoom(roomName);
+                    log.info("✅ Client {} joined room: {}", client.getSessionId(), roomName);
                 } else {
-                    log.warn("Could not extract userId from token");
+                    log.warn("Could not extract accountId from token");
                     client.disconnect();
                 }
             } else {
@@ -128,31 +138,27 @@ public class SocketHandler {
     }
 
     /**
-     * Extract userId from JWT token
-     * This is a placeholder - implement based on your token structure
+     * Extract accountId from JWT token
+     * The JWT subject field contains the accountId (from Account.getId())
+     * 
+     * Note: Using proper JWT parsing with SignedJWT library
      */
-    private String extractUserIdFromToken(String token) {
+    private String extractAccountIdFromToken(String token) {
         try {
-            // Parse JWT token and extract userId
-            // You can use JWT libraries or your existing token parsing logic
-            String[] parts = token.split("\\.");
-            if (parts.length == 3) {
-                // Decode payload and extract userId
-                // This is simplified - use proper JWT parsing in production
-                String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
-                
-                // Extract userId from payload JSON
-                // Example: {"sub":"userId","exp":1234567890}
-                if (payload.contains("\"sub\":")) {
-                    int startIndex = payload.indexOf("\"sub\":\"") + 7;
-                    int endIndex = payload.indexOf("\"", startIndex);
-                    if (endIndex > startIndex) {
-                        return payload.substring(startIndex, endIndex);
-                    }
-                }
+            // Parse JWT token using Nimbus JOSE library
+            SignedJWT signedJWT = com.nimbusds.jwt.SignedJWT.parse(token);
+            
+            // Extract subject claim which contains accountId
+            String accountId = signedJWT.getJWTClaimsSet().getSubject();
+            
+            if (accountId != null && !accountId.isEmpty()) {
+                log.debug("Extracted accountId from token: {}", accountId);
+                return accountId;
+            } else {
+                log.warn("Token subject (accountId) is null or empty");
             }
         } catch (Exception e) {
-            log.error("Error extracting userId from token: {}", e.getMessage());
+            log.error("Error extracting accountId from token: {}", e.getMessage(), e);
         }
         return null;
     }

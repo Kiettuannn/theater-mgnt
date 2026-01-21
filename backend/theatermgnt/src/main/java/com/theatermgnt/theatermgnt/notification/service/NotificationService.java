@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.theatermgnt.theatermgnt.notification.dto.request.CreateNotificationRequest;
 import com.theatermgnt.theatermgnt.notification.enums.Priority;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.theatermgnt.theatermgnt.common.exception.AppException;
 import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
-import com.theatermgnt.theatermgnt.notification.dto.request.CreateNotificationRequest;
 import com.theatermgnt.theatermgnt.notification.dto.response.NotificationDetailResponse;
 import com.theatermgnt.theatermgnt.notification.dto.response.NotificationLogDetailResponse;
 import com.theatermgnt.theatermgnt.notification.dto.response.NotificationLogResponse;
@@ -50,83 +50,80 @@ public class NotificationService {
     SocketIOService socketIOService;
 
     /**
-     * Create notification and dispatch to channels
-     * This is the main method called by event listeners
+     * Create and send notifications to one or multiple recipients
+     * Handles both single and batch sends with the same logic
      */
-    public NotificationDetailResponse createAndSend(CreateNotificationRequest request) {
+    public List<NotificationDetailResponse> createAndSend(CreateNotificationRequest request) {
         log.info(
-                "Creating and sending notification for recipient: {}, template: {}, channels: {}",
-                request.getRecipientId(),
+                "Creating and sending notification to {} recipient(s), template: {}, channels: {}",
+                request.getRecipientIds().size(),
                 request.getTemplateCode(),
                 request.getChannels());
 
         // 1. Get template
         NotificationTemplate template = templateService.getTemplateByCode(request.getTemplateCode());
 
-        // 2. Build metadata with template variables and category
-        Map<String, Object> metadata = new HashMap<>();
-        if (request.getMetadata() != null) {
-            metadata.putAll(request.getMetadata());
-        }
-        metadata.put("category", request.getCategory().name());
 
-        // Render and store title/content in metadata for quick access
+        // 3. Build base metadata
+        Map<String, Object> baseMetadata = new HashMap<>();
+        if (request.getMetadata() != null) {
+            baseMetadata.putAll(request.getMetadata());
+        }
+        baseMetadata.put("category", request.getCategory().name());
+
+        // 4. Render template once (same content for all recipients)
         String title = templateService.renderTitle(request.getTemplateCode(), request.getMetadata());
         String content = templateService.renderTemplate(request.getTemplateCode(), request.getMetadata());
-        metadata.put("title", title);
-        metadata.put("content", content);
+        baseMetadata.put("title", title);
+        baseMetadata.put("content", content);
 
-        // 3. Create notification entity using builder
-        Notification notification = Notification.builder()
-                .notificationTemplate(template)
-                .recipientId(request.getRecipientId())
-                .recipientType(request.getRecipientType())
-                .priority(request.getPriority() != null ? request.getPriority() : Priority.NORMAL)
-                .status(NotificationStatus.PENDING)
-                .metadata(metadata)
-                .build();
+        // 5. Create notifications for all recipients
+        List<Notification> notifications = new ArrayList<>();
+        for (String recipientId : request.getRecipientIds()) {
+            Notification notification = Notification.builder()
+                    .notificationTemplate(template)
+                    .recipientId(recipientId)
+                    .recipientType(request.getRecipientType())
+                    .priority(request.getPriority())
+                    .status(NotificationStatus.PENDING)
+                    .metadata(new HashMap<>(baseMetadata)) // Clone metadata for each recipient
+                    .build();
+            notifications.add(notification);
+        }
 
-        // 4. Save notification to DB in a separate transaction (commits immediately)
-        Notification saved = saveNotification(notification);
-        log.info("Notification created with ID: {}", saved.getId());
+        // 6. Batch save all notifications
+        List<Notification> savedNotifications = notificationRepository.saveAll(notifications);
+        log.info("Created {} notification(s)", savedNotifications.size());
 
-        // 5. Dispatch to channels asynchronously (transaction already committed)
-        log.info("About to dispatch notification {} to channels: {}", saved.getId(), request.getChannels());
-        dispatcher.dispatch(saved.getId(), request.getChannels(), metadata);
-        log.info("Dispatcher.dispatch() called successfully for notification: {}", saved.getId());
-
-        // 6. Emit to Socket.IO for IN_APP channel
-        if (request.getChannels().contains("IN_APP")) {
-            log.info("Emitting notification {} to Socket.IO for IN_APP channel", saved.getId());
+        // 7. Dispatch to channels and emit Socket.IO for each notification
+        for (Notification saved : savedNotifications) {
+            // Dispatch asynchronously
+            dispatcher.dispatch(saved.getId(), request.getChannels(), saved.getMetadata());
             
-            // Create response with title/content from metadata
-            NotificationDetailResponse response = notificationMapper.toDetailResponse(saved);
-            if (saved.getMetadata() != null) {
-                if (saved.getMetadata().containsKey("category")) {
-                    response.setCategory(NotificationCategory.valueOf(
-                            (String) saved.getMetadata().get("category")));
+            // Emit to Socket.IO for IN_APP channel
+            if (request.getChannels().contains("IN_APP")) {
+                NotificationDetailResponse response = notificationMapper.toDetailResponse(saved);
+                if (saved.getMetadata() != null) {
+                    if (saved.getMetadata().containsKey("category")) {
+                        response.setCategory(NotificationCategory.valueOf(
+                                (String) saved.getMetadata().get("category")));
+                    }
+                    if (saved.getMetadata().containsKey("title")) {
+                        response.setTitle((String) saved.getMetadata().get("title"));
+                    }
+                    if (saved.getMetadata().containsKey("content")) {
+                        response.setContent((String) saved.getMetadata().get("content"));
+                    }
                 }
-                if (saved.getMetadata().containsKey("title")) {
-                    response.setTitle((String) saved.getMetadata().get("title"));
-                }
-                if (saved.getMetadata().containsKey("content")) {
-                    response.setContent((String) saved.getMetadata().get("content"));
-                }
-            }
-            response.setIsRead(false); // New notification is always unread
-            
-            // Only emit to targeted user OR broadcast, not both
-            log.info("Socket.IO emit check - recipientId: {}", request.getRecipientId());
-            if (request.getRecipientId() != null && !request.getRecipientId().isEmpty()) {
-                log.info("Emitting to specific user: {}", request.getRecipientId());
-                socketIOService.emitNotificationToUser(request.getRecipientId(), response);
-            } else {
-                log.info("Broadcasting to all users");
-                socketIOService.broadcastNotification(response);
+                response.setIsRead(false);
+                socketIOService.emitNotificationToUser(saved.getRecipientId(), response);
             }
         }
 
-        return notificationMapper.toDetailResponse(saved);
+        // 8. Return all created notifications
+        return savedNotifications.stream()
+                .map(notificationMapper::toDetailResponse)
+                .collect(Collectors.toList());
     }
 
     /**

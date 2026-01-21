@@ -6,6 +6,7 @@ import java.util.Map;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import com.theatermgnt.theatermgnt.notification.enums.NotificationCategory;
 import com.theatermgnt.theatermgnt.notification.enums.Priority;
@@ -23,8 +24,9 @@ public class CreateNotificationRequest {
     @NotBlank(message = "Template code is required")
     String templateCode;
 
-    @NotBlank(message = "Recipient ID is required")
-    String recipientId;
+    @NotEmpty(message = "At least one recipient is required")
+    @Size(max = 1000, message = "Cannot send to more than 1000 recipients at once")
+    List<String> recipientIds;
 
     @NotNull(message = "Recipient type is required")
     RecipientType recipientType;

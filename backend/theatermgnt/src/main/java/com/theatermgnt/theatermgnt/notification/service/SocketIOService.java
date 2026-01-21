@@ -3,6 +3,8 @@ package com.theatermgnt.theatermgnt.notification.service;
 import org.springframework.stereotype.Service;
 
 import com.corundumstudio.socketio.SocketIOServer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.theatermgnt.theatermgnt.notification.dto.response.NotificationDetailResponse;
 
 import lombok.AccessLevel;
@@ -20,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SocketIOService {
     SocketIOServer socketServer;
+    ObjectMapper objectMapper;
 
     /**
      * Emit notification to specific user
@@ -30,9 +33,25 @@ public class SocketIOService {
 
         try {
             String roomName = "user:" + userId;
-            socketServer.getRoomOperations(roomName).sendEvent("notification:new", notification);
+            
+            // Check how many clients are in this room
+            var room = socketServer.getRoomOperations(roomName);
+            var clients = room.getClients();
+            log.info("📡 Room '{}' has {} clients", roomName, clients.size());
+            
+            if (clients.isEmpty()) {
+                log.warn("⚠️ No clients in room '{}' - notification will not be delivered", roomName);
+                return;
+            }
+            
+            // Serialize to JSON string first (like chat-service does)
+            // This uses Spring's ObjectMapper which already has JavaTimeModule configured
+            String notificationJson = objectMapper.writeValueAsString(notification);
+            room.sendEvent("notification:new", notificationJson);
 
             log.info("Notification emitted successfully to room: {}", roomName);
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize notification {}: {}", notification.getId(), e.getMessage(), e);
         } catch (Exception e) {
             log.error("Failed to emit notification to user {}: {}", userId, e.getMessage(), e);
         }
@@ -45,8 +64,12 @@ public class SocketIOService {
         log.info("Broadcasting notification to all clients: {}", notification.getId());
 
         try {
-            socketServer.getBroadcastOperations().sendEvent("notification:new", notification);
+            // Serialize to JSON string first
+            String notificationJson = objectMapper.writeValueAsString(notification);
+            socketServer.getBroadcastOperations().sendEvent("notification:new", notificationJson);
             log.info("Notification broadcasted successfully");
+        } catch (JsonProcessingException e) {
+            log.error("Failed to serialize notification {}: {}", notification.getId(), e.getMessage(), e);
         } catch (Exception e) {
             log.error("Failed to broadcast notification: {}", e.getMessage(), e);
         }
