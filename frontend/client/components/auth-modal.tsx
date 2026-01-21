@@ -7,6 +7,7 @@ import { login, register } from "@/services/authService";
 import { getRedirectPath, clearRedirectPath } from "@/lib/auth-utils";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store";
+import { getErrorMessage, isApiError } from "@/lib/errors";
 
 interface AuthModalProps {
   mode: "login" | "register";
@@ -35,6 +36,7 @@ export function AuthModal({ mode, onClose, onSwitchMode }: AuthModalProps) {
       if (isLogin) {
         const loginIdentifier = formData.get("loginIdentifier") as string;
         const response = await login({ loginIdentifier, password });
+        console.log("Login successful:", response);
 
         // Update auth context
         authLogin();
@@ -67,6 +69,8 @@ export function AuthModal({ mode, onClose, onSwitchMode }: AuthModalProps) {
         const firstName = formData.get("firstName") as string;
         const lastName = formData.get("lastName") as string;
         const dob = formData.get("dob") as string;
+        const gender = formData.get("gender") as string;
+        const address = formData.get("address") as string;
 
         const response = await register({
           username,
@@ -76,7 +80,10 @@ export function AuthModal({ mode, onClose, onSwitchMode }: AuthModalProps) {
           firstName,
           lastName,
           dob,
+          gender,
+          address,
         });
+        console.log("Registration successful:", response);
 
         // Update auth context
         authLogin();
@@ -88,18 +95,29 @@ export function AuthModal({ mode, onClose, onSwitchMode }: AuthModalProps) {
         router.push("/");
       }
     } catch (err: any) {
-      console.error("Authentication error:", err);
-      setError(
-        err.response?.data?.message ||
-          "Authentication failed. Please try again."
-      );
+      // Backend always returns structured response with code
+      // If code !== 1000, it's an error with a message
+      const errorCode = err?.response?.data?.code || err?.code;
+      const backendMessage = err?.response?.data?.message || err?.message;
+
+      // Default fallback message
+      let errorMessage = isLogin
+        ? "Login failed. Please try again."
+        : "Registration failed. Please try again.";
+
+      // Priority: Use backend message if available (code !== 1000)
+      if (backendMessage) {
+        errorMessage = backendMessage;
+      }
+
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleSignIn = () => {
-    // Google sign in handled by GoogleSignInButton component
+    console.log("Initiating Google sign in from modal");
   };
 
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -217,6 +235,32 @@ export function AuthModal({ mode, onClose, onSwitchMode }: AuthModalProps) {
                     required
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Gender</label>
+                <select
+                  name="gender"
+                  className="w-full px-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:border-purple-500 transition-colors"
+                  required
+                >
+                  <option value="">Select gender</option>
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Address
+                </label>
+                <input
+                  type="text"
+                  name="address"
+                  placeholder="Your address"
+                  className="w-full px-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:border-purple-500 transition-colors"
+                />
               </div>
 
               <div>

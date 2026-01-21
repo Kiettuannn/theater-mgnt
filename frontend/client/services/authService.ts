@@ -1,7 +1,7 @@
 import httpClient from "../configurations/httpClient";
 import { API, OAuthConfig } from "../configurations/configuration";
 import { setToken, setUserInfo, getToken } from "./localStorageService";
-import { getMyInfo } from "./customerService";
+import { AlignHorizontalDistributeCenterIcon } from "lucide-react";
 
 export interface LoginRequest {
   loginIdentifier: string;
@@ -16,6 +16,8 @@ export interface RegisterRequest {
   firstName: string;
   lastName: string;
   dob: string;
+  gender: string;
+  address?: string;
 }
 
 export interface AuthResponse {
@@ -32,19 +34,13 @@ export interface GoogleAuthResponse {
   };
 }
 
+// Login with email and password
 export const login = async (data: LoginRequest): Promise<AuthResponse> => {
   try {
     const response = await httpClient.post<AuthResponse>(API.LOGIN, data);
-
+    
     if (response.data.result?.token) {
       setToken(response.data.result.token);
-
-      try {
-        const userInfo = await getMyInfo();
-        setUserInfo(userInfo);
-      } catch (error) {
-        console.error("Failed to fetch user info after login:", error);
-      }
     }
     return response.data;
   } catch (error) {
@@ -53,21 +49,16 @@ export const login = async (data: LoginRequest): Promise<AuthResponse> => {
   }
 };
 
+// Register new customer
 export const register = async (data: RegisterRequest): Promise<AuthResponse> => {
   try {
     const response = await httpClient.post<AuthResponse>(API.REGISTER, data);
-
+    console.log("Registration Response:", response);
+    
     if (response.data.result?.token) {
       setToken(response.data.result.token);
-
-      try {
-        const userInfo = await getMyInfo();
-        setUserInfo(userInfo);
-      } catch (error) {
-        console.error("Failed to fetch user info after registration:", error);
-      }
     }
-
+    
     return response.data;
   } catch (error) {
     console.error("Registration failed:", error);
@@ -75,17 +66,19 @@ export const register = async (data: RegisterRequest): Promise<AuthResponse> => 
   }
 };
 
+// Authenticate with Google
 export const authenticateWithGoogle = async (code: string): Promise<GoogleAuthResponse> => {
   try {
     const response = await httpClient.post<GoogleAuthResponse>(
       `${API.GOOGLE_AUTH}?code=${code}`
     );
-
+    console.log("Google Auth Response:", response);
+    
     if (response.data.result?.token) {
       setToken(response.data.result.token);
       setUserInfo(response.data.result.user);
     }
-
+    
     return response.data;
   } catch (error) {
     console.error("Google authentication failed:", error);
@@ -93,6 +86,7 @@ export const authenticateWithGoogle = async (code: string): Promise<GoogleAuthRe
   }
 };
 
+// Generate Google OAuth URL
 export const getGoogleAuthUrl = (): string => {
   const { clientId, redirectUri, authUri } = OAuthConfig;
   
@@ -101,6 +95,7 @@ export const getGoogleAuthUrl = (): string => {
   )}&response_type=code&client_id=${clientId}&scope=openid%20email%20profile`;
 };
 
+// Create password for Google OAuth users
 export const createPassword = async (password: string, confirmPassword: string): Promise<{ result: boolean }> => {
   try {
     const response = await httpClient.post<{ result: boolean }>(

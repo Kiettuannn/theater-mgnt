@@ -54,18 +54,20 @@ export function CreatePasswordModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-xl w-full max-w-md p-6 relative border border-gray-200 dark:border-slate-700">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
           disabled={isLoading}
         >
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className="text-2xl font-bold mb-2">Create Password</h2>
-        <p className="text-gray-600 mb-6">
+        <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">
+          Create Password
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400 mb-6">
           You've signed in with Google. Please create a password to be able to
           sign in with email in the future.
         </p>
@@ -74,7 +76,7 @@ export function CreatePasswordModal({
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium mb-2"
+              className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
             >
               New Password
             </label>
@@ -83,7 +85,7 @@ export function CreatePasswordModal({
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="Enter password (minimum 8 characters)"
               required
               disabled={isLoading}
@@ -94,7 +96,7 @@ export function CreatePasswordModal({
           <div>
             <label
               htmlFor="confirmPassword"
-              className="block text-sm font-medium mb-2"
+              className="block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300"
             >
               Confirm Password
             </label>
@@ -103,7 +105,7 @@ export function CreatePasswordModal({
               id="confirmPassword"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
               placeholder="Re-enter password"
               required
               disabled={isLoading}
@@ -112,7 +114,7 @@ export function CreatePasswordModal({
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-sm">
               {error}
             </div>
           )}
@@ -121,14 +123,14 @@ export function CreatePasswordModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors text-gray-700 dark:text-gray-300"
               disabled={isLoading}
             >
               Skip
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isLoading}
             >
               {isLoading ? "Processing..." : "Create Password"}

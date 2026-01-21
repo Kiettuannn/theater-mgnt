@@ -28,6 +28,7 @@ export function useReviewManager(movieId?: string) {
         setLoading(true);
         setError(null);
         const data = await reviewService.getReviewsByMovieId(id);
+        console.log("Loaded reviews:", data);
         setReviews(data);
       } catch (err: any) {
         console.error("Failed to load reviews:", err);

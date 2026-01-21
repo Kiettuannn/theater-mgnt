@@ -28,6 +28,12 @@ export function Header() {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (mounted) {
+      console.log("[v0] Theme changed to:", resolvedTheme);
+    }
+  }, [resolvedTheme, mounted]);
+
   // Handle scroll to section when navigating with hash
   useEffect(() => {
     if (pathname === "/" && window.location.hash) {
@@ -79,7 +85,7 @@ export function Header() {
 
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
-    href: string
+    href: string,
   ) => {
     e.preventDefault();
 
@@ -100,6 +106,7 @@ export function Header() {
 
   const handleThemeToggle = () => {
     const newTheme = resolvedTheme === "dark" ? "light" : "dark";
+    console.log("[v0] Toggling theme to:", newTheme);
     setTheme(newTheme);
   };
 
@@ -113,7 +120,7 @@ export function Header() {
               <span className="text-white font-bold text-lg">C</span>
             </div>
             <span className="gradient-text font-bold text-xl hidden sm:inline">
-              CINEPLEX
+              Cifastar
             </span>
           </Link>
 

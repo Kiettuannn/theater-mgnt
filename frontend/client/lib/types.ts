@@ -16,9 +16,12 @@ export interface Showtime {
   id: string
   movieId: string
   time: string
+  date?: string
   format: string
   price: number
   availableSeats: number
+  roomId?: string
+  cinemaId?: string
 }
 
 export interface Seat {
@@ -27,6 +30,15 @@ export interface Seat {
   number: number
   isAvailable: boolean
   isSelected?: boolean
+  type?: "standard" | "vip" | "couple"
+  price?: number
+}
+
+export interface ComboItemDetail {
+  id: string
+  comboName?: string
+  name: string
+  quantity: number
 }
 
 export interface ComboItem {
@@ -34,6 +46,11 @@ export interface ComboItem {
   name: string
   price: number
   icon: string
+  description?: string
+  imageUrl?: string
+  items?: ComboItemDetail[]
+  quantity?: number
+  deleted?: boolean
 }
 
 export interface BookingState {

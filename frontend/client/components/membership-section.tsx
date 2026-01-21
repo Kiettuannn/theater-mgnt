@@ -1,11 +1,14 @@
-"use client"
+"use client";
 
-import { Check, Zap } from "lucide-react"
-import { membershipTiers } from "@/lib/mock-data"
+import { Check, Zap } from "lucide-react";
+import { membershipTiers } from "@/lib/mock-data";
 
 export function MembershipSection() {
   return (
-    <section id="membership" className="section-padding bg-slate-950 relative overflow-hidden">
+    <section
+      id="membership"
+      className="section-padding bg-slate-950 relative overflow-hidden"
+    >
       {/* Background elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-600/5 rounded-full blur-3xl" />
@@ -14,7 +17,9 @@ export function MembershipSection() {
         {/* Section Header */}
         <div className="mb-12 space-y-4 text-center">
           <div className="inline-block px-4 py-2 rounded-full bg-yellow-500/20 border border-yellow-500/50">
-            <span className="text-yellow-300 text-sm font-semibold">Exclusive Benefits</span>
+            <span className="text-yellow-300 text-sm font-semibold">
+              Exclusive Benefits
+            </span>
           </div>
 
           <h2 className="text-4xl md:text-5xl font-bold">
@@ -22,7 +27,8 @@ export function MembershipSection() {
           </h2>
 
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-            Choose the perfect membership plan and unlock exclusive perks, discounts, and VIP experiences.
+            Choose the perfect membership plan and unlock exclusive perks,
+            discounts, and VIP experiences.
           </p>
         </div>
 
@@ -48,11 +54,15 @@ export function MembershipSection() {
               )}
 
               {/* Tier Name */}
-              <h3 className="text-2xl font-bold text-white mb-2">{tier.name}</h3>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                {tier.name}
+              </h3>
 
               {/* Price */}
               <div className="mb-6">
-                <span className="text-4xl font-bold gradient-text">${tier.price}</span>
+                <span className="text-4xl font-bold gradient-text">
+                  ${tier.price}
+                </span>
                 <span className="text-slate-400 ml-2">/month</span>
               </div>
 
@@ -71,7 +81,10 @@ export function MembershipSection() {
               <div className="space-y-4">
                 {tier.benefits.map((benefit, idx) => (
                   <div key={idx} className="flex items-start gap-3">
-                    <Check size={20} className="text-green-400 flex-shrink-0 mt-0.5" />
+                    <Check
+                      size={20}
+                      className="text-green-400 flex-shrink-0 mt-0.5"
+                    />
                     <span className="text-slate-300">{benefit}</span>
                   </div>
                 ))}
@@ -83,14 +96,15 @@ export function MembershipSection() {
         {/* Additional Info */}
         <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center">
           <p className="text-slate-300 mb-4">
-            All memberships include access to our mobile app, priority customer support, and exclusive member-only
-            events.
+            All memberships include access to our mobile app, priority customer
+            support, and exclusive member-only events.
           </p>
           <p className="text-slate-400 text-sm">
-            Cancel anytime. No hidden fees. Your membership renews automatically each month.
+            Cancel anytime. No hidden fees. Your membership renews automatically
+            each month.
           </p>
         </div>
       </div>
     </section>
-  )
+  );
 }

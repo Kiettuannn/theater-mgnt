@@ -22,10 +22,16 @@ interface ReviewsSectionProps {
   movieStatus?: string;
 }
 
-export function ReviewsSection({ movieId, customerId: customerIdProp, movieStatus }: ReviewsSectionProps) {
+export function ReviewsSection({
+  movieId,
+  customerId: customerIdProp,
+  movieStatus,
+}: ReviewsSectionProps) {
   const { isAuthenticated } = useAuthStore();
   const [showReviewForm, setShowReviewForm] = useState(false);
-  const [customerId, setCustomerId] = useState<string | undefined>(customerIdProp);
+  const [customerId, setCustomerId] = useState<string | undefined>(
+    customerIdProp,
+  );
   const [loadingCustomerId, setLoadingCustomerId] = useState(false);
   const hasFetchedRef = useRef(false);
 
@@ -52,16 +58,16 @@ export function ReviewsSection({ movieId, customerId: customerIdProp, movieStatu
           // Method 2: If not found, fetch from API
           if (!userId) {
             const customerInfo = await getMyInfo();
-            userId = customerInfo.id;
+            userId = customerInfo.customerId;
           }
 
           if (userId) {
             setCustomerId(userId);
           } else {
-            console.warn('Could not get customer ID');
+            console.warn("Could not get customer ID");
           }
         } catch (error) {
-          console.error('Failed to fetch customer ID:', error);
+          console.error("Failed to fetch customer ID:", error);
         } finally {
           setLoadingCustomerId(false);
         }
@@ -107,7 +113,7 @@ export function ReviewsSection({ movieId, customerId: customerIdProp, movieStatu
 
   // Check if movie is currently showing (allow reviews)
   // Backend returns 'now_showing' (lowercase with underscore)
-  const isMovieShowing = movieStatus === 'now_showing';
+  const isMovieShowing = movieStatus === "now_showing";
   const canWriteReview = isAuthenticated && customerId && isMovieShowing;
 
   return (
@@ -129,9 +135,7 @@ export function ReviewsSection({ movieId, customerId: customerIdProp, movieStatu
             Reviews are only available for movies currently showing
           </p>
         ) : loadingCustomerId ? (
-          <p className="text-sm text-gray-500">
-            Loading...
-          </p>
+          <p className="text-sm text-gray-500">Loading...</p>
         ) : null}
       </div>
 

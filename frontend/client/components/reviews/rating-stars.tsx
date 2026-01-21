@@ -41,7 +41,7 @@ export function RatingStars({
   const renderStar = (index: number) => {
     const fillPercentage = Math.min(
       Math.max((normalizedRating - index) * 100, 0),
-      100
+      100,
     );
 
     return (
@@ -53,7 +53,7 @@ export function RatingStars({
         className={cn(
           "relative inline-block",
           interactive && "cursor-pointer hover:scale-110 transition-transform",
-          !interactive && "cursor-default"
+          !interactive && "cursor-default",
         )}
       >
         {/* Background star (empty) */}

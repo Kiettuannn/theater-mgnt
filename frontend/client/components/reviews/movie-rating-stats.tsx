@@ -52,20 +52,21 @@ export function MovieRatingStatsDisplay({
   // Group ratings into ranges for better visualization
   const ratingRanges = [
     { label: "9-10", min: 9, max: 10 },
-    { label: "7-8", min: 7, max: 9 },
-    { label: "5-6", min: 5, max: 7 },
-    { label: "3-4", min: 3, max: 5 },
-    { label: "1-2", min: 1, max: 3 },
+    { label: "7-8", min: 7, max: 8.9 },
+    { label: "5-6", min: 5, max: 6.9 },
+    { label: "3-4", min: 3, max: 4.9 },
+    { label: "1-2", min: 1, max: 2.9 },
   ];
 
   const groupedDistribution = ratingRanges.map((range) => {
     const count = distributionArray
-      .filter((item) => item.rating >= range.min && item.rating < range.max)
+      .filter((item) => item.rating >= range.min && item.rating <= range.max)
       .reduce((sum, item) => sum + item.count, 0);
     return {
       ...range,
       count,
-      percentage: stats.totalReviews > 0 ? (count / stats.totalReviews) * 100 : 0,
+      percentage:
+        stats.totalReviews > 0 ? (count / stats.totalReviews) * 100 : 0,
     };
   });
 
@@ -96,7 +97,9 @@ export function MovieRatingStatsDisplay({
 
       {/* Rating Distribution */}
       <div className="space-y-3">
-        <h4 className="text-sm font-medium text-gray-700">Rating Distribution</h4>
+        <h4 className="text-sm font-medium text-gray-700">
+          Rating Distribution
+        </h4>
         {groupedDistribution.map((range) => (
           <div key={range.label} className="flex items-center gap-3">
             <span className="text-sm font-medium text-gray-600 w-12">

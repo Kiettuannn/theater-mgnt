@@ -87,17 +87,29 @@ function ReviewCard({
   onHelpful,
   onUnhelpful,
   customerId,
-  userVote
+  userVote,
 }: ReviewCardProps) {
-  const customerName = `${review.customer.firstName} ${review.customer.lastName}`;
-  const initials = `${review.customer.firstName[0]}${review.customer.lastName[0]}`.toUpperCase();
+  // Handle deleted customer case
+  const customer = review.customer || {
+    id: "deleted",
+    firstName: "Deleted",
+    lastName: "User",
+    avatarUrl: null,
+  };
+
+  const customerName = `${customer.firstName ?? ""} ${
+    customer.lastName ?? ""
+  }`.trim();
+  const initials = `${customer.firstName ? customer.firstName[0] : ""}${
+    customer.lastName ? customer.lastName[0] : ""
+  }`.toUpperCase();
   const reviewDate = formatDistanceToNow(new Date(review.createdAt), {
     addSuffix: true,
   });
 
   const hasVotedHelpful = userVote === "HELPFUL";
   const hasVotedUnhelpful = userVote === "UNHELPFUL";
-  const isOwnReview = customerId === review.customer.id;
+  const isOwnReview = customerId === customer.id;
   const canVote = !!customerId && !isOwnReview;
 
   const handleHelpful = () => {
@@ -118,7 +130,10 @@ function ReviewCard({
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <Avatar>
-            <AvatarImage src={review.customer.avatarUrl} alt={customerName} />
+            <AvatarImage
+              src={customer.avatarUrl ?? undefined}
+              alt={customerName}
+            />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div>
@@ -128,7 +143,12 @@ function ReviewCard({
         </div>
 
         <div className="flex items-center gap-2">
-          <RatingStars rating={review.rating} maxRating={10} size="sm" showValue />
+          <RatingStars
+            rating={review.rating}
+            maxRating={10}
+            size="sm"
+            showValue
+          />
           {review.isSpoiler && (
             <Badge variant="destructive" className="flex items-center gap-1">
               <AlertTriangle className="h-3 w-3" />
@@ -156,8 +176,8 @@ function ReviewCard({
             !canVote
               ? "text-gray-400 cursor-not-allowed hover:text-gray-400 hover:bg-transparent"
               : hasVotedHelpful
-              ? "bg-green-600 text-white hover:bg-green-700"
-              : "text-gray-600 hover:text-green-600"
+                ? "bg-green-600 text-white hover:bg-green-700"
+                : "text-gray-600 hover:text-green-600"
           }`}
         >
           <ThumbsUp className="h-4 w-4" />
@@ -173,8 +193,8 @@ function ReviewCard({
             !canVote
               ? "text-gray-400 cursor-not-allowed hover:text-gray-400 hover:bg-transparent"
               : hasVotedUnhelpful
-              ? "bg-red-600 text-white hover:bg-red-700"
-              : "text-gray-600 hover:text-red-600"
+                ? "bg-red-600 text-white hover:bg-red-700"
+                : "text-gray-600 hover:text-red-600"
           }`}
         >
           <ThumbsDown className="h-4 w-4" />

@@ -1,51 +1,54 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { ChevronRight } from "lucide-react"
-import { MovieCard } from "./movie-card"
-import { getNowShowingMovies, mapMovieForDisplay } from "@/lib/api-movie"
+import { useState, useEffect } from "react";
+import { ChevronRight } from "lucide-react";
+import { MovieCard } from "./movie-card";
+import { getNowShowingMovies, mapMovieForDisplay } from "@/lib/api-movie";
 
 export function NowShowingSection() {
-  const [movies, setMovies] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedGenre, setSelectedGenre] = useState<string | null>(null)
+  const [movies, setMovies] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedGenre, setSelectedGenre] = useState<string | null>(null);
 
   // Fetch movies khi component mount
   useEffect(() => {
-      const fetchMovies = async () => {
-        try {
-          setLoading(true)
-          const data = await getNowShowingMovies()
+    const fetchMovies = async () => {
+      try {
+        setLoading(true);
+        const data = await getNowShowingMovies();
 
-          // ✅ Kiểm tra data trước khi map
-          if (data && Array.isArray(data)) {
-            const mappedMovies = data.map(mapMovieForDisplay)
-            setMovies(mappedMovies)
-          } else {
-            console.error('API response is not an array:', data)
-            setMovies([])
-          }
-        } catch (error) {
-          console.error('Error fetching movies:', error)
-          setMovies([])
-        } finally {
-          setLoading(false)
+        // ✅ Kiểm tra data trước khi map
+        if (data && Array.isArray(data)) {
+          const mappedMovies = data.map(mapMovieForDisplay);
+          setMovies(mappedMovies);
+        } else {
+          console.error("API response is not an array:", data);
+          setMovies([]);
         }
+      } catch (error) {
+        console.error("Error fetching movies:", error);
+        setMovies([]);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      fetchMovies()
-    }, [])
+    fetchMovies();
+  }, []);
 
   // Lấy danh sách genres từ movies
-  const genres = Array.from(new Set(movies.flatMap((m) => m.genre)))
+  const genres = Array.from(new Set(movies.flatMap((m) => m.genre)));
 
   // Filter movies theo genre
   const filteredMovies = selectedGenre
     ? movies.filter((m) => m.genre.includes(selectedGenre))
-    : movies
+    : movies;
 
   return (
-    <section id="now-showing" className="section-padding bg-background dark:bg-slate-950 relative overflow-hidden">
+    <section
+      id="now-showing"
+      className="section-padding bg-background dark:bg-slate-950 relative overflow-hidden"
+    >
       {/* Background elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/5 rounded-full blur-3xl" />
 
@@ -53,7 +56,9 @@ export function NowShowingSection() {
         {/* Section Header */}
         <div className="mb-12 space-y-4">
           <div className="inline-block px-4 py-2 rounded-full bg-purple-500/20 border border-purple-500/50">
-            <span className="text-purple-300 text-sm font-semibold">Featured Content</span>
+            <span className="text-purple-300 text-sm font-semibold">
+              Featured Content
+            </span>
           </div>
 
           <h2 className="text-4xl md:text-5xl font-bold">
@@ -61,7 +66,8 @@ export function NowShowingSection() {
           </h2>
 
           <p className="text-xl text-muted-foreground max-w-2xl">
-            Discover the latest blockbusters and critically acclaimed films playing at CINEPLEX now.
+            Discover the latest blockbusters and critically acclaimed films
+            playing at Cifastar now.
           </p>
         </div>
 
@@ -120,7 +126,9 @@ export function NowShowingSection() {
         {/* Empty state */}
         {!loading && movies.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-muted-foreground text-xl">No movies currently showing</p>
+            <p className="text-muted-foreground text-xl">
+              No movies currently showing
+            </p>
           </div>
         )}
 
@@ -128,10 +136,13 @@ export function NowShowingSection() {
         <div className="flex justify-center">
           <button className="px-8 py-4 rounded-lg border border-border dark:border-slate-700 text-foreground dark:text-white font-semibold hover:bg-muted dark:hover:bg-slate-800 transition-all flex items-center gap-2 group">
             View All Movies
-            <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            <ChevronRight
+              size={20}
+              className="group-hover:translate-x-1 transition-transform"
+            />
           </button>
         </div>
       </div>
     </section>
-  )
+  );
 }

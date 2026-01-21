@@ -1,0 +1,60 @@
+import axios from "axios"
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/theater-mgnt"
+
+export interface TicketResponse {
+  id: string
+  ticketCode: string
+  movieTitle: string
+  startTime: string
+  qrContent: string
+  seatName: string
+  price: number
+  status: string
+  expiresAt: string
+  purchaseDate?: string
+}
+
+export const getTicketsByBooking = async (bookingId: string): Promise<TicketResponse[]> => {
+  try {
+    const token = typeof window !== "undefined" ? localStorage.getItem("customer_token") : null
+    
+    const response = await axios.get(`${API_BASE_URL}/tickets/by-booking/${bookingId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    // Handle the ApiResponse wrapper
+    if (response.data?.result) {
+      return response.data.result
+    }
+    
+    return response.data
+  } catch (error) {
+    console.error("Failed to fetch tickets:", error)
+    throw error
+  }
+}
+
+export const getTicketsByCustomer = async (customerId: string): Promise<TicketResponse[]> => {
+  try {
+    const token = typeof window !== "undefined" ? localStorage.getItem("customer_token") : null
+    
+    const response = await axios.get(`${API_BASE_URL}/tickets/my-tickets/${customerId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+
+    // Handle the ApiResponse wrapper
+    if (response.data?.result) {
+      return response.data.result
+    }
+    
+    return response.data
+  } catch (error) {
+    console.error("Failed to fetch customer tickets:", error)
+    throw error
+  }
+}

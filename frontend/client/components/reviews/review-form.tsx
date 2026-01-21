@@ -112,10 +112,7 @@ export function ReviewForm({
           checked={isSpoiler}
           onCheckedChange={(checked) => setIsSpoiler(checked === true)}
         />
-        <Label
-          htmlFor="spoiler"
-          className="text-sm font-normal cursor-pointer"
-        >
+        <Label htmlFor="spoiler" className="text-sm font-normal cursor-pointer">
           This review contains spoilers
         </Label>
       </div>
