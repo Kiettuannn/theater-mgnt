@@ -11,27 +11,34 @@ import { CreateShowtimeDialog } from "@/components/showtimes/CreateShowtimeDialo
 import { EditShowtimeDialog } from "@/components/showtimes/EditShowtimeDialog";
 import { DeleteShowtimeDialog } from "@/components/showtimes/DeleteShowtimeDialog";
 import { getAllCinemas, type Cinema } from "@/services/cinemaService";
-import { getAllShowtimes, type ShowtimeResponse } from "@/services/showtimeService";
+import {
+  getAllShowtimes,
+  type ShowtimeResponse,
+} from "@/services/showtimeService";
 import { getRoomsByCinema, type Room } from "@/services/roomService";
 import { useNotificationStore } from "@/stores";
 
 export function ShowtimeCalendarPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const addNotification = useNotificationStore((state) => state.addNotification);
+  const addNotification = useNotificationStore(
+    (state) => state.addNotification,
+  );
 
   // State
   const [cinemas, setCinemas] = useState<Cinema[]>([]);
   const [selectedCinemaId, setSelectedCinemaId] = useState<string | null>(
-    searchParams.get("cinema") || null
+    searchParams.get("cinema") || null,
   );
   const [rooms, setRooms] = useState<Room[]>([]);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(
-    searchParams.get("room") || null
+    searchParams.get("room") || null,
   );
   const [allShowtimes, setAllShowtimes] = useState<ShowtimeResponse[]>([]);
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date());
-  const [selectedShowtimeId, setSelectedShowtimeId] = useState<string | null>(null);
+  const [selectedShowtimeId, setSelectedShowtimeId] = useState<string | null>(
+    null,
+  );
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   // Dialog states
@@ -107,15 +114,16 @@ export function ShowtimeCalendarPage() {
     try {
       setLoadingShowtimes(true);
       const data = await getAllShowtimes();
-      
+      console.log("All showtimes loaded:", data);
+
       // Filter by selected cinema and room
       let filteredShowtimes = data.filter(
-        (showtime) => showtime.cinemaId === selectedCinemaId
+        (showtime) => showtime.cinemaId === selectedCinemaId,
       );
 
       if (selectedRoomId) {
         filteredShowtimes = filteredShowtimes.filter(
-          (showtime) => showtime.roomId === selectedRoomId
+          (showtime) => showtime.roomId === selectedRoomId,
         );
       }
 
@@ -137,9 +145,11 @@ export function ShowtimeCalendarPage() {
     const params = new URLSearchParams();
     if (cinemaId) params.set("cinema", cinemaId);
     if (roomId) params.set("room", roomId);
-    
+
     const queryString = params.toString();
-    const newUrl = queryString ? `/admin/showtimes?${queryString}` : "/admin/showtimes";
+    const newUrl = queryString
+      ? `/admin/showtimes?${queryString}`
+      : "/admin/showtimes";
     navigate(newUrl, { replace: true });
   };
 
@@ -206,17 +216,16 @@ export function ShowtimeCalendarPage() {
                 <h3 className="text-lg font-semibold text-gray-900">
                   {selectedCinema?.name}
                 </h3>
-                <p className="text-sm text-gray-600">{selectedCinema?.address}</p>
+                <p className="text-sm text-gray-600">
+                  {selectedCinema?.address}
+                </p>
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="flex items-center gap-3">
-            <Button
-              onClick={() => setCreateDialogOpen(true)}
-              className="gap-2"
-            >
+            <Button onClick={() => setCreateDialogOpen(true)} className="gap-2">
               <Plus className="h-4 w-4" />
               Create Showtime
             </Button>
