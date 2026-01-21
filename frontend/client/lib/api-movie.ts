@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { clearAuthData } from '@/services/localStorageService'
+import { useAuthStore } from '@/store'
 
 
 const API_BASE_URL = 'http://localhost:8080/api/theater-mgnt'
@@ -12,11 +14,36 @@ const api = axios.create({
   },
 })
 
+const PUBLIC_API_PATHS = [
+  "/movies",
+  "/genres",
+  "/screenings",
+  "/cinemas",
+  "/reviews",
+  "/payment",
+];
+
+const isPublicRequest = (url?: string) => {
+  if (!url) {
+    return false;
+  }
+  const path = url.startsWith("http") ? new URL(url).pathname : url;
+  return PUBLIC_API_PATHS.some((publicPath) => path.startsWith(publicPath));
+};
+
+const handleAuthFailure = () => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  clearAuthData();
+  useAuthStore.getState().logout();
+};
+
 
 api.interceptors.request.use(
   (config) => {
     // Add auth token from localStorage
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && !isPublicRequest(config.url)) {
       const token = localStorage.getItem("customer_token");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -40,7 +67,14 @@ api.interceptors.response.use(
     return response
   },
   (error) => {
-    console.error('API Error:', error.response?.data || error.message)
+    const status = error?.response?.status;
+    const code = error?.response?.data?.code;
+    if (status === 401 || code === 1006) {
+      handleAuthFailure();
+    }
+    if (status !== 401) {
+      console.error('API Error:', error.response?.data || error.message)
+    }
     return Promise.reject(error)
   }
 )

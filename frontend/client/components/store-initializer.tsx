@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { useAuthStore } from "@/store";
+import { clearAuthData, getToken } from "@/services/localStorageService";
+import { introspectToken } from "@/services/authService";
 
 /**
  * StoreInitializer - Initialize stores on app mount
@@ -10,14 +12,30 @@ import { useAuthStore } from "@/store";
 export function StoreInitializer({ children }: { children: React.ReactNode }) {
   const initialized = useRef(false);
   const checkAuth = useAuthStore((state) => state.checkAuth);
+  const logout = useAuthStore((state) => state.logout);
 
   useEffect(() => {
-    if (!initialized.current) {
+    if (initialized.current) {
+      return;
+    }
+
+    const initAuth = async () => {
+      const token = getToken();
+      if (token) {
+        const isValid = await introspectToken(token);
+        if (!isValid) {
+          clearAuthData();
+          logout();
+        }
+      }
+
       // Initialize auth state on mount
       checkAuth();
       initialized.current = true;
-    }
-  }, [checkAuth]);
+    };
+
+    void initAuth();
+  }, [checkAuth, logout]);
 
   return <>{children}</>;
 }

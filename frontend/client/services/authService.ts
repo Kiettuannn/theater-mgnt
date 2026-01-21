@@ -34,6 +34,12 @@ export interface GoogleAuthResponse {
   };
 }
 
+export interface IntrospectResponse {
+  result: {
+    valid: boolean;
+  };
+}
+
 // Login with email and password
 export const login = async (data: LoginRequest): Promise<AuthResponse> => {
   try {
@@ -83,6 +89,22 @@ export const authenticateWithGoogle = async (code: string): Promise<GoogleAuthRe
   } catch (error) {
     console.error("Google authentication failed:", error);
     throw error;
+  }
+};
+
+// Introspect token validity
+export const introspectToken = async (token: string): Promise<boolean> => {
+  try {
+    const response = await httpClient.post<IntrospectResponse>("/auth/introspect", { token });
+    return !!response.data.result?.valid;
+  } catch (error) {
+    const status = (error as any)?.response?.status;
+    const code = (error as any)?.code ?? (error as any)?.response?.data?.code;
+    if (status === 401 || code === 1006) {
+      return false;
+    }
+    console.error("Token introspection failed:", error);
+    return false;
   }
 };
 

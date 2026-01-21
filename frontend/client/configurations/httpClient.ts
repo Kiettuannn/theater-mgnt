@@ -1,6 +1,8 @@
 import axios, { AxiosError, InternalAxiosRequestConfig, AxiosResponse } from "axios";
 import { CONFIG } from "./configuration";
 import { ApiError, ApiResponse } from "@/lib/errors";
+import { clearAuthData } from "@/services/localStorageService";
+import { useAuthStore } from "@/store";
 
 const httpClient = axios.create({
   baseURL: CONFIG.API,
@@ -10,11 +12,30 @@ const httpClient = axios.create({
   },
 });
 
+const PUBLIC_API_PATHS = [
+  "/auth",
+  "/register",
+  "/movies",
+  "/genres",
+  "/screenings",
+  "/cinemas",
+  "/reviews",
+  "/payment",
+];
+
+const isPublicRequest = (url?: string) => {
+  if (!url) {
+    return false;
+  }
+  const path = url.startsWith("http") ? new URL(url).pathname : url;
+  return PUBLIC_API_PATHS.some((publicPath) => path.startsWith(publicPath));
+};
+
 // Request interceptor
 httpClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Add auth token from localStorage
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && !isPublicRequest(config.url)) {
       const token = localStorage.getItem("customer_token");
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -26,6 +47,14 @@ httpClient.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+const handleAuthFailure = () => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  clearAuthData();
+  useAuthStore.getState().logout();
+};
 
 // Response interceptor
 httpClient.interceptors.response.use(
@@ -48,6 +77,9 @@ httpClient.interceptors.response.use(
     // Handle HTTP errors (4xx, 5xx)
     if (error.response?.data) {
       const data = error.response.data;
+      if (error.response.status === 401 || data.code === 1006) {
+        handleAuthFailure();
+      }
       
       // If backend returns standard format even in error response
       if (typeof data.code !== 'undefined') {
@@ -60,8 +92,14 @@ httpClient.interceptors.response.use(
       }
     }
 
+    if (error.response?.status === 401) {
+      handleAuthFailure();
+    }
+
     // Handle network errors or other errors
-    console.error("API Error:", error);
+    if (error.response?.status !== 401) {
+      console.error("API Error:", error);
+    }
     return Promise.reject(error);
   }
 );
