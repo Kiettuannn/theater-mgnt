@@ -91,6 +91,10 @@ cloudinary:
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
 
+# Socket.IO Configuration for real-time communication
+socketio:
+  port: 9092
+
 logging:
   level:
     com.theatermgnt.theatermgnt.chatbotInternal.util.DocumentSectionTracker: DEBUG
