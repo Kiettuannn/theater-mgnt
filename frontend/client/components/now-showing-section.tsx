@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ChevronRight } from "lucide-react";
 import { MovieCard } from "./movie-card";
 import { getNowShowingMovies, mapMovieForDisplay } from "@/lib/api-movie";
 
@@ -132,16 +131,6 @@ export function NowShowingSection() {
           </div>
         )}
 
-        {/* View All Button */}
-        <div className="flex justify-center">
-          <button className="px-8 py-4 rounded-lg border border-border dark:border-slate-700 text-foreground dark:text-white font-semibold hover:bg-muted dark:hover:bg-slate-800 transition-all flex items-center gap-2 group">
-            View All Movies
-            <ChevronRight
-              size={20}
-              className="group-hover:translate-x-1 transition-transform"
-            />
-          </button>
-        </div>
       </div>
     </section>
   );

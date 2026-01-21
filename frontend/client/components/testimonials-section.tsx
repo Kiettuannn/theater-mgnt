@@ -13,15 +13,18 @@ export function TestimonialsSection() {
         {/* Section Header */}
         <div className="mb-12 space-y-4 text-center">
           <div className="inline-block px-4 py-2 rounded-full bg-yellow-500/20 border border-yellow-500/50 mx-auto">
-            <span className="text-yellow-300 text-sm font-semibold">Customer Reviews</span>
+            <span className="text-yellow-300 text-sm font-semibold">
+              Cinema Chain Reviews
+            </span>
           </div>
 
           <h2 className="text-4xl md:text-5xl font-bold">
-            <span className="gradient-text">What Our Customers Say</span>
+            <span className="gradient-text">How Guests Rate Cifastar</span>
           </h2>
 
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-            Join thousands of satisfied customers who have experienced the CINEPLEX difference.
+            Real feedback on sound quality, seating comfort, cleanliness, and service across our
+            theaters.
           </p>
         </div>
 
@@ -58,13 +61,6 @@ export function TestimonialsSection() {
           ))}
         </div>
 
-        {/* CTA */}
-        <div className="mt-12 text-center">
-          <p className="text-slate-400 mb-6">Share your CINEPLEX experience with us</p>
-          <button className="px-8 py-4 rounded-lg gradient-primary text-white font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition-all">
-            Write a Review
-          </button>
-        </div>
       </div>
     </section>
   )

@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-import { Bell } from "lucide-react"
 import { MovieCard } from "./movie-card"
 import { useState, useEffect } from "react"
 import { getComingSoonMovies, mapMovieForDisplay } from "@/lib/api-movie"
@@ -9,8 +7,6 @@ import { getComingSoonMovies, mapMovieForDisplay } from "@/lib/api-movie"
 export function ComingSoonSection() {
   const [movies, setMovies] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [notifyEmail, setNotifyEmail] = useState("")
-  const [notified, setNotified] = useState(false)
 
   // Fetch movies khi component mount
     useEffect(() => {
@@ -37,12 +33,6 @@ export function ComingSoonSection() {
 
       fetchMovies()
     }, [])
-
-  const handleNotify = (e: React.FormEvent) => {
-    e.preventDefault()
-    setNotified(true)
-    setTimeout(() => setNotified(false), 3000)
-  }
 
   return (
     <section
@@ -97,37 +87,6 @@ export function ComingSoonSection() {
           </div>
         )}
 
-        {/* Notification CTA */}
-        <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 border border-purple-500/30 rounded-2xl p-8 md:p-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <Bell className="text-pink-400" size={28} />
-                <h3 className="text-2xl md:text-3xl font-bold text-white">Never Miss a Release</h3>
-              </div>
-              <p className="text-slate-300 text-lg">
-                Subscribe to get notified about new releases, special screenings, and exclusive member events.
-              </p>
-            </div>
-
-            <form onSubmit={handleNotify} className="flex flex-col gap-3">
-              <input
-                type="email"
-                placeholder="Enter your email"
-                value={notifyEmail}
-                onChange={(e) => setNotifyEmail(e.target.value)}
-                className="px-4 py-3 rounded-lg bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-500 transition-colors"
-                required
-              />
-              <button
-                type="submit"
-                className="px-6 py-3 rounded-lg gradient-primary text-white font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition-all"
-              >
-                {notified ? "Subscribed!" : "Notify Me"}
-              </button>
-            </form>
-          </div>
-        </div>
       </div>
     </section>
   )

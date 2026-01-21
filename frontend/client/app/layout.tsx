@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
 import { RouteGuard } from "@/components/route-guard";
 import { ProtectedRouteNotification } from "@/components/protected-route-notification";
 import { StoreInitializer } from "@/components/store-initializer";
@@ -40,7 +39,6 @@ export default function RootLayout({
               <Header />
               <ProtectedRouteNotification />
               {children}
-              <Footer />
             </RouteGuard>
           </StoreInitializer>
         </ThemeProvider>

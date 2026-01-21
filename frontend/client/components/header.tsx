@@ -78,9 +78,7 @@ export function Header() {
   const navItems = [
     { label: "Now Showing", href: "#now-showing" },
     { label: "Coming Soon", href: "#coming-soon" },
-    { label: "Membership", href: "#membership" },
     { label: "Facilities", href: "#facilities" },
-    { label: "Contact", href: "#contact" },
   ];
 
   const handleNavClick = (
@@ -113,13 +111,13 @@ export function Header() {
   return (
     <>
       <header className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border">
-        <div className="container-max flex items-center justify-between h-16 px-4 md:px-8">
+        <div className="container-max flex items-center justify-between h-20 px-4 md:px-8">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 gradient-primary rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">C</span>
             </div>
-            <span className="gradient-text font-bold text-xl hidden sm:inline">
+            <span className="gradient-text font-bold text-2xl hidden sm:inline">
               Cifastar
             </span>
           </Link>
@@ -131,7 +129,7 @@ export function Header() {
                 key={item.href}
                 href={item.href}
                 onClick={(e) => handleNavClick(e, item.href)}
-                className="text-muted-foreground hover:text-foreground transition-colors text-sm font-medium cursor-pointer"
+                className="text-foreground/80 hover:text-foreground transition-colors text-base font-semibold cursor-pointer"
               >
                 {item.label}
               </a>
@@ -161,7 +159,7 @@ export function Header() {
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium"
+                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-border hover:bg-muted transition-colors text-base font-semibold"
                 >
                   <User size={18} />
                   <span>Profile</span>
@@ -171,14 +169,14 @@ export function Header() {
                   <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-lg py-2 z-50">
                     <Link
                       href="/profile"
-                      className="block px-4 py-2 text-sm hover:bg-muted transition-colors"
+                      className="block px-4 py-2 text-base hover:bg-muted transition-colors"
                       onClick={() => setShowUserMenu(false)}
                     >
                       My Profile
                     </Link>
                     <Link
                       href="/my-tickets"
-                      className="block px-4 py-2 text-sm hover:bg-muted transition-colors"
+                      className="block px-4 py-2 text-base hover:bg-muted transition-colors"
                       onClick={() => setShowUserMenu(false)}
                     >
                       My Tickets
@@ -186,7 +184,7 @@ export function Header() {
                     <hr className="my-2 border-border" />
                     <button
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-muted transition-colors"
+                      className="w-full text-left px-4 py-2 text-base text-red-600 hover:bg-muted transition-colors"
                     >
                       Logout
                     </button>
@@ -197,13 +195,13 @@ export function Header() {
               <>
                 <button
                   onClick={() => setShowAuthModal("login")}
-                  className="px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium"
+                  className="px-5 py-2.5 rounded-lg border border-border hover:bg-muted transition-colors text-base font-semibold"
                 >
                   Login
                 </button>
                 <button
                   onClick={() => setShowAuthModal("register")}
-                  className="px-6 py-2 rounded-lg gradient-primary text-white font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition-all text-sm"
+                  className="px-6 py-2.5 rounded-lg gradient-primary text-white font-semibold hover:shadow-lg hover:shadow-purple-500/50 transition-all text-base"
                 >
                   Sign Up
                 </button>
@@ -239,7 +237,7 @@ export function Header() {
                 {mounted && (
                   <button
                     onClick={handleThemeToggle}
-                    className="flex-1 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium flex items-center justify-center gap-2"
+                    className="flex-1 px-4 py-2.5 rounded-lg border border-border hover:bg-muted transition-colors text-base font-semibold flex items-center justify-center gap-2"
                     aria-label="Toggle theme"
                   >
                     {resolvedTheme === "dark" ? (
@@ -252,13 +250,13 @@ export function Header() {
                 )}
                 <button
                   onClick={() => setShowAuthModal("login")}
-                  className="flex-1 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium"
+                  className="flex-1 px-4 py-2.5 rounded-lg border border-border hover:bg-muted transition-colors text-base font-semibold"
                 >
                   Login
                 </button>
                 <button
                   onClick={() => setShowAuthModal("register")}
-                  className="flex-1 px-4 py-2 rounded-lg gradient-primary text-white font-semibold text-sm"
+                  className="flex-1 px-4 py-2.5 rounded-lg gradient-primary text-white font-semibold text-base"
                 >
                   Sign Up
                 </button>

@@ -146,24 +146,24 @@ export const testimonials: Testimonial[] = [
   {
     id: "1",
     name: "Sarah Johnson",
-    role: "Movie Enthusiast",
-    content: "CINEPLEX offers the best cinema experience I've ever had. The sound quality and comfort are unmatched!",
+    role: "Weekend Regular",
+    content: "Cifastar is consistently clean and comfortable. The sound system is top-tier, and the seats are great.",
     rating: 5,
     avatar: "/diverse-woman-avatar.png",
   },
   {
     id: "2",
     name: "Michael Chen",
-    role: "Frequent Visitor",
-    content: "The online booking system is so convenient. I love being able to reserve my seats in advance.",
+    role: "Family Visitor",
+    content: "Staff are friendly and quick to help. We love the spacious rooms and clear screens at every branch.",
     rating: 5,
     avatar: "/man-avatar.png",
   },
   {
     id: "3",
     name: "Emma Williams",
-    role: "Premium Member",
-    content: "The membership program is fantastic. Great discounts and exclusive perks make it worth every penny.",
+    role: "Student Moviegoer",
+    content: "Easy booking, good snacks, and reliable showtimes. Cifastar has become our go-to cinema chain.",
     rating: 5,
     avatar: "/professional-woman-avatar.png",
   },
@@ -174,35 +174,35 @@ export const faqs: FAQItem[] = [
     id: "1",
     question: "How do I book tickets online?",
     answer:
-      "Simply select your movie, choose your preferred date and time, select your seats, and complete the payment. Your tickets will be sent to your email immediately.",
+      "Choose your movie, pick a showtime, select seats, and complete payment. Your tickets appear in My Tickets and via email confirmation.",
   },
   {
     id: "2",
     question: "Can I cancel or modify my booking?",
     answer:
-      "Yes, you can cancel or modify your booking up to 2 hours before the showtime. Visit your account and select the booking you wish to change.",
+      "You can cancel a booking up to 2 hours before showtime. Open My Tickets, select the booking, and choose Cancel.",
   },
   {
     id: "3",
     question: "What payment methods do you accept?",
-    answer: "We accept all major credit cards, debit cards, digital wallets, and bank transfers for your convenience.",
+    answer: "Cifastar supports cards, bank transfer, and VNPAY for online payments.",
   },
   {
     id: "4",
-    question: "Is there a membership program?",
+    question: "How do loyalty points work?",
     answer:
-      "Yes! Our membership program offers exclusive discounts, early access to bookings, and special perks. Choose from Silver, Gold, or Platinum tiers.",
+      "Earn points after each successful booking and redeem them at checkout for ticket discounts.",
   },
   {
     id: "5",
     question: "Do you offer group discounts?",
-    answer: "Groups of 10 or more receive special discounts. Contact our group sales team for more information.",
+    answer: "For group bookings, please contact Cifastar support to receive the best available rates.",
   },
   {
     id: "6",
     question: "What is your refund policy?",
     answer:
-      "Full refunds are available for cancellations made at least 2 hours before showtime. No refunds for no-shows.",
+      "Refunds apply to cancellations made at least 2 hours before showtime. No refunds for no-shows.",
   },
 ]
 

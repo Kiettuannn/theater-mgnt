@@ -24,7 +24,7 @@ export function FAQSection() {
           </h2>
 
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">
-            Find answers to common questions about booking, memberships, and our services.
+            Find answers to common questions about booking, payments, and Cifastar services.
           </p>
         </div>
 
@@ -59,12 +59,6 @@ export function FAQSection() {
         </div>
 
         {/* Contact Support */}
-        <div className="mt-12 text-center">
-          <p className="text-slate-400 mb-4">Didn't find what you're looking for?</p>
-          <button className="px-8 py-4 rounded-lg border border-slate-700 text-white font-semibold hover:bg-slate-800 transition-all">
-            Contact Support
-          </button>
-        </div>
       </div>
     </section>
   )
