@@ -57,7 +57,6 @@ public class MovieService {
 
         // Map and set relationships
         Movie movie = movieMapper.toMovie(request);
-        movie.setId(UUID.randomUUID().toString());
         movie.setAgeRating(ageRating);
         movie.setGenres(genres);
 
@@ -123,7 +122,7 @@ public class MovieService {
     public MovieResponse updateMovie(String id, UpdateMovieRequest request) {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
 
- if (request.getStatus() == MovieStatus.archived
+        if (request.getStatus() == MovieStatus.archived
                 && screeningRepository.existsByMovieIdAndStatus(id, ScreeningStatus.SCHEDULED)) {
             throw new AppException(ErrorCode.MOVIE_HAS_SCHEDULED_SCREENINGS);
         }
@@ -186,14 +185,4 @@ public class MovieService {
         log.info("Deleted movie with id: {}", movieId);
     }
 
-    private boolean shouldShowArchiveWarning(Movie movie) {
-        if (movie.getStatus() != MovieStatus.now_showing) {
-            return false;
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime sevenDaysLater = now.plusDays(7);
-
-        return !screeningRepository.existsByMovieIdAndStartTimeBetween(movie.getId(), now, sevenDaysLater);
-    }
 }

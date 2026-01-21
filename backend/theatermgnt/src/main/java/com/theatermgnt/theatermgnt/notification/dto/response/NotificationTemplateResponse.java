@@ -2,8 +2,6 @@ package com.theatermgnt.theatermgnt.notification.dto.response;
 
 import java.time.LocalDateTime;
 
-import com.theatermgnt.theatermgnt.notification.enums.Priority;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -17,7 +15,6 @@ public class NotificationTemplateResponse {
     String templateCode;
     String titleTemplate;
     String contentTemplate;
-    Priority priority;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }

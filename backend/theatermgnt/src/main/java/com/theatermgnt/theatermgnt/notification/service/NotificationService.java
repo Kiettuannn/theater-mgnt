@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.theatermgnt.theatermgnt.notification.enums.Priority;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -80,7 +81,7 @@ public class NotificationService {
                 .notificationTemplate(template)
                 .recipientId(request.getRecipientId())
                 .recipientType(request.getRecipientType())
-                .priority(request.getPriority() != null ? request.getPriority() : template.getPriority())
+                .priority(request.getPriority() != null ? request.getPriority() : Priority.NORMAL)
                 .status(NotificationStatus.PENDING)
                 .metadata(metadata)
                 .build();

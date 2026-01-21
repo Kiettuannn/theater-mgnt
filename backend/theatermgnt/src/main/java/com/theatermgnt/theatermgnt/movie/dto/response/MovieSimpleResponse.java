@@ -24,8 +24,7 @@ public class MovieSimpleResponse {
     String title;
     String posterUrl;
     String trailerUrl;
-    Set<MovieResponse.GenreInfo> genres;
-    Boolean needsArchiveWarning;
+
 
     Integer durationMinutes;
 

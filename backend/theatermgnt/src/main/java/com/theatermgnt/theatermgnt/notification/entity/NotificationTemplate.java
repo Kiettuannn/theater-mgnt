@@ -8,7 +8,6 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
 import com.theatermgnt.theatermgnt.common.entity.BaseEntity;
-import com.theatermgnt.theatermgnt.notification.enums.Priority;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -28,6 +27,4 @@ public class NotificationTemplate extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     String contentTemplate;
-
-    Priority priority;
 }

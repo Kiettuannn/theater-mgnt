@@ -37,7 +37,5 @@ public interface ScreeningRepository extends JpaRepository<Screening, String> {
 	""")
     boolean isTimeOverlap(String roomId, LocalDateTime startTime, LocalDateTime endTime, String excludeId);
 
-    boolean existsByMovieIdAndStartTimeBetween(String movieId, LocalDateTime startDate, LocalDateTime endDate);
 
-    boolean existsByMovieIdAndStatus(String movieId, ScreeningStatus status);
 }
