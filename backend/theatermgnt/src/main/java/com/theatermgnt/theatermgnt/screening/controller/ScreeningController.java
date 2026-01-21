@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
 import com.theatermgnt.theatermgnt.screening.dto.request.ScreeningCreationRequest;
 import com.theatermgnt.theatermgnt.screening.dto.request.ScreeningUpdateRequest;
+import com.theatermgnt.theatermgnt.screening.dto.response.ScreeningDetailResponse;
 import com.theatermgnt.theatermgnt.screening.dto.response.ScreeningResponse;
 import com.theatermgnt.theatermgnt.screening.service.ScreeningService;
 
@@ -50,6 +51,13 @@ public class ScreeningController {
     ApiResponse<ScreeningResponse> getScreening(@PathVariable String screeningId) {
         return ApiResponse.<ScreeningResponse>builder()
                 .result(screeningService.getScreening(screeningId))
+                .build();
+    }
+
+    @GetMapping("/{screeningId}/detail")
+    ApiResponse<ScreeningDetailResponse> getScreeningDetail(@PathVariable String screeningId) {
+        return ApiResponse.<ScreeningDetailResponse>builder()
+                .result(screeningService.getScreeningDetail(screeningId))
                 .build();
     }
 

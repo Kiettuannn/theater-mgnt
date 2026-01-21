@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ScreeningResponse {
+public class ScreeningDetailResponse {
     String id;
     String movieId;
     String movieName;
@@ -21,4 +21,9 @@ public class ScreeningResponse {
     LocalDateTime startTime;
     LocalDateTime endTime;
     String status;
+
+    // Ticket information
+    Integer totalSeats; // Tổng số ghế trong phòng
+    Integer bookedSeats; // Số ghế đã được đặt
+    Integer availableSeats; // Số ghế còn trống
 }
