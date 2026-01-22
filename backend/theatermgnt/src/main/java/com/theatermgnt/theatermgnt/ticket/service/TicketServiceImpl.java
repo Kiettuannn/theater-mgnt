@@ -242,4 +242,59 @@ public class TicketServiceImpl implements TicketService {
         ticketRepository.saveAll(activeTickets);
         log.info("Expired {} tickets for booking: {}", activeTickets.size(), bookingId);
     }
+
+    @Override
+    public void markTicketForTransfer(String ticketCode, String customerId) {
+        Ticket ticket = ticketRepository
+                .findByTicketCode(ticketCode)
+                .orElseThrow(() -> new AppException(ErrorCode.TICKET_NOT_EXISTED));
+
+        // Verify ownership
+        if (!ticket.getBooking().getCustomer().getId().equals(customerId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Check if ticket is active
+        if (ticket.getStatus() != TicketStatus.ACTIVE) {
+            throw new AppException(ErrorCode.TICKET_NOT_ACTIVE);
+        }
+
+        // Check if screening is at least 1 hour away
+        Instant now = Instant.now();
+        Instant screeningTime = ticket.getBooking()
+                .getScreening()
+                .getStartTime()
+                .atZone(java.time.ZoneId.systemDefault())
+                .toInstant();
+        long hoursUntilScreening = (screeningTime.toEpochMilli() - now.toEpochMilli()) / (1000 * 60 * 60);
+
+        if (hoursUntilScreening < 1) {
+            throw new AppException(ErrorCode.BOOKING_NOT_EXISTED);
+        }
+
+        ticket.setStatus(TicketStatus.FOR_TRANSFER);
+        ticketRepository.save(ticket);
+        log.info("Ticket {} marked for transfer by customer {}", ticketCode, customerId);
+    }
+
+    @Override
+    public void cancelTicketTransfer(String ticketCode, String customerId) {
+        Ticket ticket = ticketRepository
+                .findByTicketCode(ticketCode)
+                .orElseThrow(() -> new AppException(ErrorCode.TICKET_NOT_EXISTED));
+
+        // Verify ownership
+        if (!ticket.getBooking().getCustomer().getId().equals(customerId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Check if ticket is marked for transfer
+        if (ticket.getStatus() != TicketStatus.FOR_TRANSFER) {
+            throw new AppException(ErrorCode.TICKET_NOT_ACTIVE);
+        }
+
+        ticket.setStatus(TicketStatus.ACTIVE);
+        ticketRepository.save(ticket);
+        log.info("Ticket {} transfer cancelled by customer {}", ticketCode, customerId);
+    }
 }

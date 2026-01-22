@@ -53,11 +53,11 @@ public class PaymentServiceImpl implements PaymentService {
             // Get invoice
             Invoice invoice = invoiceRepository
                     .findById(invoiceId)
-                    .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_EXISTED));
+                    .orElseThrow(() -> new AppException(ErrorCode.INVOICE_NOT_EXISTED));
 
             // Check if invoice is already paid
             if (invoice.getStatus() == InvoiceStatus.PAID) {
-                throw new AppException(ErrorCode.BOOKING_NOT_EXISTED); // custom error
+                throw new AppException(ErrorCode.INVOICE_ALREADY_PAID); // custom error
             }
 
             // Generate transaction reference
@@ -70,7 +70,7 @@ public class PaymentServiceImpl implements PaymentService {
             // Get VNPay payment method
             var vnpayMethod = paymentMethodRepository.findByName("VNPay").orElseThrow(() -> {
                 log.error("VNPay payment method not found in database");
-                return new AppException(ErrorCode.BOOKING_NOT_EXISTED);
+                return new AppException(ErrorCode.PAYMENT_METHOD_NOT_EXISTED);
             });
 
             // Create payment record
@@ -384,17 +384,17 @@ public class PaymentServiceImpl implements PaymentService {
             // Get invoice
             Invoice invoice = invoiceRepository
                     .findById(invoiceId)
-                    .orElseThrow(() -> new AppException(ErrorCode.BOOKING_NOT_EXISTED));
+                    .orElseThrow(() -> new AppException(ErrorCode.INVOICE_NOT_EXISTED));
 
             // Check if invoice is already paid
             if (invoice.getStatus() == InvoiceStatus.PAID) {
-                throw new AppException(ErrorCode.BOOKING_NOT_EXISTED); // Invoice already paid
+                throw new AppException(ErrorCode.INVOICE_ALREADY_PAID); // Invoice already paid
             }
 
             // Get Cash payment method
             var cashMethod = paymentMethodRepository.findByName("Cash").orElseThrow(() -> {
                 log.error("Cash payment method not found in database");
-                return new AppException(ErrorCode.BOOKING_NOT_EXISTED);
+                return new AppException(ErrorCode.PAYMENT_METHOD_NOT_EXISTED);
             });
 
             // Generate transaction code for cash payment

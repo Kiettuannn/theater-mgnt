@@ -37,4 +37,7 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
 
     // Find all tickets for a booking
     List<Ticket> findByBookingIdAndStatus(UUID bookingId, TicketStatus status);
+
+    // Find tickets by screening seat IDs and status (for transfer tickets)
+    List<Ticket> findByScreeningSeatIdInAndStatus(List<String> screeningSeatIds, TicketStatus status);
 }

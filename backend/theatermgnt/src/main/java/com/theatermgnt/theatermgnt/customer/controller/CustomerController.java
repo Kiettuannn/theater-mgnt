@@ -5,6 +5,7 @@ import java.util.List;
 import com.theatermgnt.theatermgnt.account.service.RegistrationService;
 import com.theatermgnt.theatermgnt.customer.dto.request.CustomerAccountCreationRequest;
 import com.theatermgnt.theatermgnt.customer.dto.request.StaffCreateCustomerAccountRequest;
+import com.theatermgnt.theatermgnt.customer.dto.response.CustomerLoyaltyPointsResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,12 +67,12 @@ public class CustomerController {
                 .build();
     }
 
-//    @GetMapping("/{customerId}/loyalty-points")
-//    ApiResponse<CustomerLoyaltyPointsResponse> getLoyaltyPoints(@PathVariable String customerId) {
-//        return ApiResponse.<CustomerLoyaltyPointsResponse>builder()
-//                .result(customerService.getLoyaltyPoints(customerId))
-//                .build();
-//    }
+    @GetMapping("/{customerId}/loyalty-points")
+    ApiResponse<CustomerLoyaltyPointsResponse> getLoyaltyPoints(@PathVariable String customerId) {
+        return ApiResponse.<CustomerLoyaltyPointsResponse>builder()
+                .result(customerService.getLoyaltyPoints(customerId))
+                .build();
+    }
 
     @DeleteMapping("/{customerId}" )
     ApiResponse<Void> deleteCustomerProfile(@PathVariable String customerId) {

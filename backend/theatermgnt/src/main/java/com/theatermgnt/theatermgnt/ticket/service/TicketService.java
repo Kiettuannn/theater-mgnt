@@ -27,4 +27,9 @@ public interface TicketService {
     void checkInTicket(TicketCheckInRequest request);
 
     void expireTicketsByBookingId(UUID bookingId);
+
+    // Pass ticket methods
+    void markTicketForTransfer(String ticketCode, String customerId);
+
+    void cancelTicketTransfer(String ticketCode, String customerId);
 }
