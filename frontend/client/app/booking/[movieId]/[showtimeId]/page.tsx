@@ -26,10 +26,7 @@ import {
 } from "@/services/bookingService";
 import type { BookingSummaryResponse } from "@/services/bookingService";
 import { getUserInfo, getToken } from "@/services/localStorageService";
-import {
-  getMyInfo,
-  getCustomerLoyaltyPoints,
-} from "@/services/customerService";
+import { getMyInfo } from "@/services/customerService";
 import type { Seat, ComboItem, Showtime } from "@/lib/types";
 import SeatSelectionStep from "@/components/booking/seat-selection-step";
 import ComboSelectionStep from "@/components/booking/combo-selection-step";
@@ -604,11 +601,13 @@ export default function BookingPage({
           userInfo = await getMyInfo();
         }
 
-        const customerId = userInfo?.id || userInfo?.customerId;
-        if (customerId) {
-          const points = await getCustomerLoyaltyPoints(customerId);
-          setCustomerPoints(points);
+        if (typeof userInfo?.loyaltyPoints === "number") {
+          setCustomerPoints(userInfo.loyaltyPoints);
+          return;
         }
+
+        const freshInfo = await getMyInfo();
+        setCustomerPoints(freshInfo?.loyaltyPoints ?? 0);
       } catch (error: any) {
         console.error("Error fetching customer loyalty points:", error);
       }
@@ -717,10 +716,15 @@ export default function BookingPage({
         ? "Loading summary..."
         : "Next";
 
-  const summarySeatCount =
-    bookingSummary?.seats?.length ?? selectedSeats.length;
-  const summaryComboCount =
-    bookingSummary?.combos?.length ?? selectedCombos.length;
+  const summarySeatCount = useBookingSummary
+    ? bookingSummary?.seats?.length ?? selectedSeats.length
+    : selectedSeats.length;
+  const summaryComboCount = useBookingSummary
+    ? bookingSummary?.combos?.reduce(
+        (sum, combo) => sum + (combo.quantity || 1),
+        0,
+      ) ?? selectedCombos.reduce((sum, combo) => sum + (combo.quantity || 1), 0)
+    : selectedCombos.reduce((sum, combo) => sum + (combo.quantity || 1), 0);
 
   const handleNextStep = async () => {
     if (currentStep === 1 && selectedSeats.length === 0) {
@@ -890,10 +894,23 @@ export default function BookingPage({
       try {
         setIsUpdatingCombos(true);
 
-        const combosPayload = selectedCombos.map((combo) => ({
-          comboId: combo.id,
-          quantity: combo.quantity && combo.quantity > 0 ? combo.quantity : 1,
-        }));
+        const combosPayload = selectedCombos
+          .map((combo) => ({
+            comboId: (combo as any).comboId ?? combo.id,
+            quantity:
+              combo.quantity && combo.quantity > 0
+                ? Math.trunc(combo.quantity)
+                : 1,
+          }))
+          .filter((combo) => !!combo.comboId);
+
+        if (combosPayload.length !== selectedCombos.length) {
+          setGeneralError({
+            title: "Combo Update Error",
+            message: "One or more selected combos are invalid. Please reselect.",
+          });
+          return;
+        }
 
         await updateBookingCombos(bookingId, { combos: combosPayload });
 
