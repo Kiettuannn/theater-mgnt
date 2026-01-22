@@ -37,7 +37,10 @@ export default function ComboSelectionStep({
   };
 
   const handleQuantityChange = (comboId: string, quantity: number) => {
-    if (quantity < 1) return;
+    if (quantity <= 0) {
+      handleRemoveCombo(comboId);
+      return;
+    }
     setQuantities({ ...quantities, [comboId]: quantity });
     // Update quantity in selectedCombos
     onSelectCombos(
@@ -131,18 +134,17 @@ export default function ComboSelectionStep({
                       onClick={() =>
                         handleQuantityChange(combo.id, quantity - 1)
                       }
-                      disabled={quantity === 1}
                       className="w-8 h-8 rounded border border-purple-600 flex items-center justify-center hover:bg-purple-500/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       <Minus size={16} className="text-purple-600" />
                     </button>
                     <input
                       type="number"
-                      min="1"
+                      min="0"
                       value={quantity}
                       onChange={(e) => {
                         const value = parseInt(e.target.value, 10);
-                        if (!isNaN(value) && value >= 1) {
+                        if (!isNaN(value) && value >= 0) {
                           handleQuantityChange(combo.id, value);
                         }
                       }}
