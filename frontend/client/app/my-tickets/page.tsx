@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { getToken, getUserInfo } from "@/services/localStorageService";
 import { useRouter } from "next/navigation";
-import { getTicketsByCustomer, TicketResponse } from "@/services/ticketService";
+import {
+  getTicketsByCustomer,
+  TicketResponse,
+  markTicketForTransfer,
+  cancelTicketTransfer,
+} from "@/services/ticketService";
 import { getMyInfo } from "@/services/customerService";
 
 export default function MyTicketsPage() {
@@ -14,6 +19,8 @@ export default function MyTicketsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [purchaseDate, setPurchaseDate] = useState("");
   const [page, setPage] = useState(1);
+  const [customerId, setCustomerId] = useState<string | null>(null);
+  const [passingTicket, setPassingTicket] = useState<string | null>(null);
 
   const PAGE_SIZE = 9;
 
@@ -43,14 +50,15 @@ export default function MyTicketsPage() {
         }
 
         // Get customer ID (prefer 'id' field, fallback to 'customerId')
-        const customerId = userInfo?.id || userInfo?.customerId;
+        const cusId = userInfo?.id || userInfo?.customerId;
 
-        if (!customerId) {
+        if (!cusId) {
           setError("Customer information not found");
           return;
         }
 
-        const fetchedTickets = await getTicketsByCustomer(customerId);
+        setCustomerId(cusId);
+        const fetchedTickets = await getTicketsByCustomer(cusId);
         setTickets(fetchedTickets);
         setError(null);
       } catch (err) {
@@ -63,6 +71,56 @@ export default function MyTicketsPage() {
 
     fetchTickets();
   }, [router]);
+
+  const canPassTicket = (ticket: TicketResponse) => {
+    if (ticket.status !== "ACTIVE") return false;
+
+    const screeningTime = new Date(ticket.startTime).getTime();
+    const now = Date.now();
+    const hoursUntilScreening = (screeningTime - now) / (1000 * 60 * 60);
+
+    return hoursUntilScreening >= 1;
+  };
+
+  const handlePassTicket = async (ticketCode: string) => {
+    if (!customerId) return;
+
+    try {
+      setPassingTicket(ticketCode);
+      await markTicketForTransfer(ticketCode, customerId);
+
+      // Refresh tickets
+      const fetchedTickets = await getTicketsByCustomer(customerId);
+      setTickets(fetchedTickets);
+    } catch (error: any) {
+      console.error("Error marking ticket for transfer:", error);
+      alert(
+        error?.response?.data?.message || "Failed to mark ticket for transfer",
+      );
+    } finally {
+      setPassingTicket(null);
+    }
+  };
+
+  const handleCancelPass = async (ticketCode: string) => {
+    if (!customerId) return;
+
+    try {
+      setPassingTicket(ticketCode);
+      await cancelTicketTransfer(ticketCode, customerId);
+
+      // Refresh tickets
+      const fetchedTickets = await getTicketsByCustomer(customerId);
+      setTickets(fetchedTickets);
+    } catch (error: any) {
+      console.error("Error cancelling ticket transfer:", error);
+      alert(
+        error?.response?.data?.message || "Failed to cancel ticket transfer",
+      );
+    } finally {
+      setPassingTicket(null);
+    }
+  };
 
   const filteredTickets = tickets.filter((ticket) => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -247,12 +305,16 @@ export default function MyTicketsPage() {
                           className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap ml-2 ${
                             ticket.status === "ACTIVE"
                               ? "bg-green-500 text-white"
-                              : ticket.status === "USED"
-                                ? "bg-blue-500 text-white"
-                                : "bg-red-500 text-white"
+                              : ticket.status === "FOR_TRANSFER"
+                                ? "bg-orange-500 text-white"
+                                : ticket.status === "USED"
+                                  ? "bg-blue-500 text-white"
+                                  : "bg-red-500 text-white"
                           }`}
                         >
-                          {ticket.status}
+                          {ticket.status === "FOR_TRANSFER"
+                            ? "PASS"
+                            : ticket.status}
                         </span>
                       </div>
                       <div className="space-y-2.5 text-sm mb-4 pb-4 border-b-2 border-current border-opacity-20">
@@ -297,6 +359,31 @@ export default function MyTicketsPage() {
                             className="w-32 h-32"
                           />
                         </div>
+                      )}
+
+                      {/* Pass/Cancel Pass Button */}
+                      {ticket.status === "ACTIVE" && canPassTicket(ticket) && (
+                        <button
+                          onClick={() => handlePassTicket(ticket.ticketCode)}
+                          disabled={passingTicket === ticket.ticketCode}
+                          className="w-full px-4 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {passingTicket === ticket.ticketCode
+                            ? "Processing..."
+                            : "Pass Ticket"}
+                        </button>
+                      )}
+
+                      {ticket.status === "FOR_TRANSFER" && (
+                        <button
+                          onClick={() => handleCancelPass(ticket.ticketCode)}
+                          disabled={passingTicket === ticket.ticketCode}
+                          className="w-full px-4 py-2.5 rounded-lg bg-gray-500 hover:bg-gray-600 text-white font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {passingTicket === ticket.ticketCode
+                            ? "Processing..."
+                            : "Cancel Pass"}
+                        </button>
                       )}
                     </div>
                   ))}

@@ -58,3 +58,43 @@ export const getTicketsByCustomer = async (customerId: string): Promise<TicketRe
     throw error
   }
 }
+
+export const markTicketForTransfer = async (ticketCode: string, customerId: string): Promise<void> => {
+  try {
+    const token = typeof window !== "undefined" ? localStorage.getItem("customer_token") : null
+    
+    await axios.post(
+      `${API_BASE_URL}/tickets/${ticketCode}/mark-for-transfer`,
+      null,
+      {
+        params: { customerId },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+  } catch (error) {
+    console.error("Failed to mark ticket for transfer:", error)
+    throw error
+  }
+}
+
+export const cancelTicketTransfer = async (ticketCode: string, customerId: string): Promise<void> => {
+  try {
+    const token = typeof window !== "undefined" ? localStorage.getItem("customer_token") : null
+    
+    await axios.post(
+      `${API_BASE_URL}/tickets/${ticketCode}/cancel-transfer`,
+      null,
+      {
+        params: { customerId },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    )
+  } catch (error) {
+    console.error("Failed to cancel ticket transfer:", error)
+    throw error
+  }
+}
