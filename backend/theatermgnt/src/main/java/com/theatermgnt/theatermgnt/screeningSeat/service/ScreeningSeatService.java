@@ -27,6 +27,9 @@ import com.theatermgnt.theatermgnt.screeningSeat.mapper.ScreeningSeatMapper;
 import com.theatermgnt.theatermgnt.screeningSeat.repository.ScreeningSeatRepository;
 import com.theatermgnt.theatermgnt.seat.entity.Seat;
 import com.theatermgnt.theatermgnt.seat.repository.SeatRepository;
+import com.theatermgnt.theatermgnt.ticket.entity.Ticket;
+import com.theatermgnt.theatermgnt.ticket.enums.TicketStatus;
+import com.theatermgnt.theatermgnt.ticket.repository.TicketRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +46,7 @@ public class ScreeningSeatService {
     ScreeningSeatRepository screeningSeatRepository;
     ScreeningSeatMapper screeningSeatMapper;
     PriceConfigRepository priceConfigRepository;
+    TicketRepository ticketRepository;
 
     @Transactional(propagation = Propagation.REQUIRED)
     public ScreeningSeatResponse createScreeningSeat(ScreeningSeatCreationRequest request) {
@@ -136,8 +140,45 @@ public class ScreeningSeatService {
                             PriceConfig::getPrice,
                             (existing, replacement) -> existing));
 
+            // Get transfer tickets for this screening
+            List<String> screeningSeatIds =
+                    seatsInGroup.stream().map(ScreeningSeat::getId).toList();
+            List<Ticket> transferTickets = ticketRepository.findByScreeningSeatIdInAndStatus(
+                    screeningSeatIds, TicketStatus.FOR_TRANSFER);
+
+            Map<String, Ticket> transferTicketMap = transferTickets.stream()
+                    .collect(Collectors.toMap(
+                            ticket -> ticket.getScreeningSeat().getId(), ticket -> ticket, (t1, t2) -> t1));
+
             List<ScreeningSeatResponse> groupResponses = seatsInGroup.stream()
-                    .map(seat -> screeningSeatMapper.toScreeningSeatResponse(seat, priceMap))
+                    .map(seat -> {
+                        ScreeningSeatResponse response =
+                                screeningSeatMapper.toScreeningSeatResponse(seat, priceMap);
+
+                        // Add transfer information if available
+                        Ticket transferTicket = transferTicketMap.get(seat.getId());
+                        if (transferTicket != null) {
+                            response.setIsForTransfer(true);
+                            response.setTransferTicketId(transferTicket.getId().toString());
+
+                            if (transferTicket.getBooking() != null
+                                    && transferTicket.getBooking().getCustomer() != null) {
+                                var customer = transferTicket.getBooking().getCustomer();
+                                var account = customer.getAccount();
+
+                                response.setSellerName(
+                                        (customer.getFirstName() != null ? customer.getFirstName() : "")
+                                                + " "
+                                                + (customer.getLastName() != null ? customer.getLastName() : ""));
+                                response.setSellerEmail(account != null ? account.getEmail() : null);
+                                response.setSellerPhone(customer.getPhoneNumber());
+                            }
+                        } else {
+                            response.setIsForTransfer(false);
+                        }
+
+                        return response;
+                    })
                     .toList();
 
             finalResult.addAll(groupResponses);

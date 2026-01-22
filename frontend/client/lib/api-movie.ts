@@ -50,7 +50,7 @@ const isRefreshRequest = (url?: string) => {
 api.interceptors.request.use(
   (config) => {
     // Add auth token from localStorage
-    if (typeof window !== "undefined" && !isPublicRequest(config.url)) {
+    if (typeof window !== "undefined") {
       const token = localStorage.getItem("customer_token");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -205,10 +205,10 @@ export function mapScreeningToShowtime(screening: any) {
   if (!screening) return null
 
   const startTime = new Date(screening.startTime)
-  const timeStr = startTime.toLocaleTimeString('en-US', {
-    hour: '2-digit',
+  const timeStr = startTime.toLocaleTimeString('en-US', { 
+    hour: '2-digit', 
     minute: '2-digit',
-    hour12: true
+    hour12: false 
   })
   const dateStr = startTime.toISOString().split('T')[0]
 
@@ -293,7 +293,13 @@ export function mapScreeningSeatToSeat(seat: any, index: number) {
     isAvailable,
     isSelected: false,
     type,
-    price
+    price,
+    // Transfer information
+    isForTransfer: seat.isForTransfer || false,
+    transferTicketId: seat.transferTicketId,
+    sellerName: seat.sellerName,
+    sellerEmail: seat.sellerEmail,
+    sellerPhone: seat.sellerPhone,
   }
 }
 

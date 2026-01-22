@@ -66,4 +66,22 @@ public class TicketController {
                 .result("Ticket checked in successfully")
                 .build();
     }
+
+    @PostMapping("/{ticketCode}/mark-for-transfer")
+    public ApiResponse<String> markTicketForTransfer(
+            @PathVariable String ticketCode, @RequestParam String customerId) {
+        ticketService.markTicketForTransfer(ticketCode, customerId);
+        return ApiResponse.<String>builder()
+                .result("Ticket marked for transfer successfully")
+                .build();
+    }
+
+    @PostMapping("/{ticketCode}/cancel-transfer")
+    public ApiResponse<String> cancelTicketTransfer(
+            @PathVariable String ticketCode, @RequestParam String customerId) {
+        ticketService.cancelTicketTransfer(ticketCode, customerId);
+        return ApiResponse.<String>builder()
+                .result("Ticket transfer cancelled successfully")
+                .build();
+    }
 }

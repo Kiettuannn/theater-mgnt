@@ -132,6 +132,14 @@ public enum ErrorCode {
     // Reporting
     INVALID_DATE_RANGE(5001, "End date must be greater than or equal start date", HttpStatus.BAD_REQUEST),
 
+    // Invoice
+    INVOICE_NOT_EXISTED(2055, "Invoice not existed", HttpStatus.NOT_FOUND),
+    INVOICE_ALREADY_PAID(2056, "Invoice already paid", HttpStatus.BAD_REQUEST),
+
+    // Payment
+    PAYMENT_METHOD_NOT_EXISTED(2057, "Payment method not existed", HttpStatus.NOT_FOUND),
+
+
     // ticket
     TICKET_NOT_EXISTED(2063, "Ticket not existed", HttpStatus.NOT_FOUND),
     TICKET_NOT_ACTIVE(2068, "Ticket not active", HttpStatus.BAD_REQUEST),

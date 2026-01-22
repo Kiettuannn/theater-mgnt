@@ -32,6 +32,12 @@ export interface Seat {
   isSelected?: boolean
   type?: "standard" | "vip" | "couple"
   price?: number
+  // Transfer information
+  isForTransfer?: boolean
+  transferTicketId?: string
+  sellerName?: string
+  sellerEmail?: string
+  sellerPhone?: string
 }
 
 export interface ComboItemDetail {

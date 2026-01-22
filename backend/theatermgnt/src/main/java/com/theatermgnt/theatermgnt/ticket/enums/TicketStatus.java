@@ -4,5 +4,6 @@ public enum TicketStatus {
     ACTIVE,
     USED,
     CANCELLED,
-    EXPIRED
+    EXPIRED,
+    FOR_TRANSFER // Ticket is available for transfer to another customer
 }
