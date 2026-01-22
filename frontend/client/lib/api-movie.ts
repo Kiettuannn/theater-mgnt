@@ -69,10 +69,18 @@ api.interceptors.response.use(
   (error) => {
     const status = error?.response?.status;
     const code = error?.response?.data?.code;
+    const url = error?.config?.url;
+    const isCancelBookingRequest =
+      typeof url === "string" &&
+      url.includes("/bookings/") &&
+      url.endsWith("/cancel");
     if (status === 401 || code === 1006) {
       handleAuthFailure();
     }
-    if (status !== 401) {
+    if (
+      status !== 401 &&
+      !(isCancelBookingRequest && (status === 400 || status === 404))
+    ) {
       console.error('API Error:', error.response?.data || error.message)
     }
     return Promise.reject(error)

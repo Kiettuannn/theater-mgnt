@@ -1185,22 +1185,6 @@ export default function BookingPage({
 
               {/* Navigation Buttons */}
               <div className="space-y-3">
-                {currentStep > 1 && (
-                  <button
-                    onClick={async () => {
-                      if (currentStep === 2) {
-                        await goToStep1WithRefresh();
-                        return;
-                      }
-
-                      setCurrentStep(currentStep - 1);
-                    }}
-                    className="w-full px-4 py-3 rounded-lg border border-border dark:border-slate-700 hover:bg-muted dark:hover:bg-slate-800 transition-colors font-semibold flex items-center justify-center gap-2"
-                  >
-                    <ChevronLeft size={20} />
-                    Previous
-                  </button>
-                )}
                 {currentStep < 4 && (
                   <button
                     onClick={handleNextStep}
@@ -1218,6 +1202,22 @@ export default function BookingPage({
                     {!isCreatingBooking &&
                       !isUpdatingCombos &&
                       !isLoadingSummary && <ChevronRight size={20} />}
+                  </button>
+                )}
+                {currentStep > 1 && (
+                  <button
+                    onClick={async () => {
+                      if (currentStep === 2) {
+                        await goToStep1WithRefresh();
+                        return;
+                      }
+
+                      setCurrentStep(currentStep - 1);
+                    }}
+                    className="w-full px-4 py-3 rounded-lg border border-border dark:border-slate-700 hover:bg-muted dark:hover:bg-slate-800 transition-colors font-semibold flex items-center justify-center gap-2"
+                  >
+                    <ChevronLeft size={20} />
+                    Previous
                   </button>
                 )}
               </div>

@@ -116,6 +116,11 @@ export const cancelBooking = async (bookingId: string): Promise<string> => {
     const response = await apiCancelBooking(bookingId)
     return response
   } catch (error) {
+    const status = (error as any)?.response?.status
+    if (status === 400 || status === 404) {
+      console.warn("Cancel booking ignored:", (error as any)?.response?.data || error)
+      return ""
+    }
     console.error("Failed to cancel booking:", error)
     throw error
   }
