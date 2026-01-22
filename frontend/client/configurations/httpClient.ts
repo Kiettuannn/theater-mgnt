@@ -2,6 +2,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig, AxiosResponse } from "ax
 import { CONFIG } from "./configuration";
 import { ApiError, ApiResponse } from "@/lib/errors";
 import { clearAuthData } from "@/services/localStorageService";
+import { requestTokenRefresh } from "@/services/tokenRefresh";
 import { useAuthStore } from "@/store";
 
 const httpClient = axios.create({
@@ -56,6 +57,12 @@ const handleAuthFailure = () => {
   useAuthStore.getState().logout();
 };
 
+const isRefreshRequest = (url?: string) => {
+  if (!url) return false;
+  const path = url.startsWith("http") ? new URL(url).pathname : url;
+  return path.startsWith("/auth/refresh");
+};
+
 // Response interceptor
 httpClient.interceptors.response.use(
   (response: AxiosResponse<ApiResponse>) => {
@@ -73,11 +80,26 @@ httpClient.interceptors.response.use(
     }
     return response;
   },
-  (error: AxiosError<ApiResponse>) => {
+  async (error: AxiosError<ApiResponse>) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
     // Handle HTTP errors (4xx, 5xx)
     if (error.response?.data) {
       const data = error.response.data;
-      if (error.response.status === 401 || data.code === 1006) {
+      if (
+        (error.response.status === 401 || data.code === 1006) &&
+        originalRequest &&
+        !originalRequest._retry &&
+        !isRefreshRequest(originalRequest.url) &&
+        !isPublicRequest(originalRequest.url)
+      ) {
+        originalRequest._retry = true;
+        const refreshedToken = await requestTokenRefresh();
+        if (refreshedToken && originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${refreshedToken}`;
+          return httpClient(originalRequest);
+        }
         handleAuthFailure();
       }
       

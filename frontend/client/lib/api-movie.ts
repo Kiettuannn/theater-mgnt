@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { clearAuthData } from '@/services/localStorageService'
+import { requestTokenRefresh } from "@/services/tokenRefresh";
 import { useAuthStore } from '@/store'
 
 
@@ -39,6 +40,12 @@ const handleAuthFailure = () => {
   useAuthStore.getState().logout();
 };
 
+const isRefreshRequest = (url?: string) => {
+  if (!url) return false;
+  const path = url.startsWith("http") ? new URL(url).pathname : url;
+  return path.startsWith("/auth/refresh");
+};
+
 
 api.interceptors.request.use(
   (config) => {
@@ -66,15 +73,29 @@ api.interceptors.response.use(
     }
     return response
   },
-  (error) => {
+  async (error) => {
     const status = error?.response?.status;
     const code = error?.response?.data?.code;
     const url = error?.config?.url;
+    const originalRequest = error?.config;
     const isCancelBookingRequest =
       typeof url === "string" &&
       url.includes("/bookings/") &&
       url.endsWith("/cancel");
     if (status === 401 || code === 1006) {
+      if (
+        originalRequest &&
+        !originalRequest._retry &&
+        !isRefreshRequest(originalRequest.url) &&
+        !isPublicRequest(originalRequest.url)
+      ) {
+        originalRequest._retry = true;
+        const refreshedToken = await requestTokenRefresh();
+        if (refreshedToken && originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${refreshedToken}`;
+          return api(originalRequest);
+        }
+      }
       handleAuthFailure();
     }
     if (

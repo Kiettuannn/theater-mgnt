@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useAuthStore } from "@/store";
 import { clearAuthData, getToken } from "@/services/localStorageService";
 import { introspectToken } from "@/services/authService";
+import { requestTokenRefresh } from "@/services/tokenRefresh";
 
 /**
  * StoreInitializer - Initialize stores on app mount
@@ -24,8 +25,11 @@ export function StoreInitializer({ children }: { children: React.ReactNode }) {
       if (token) {
         const isValid = await introspectToken(token);
         if (!isValid) {
-          clearAuthData();
-          logout();
+          const refreshedToken = await requestTokenRefresh();
+          if (!refreshedToken) {
+            clearAuthData();
+            logout();
+          }
         }
       }
 
