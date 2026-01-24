@@ -1,16 +1,18 @@
 package com.theatermgnt.theatermgnt.staff.dto.request;
 
-import com.theatermgnt.theatermgnt.account.dto.request.BaseAccountCreationRequest;
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+import com.theatermgnt.theatermgnt.account.dto.request.BaseAccountCreationRequest;
+
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
-
-import java.util.List;
 
 @Data
 @NoArgsConstructor

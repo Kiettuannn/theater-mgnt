@@ -2,15 +2,14 @@ package com.theatermgnt.theatermgnt.customer.controller;
 
 import java.util.List;
 
-import com.theatermgnt.theatermgnt.account.service.RegistrationService;
-import com.theatermgnt.theatermgnt.customer.dto.request.CustomerAccountCreationRequest;
-import com.theatermgnt.theatermgnt.customer.dto.request.StaffCreateCustomerAccountRequest;
-import com.theatermgnt.theatermgnt.customer.dto.response.CustomerLoyaltyPointsResponse;
 import jakarta.validation.Valid;
+
 import org.springframework.web.bind.annotation.*;
 
+import com.theatermgnt.theatermgnt.account.service.RegistrationService;
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
 import com.theatermgnt.theatermgnt.customer.dto.request.CustomerProfileUpdateRequest;
+import com.theatermgnt.theatermgnt.customer.dto.request.StaffCreateCustomerAccountRequest;
 import com.theatermgnt.theatermgnt.customer.dto.response.CustomerLoyaltyPointsResponse;
 import com.theatermgnt.theatermgnt.customer.dto.response.CustomerResponse;
 import com.theatermgnt.theatermgnt.customer.service.CustomerService;
@@ -29,7 +28,6 @@ public class CustomerController {
     CustomerService customerService;
     RegistrationService registrationService;
 
-
     @PostMapping
     public ApiResponse<CustomerResponse> staffCreateCustomerAccount(
             @Valid @RequestBody StaffCreateCustomerAccountRequest request) {
@@ -37,7 +35,6 @@ public class CustomerController {
                 .result(registrationService.StaffCreateCustomerAccount(request))
                 .build();
     }
-
 
     @GetMapping("/{customerId}")
     ApiResponse<CustomerResponse> getCustomerProfile(@PathVariable String customerId) {
@@ -75,7 +72,7 @@ public class CustomerController {
                 .build();
     }
 
-    @DeleteMapping("/{customerId}" )
+    @DeleteMapping("/{customerId}")
     ApiResponse<Void> deleteCustomerProfile(@PathVariable String customerId) {
         customerService.deleteCustomer(customerId);
         return ApiResponse.<Void>builder().build();

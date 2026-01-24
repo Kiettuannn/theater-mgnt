@@ -2,16 +2,17 @@ package com.theatermgnt.theatermgnt.customer.entity;
 
 import java.time.LocalDate;
 
-import com.theatermgnt.theatermgnt.common.entity.BaseEntity;
 import jakarta.persistence.*;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.theatermgnt.theatermgnt.account.entity.Account;
+import com.theatermgnt.theatermgnt.common.entity.BaseEntity;
 import com.theatermgnt.theatermgnt.common.enums.Gender;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 @Setter
 @Getter

@@ -13,22 +13,22 @@ import com.theatermgnt.theatermgnt.websocket.entity.WebSocketSession;
  */
 @Repository
 public interface WebSocketSessionRepository extends JpaRepository<WebSocketSession, String> {
-    
+
     /**
      * Find session by socket session ID
      */
     Optional<WebSocketSession> findBySocketSessionId(String socketSessionId);
-    
+
     /**
      * Find all sessions for a specific user
      */
     List<WebSocketSession> findByUserId(String userId);
-    
+
     /**
      * Delete session by socket session ID
      */
     void deleteBySocketSessionId(String socketSessionId);
-    
+
     /**
      * Check if a socket session exists
      */

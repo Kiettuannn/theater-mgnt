@@ -1,17 +1,13 @@
 package com.theatermgnt.theatermgnt.account.entity;
 
-import java.time.Instant;
-
-import com.theatermgnt.theatermgnt.common.entity.BaseEntity;
 import jakarta.persistence.*;
 
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.theatermgnt.theatermgnt.authentication.enums.AccountType;
+import com.theatermgnt.theatermgnt.common.entity.BaseEntity;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -29,7 +25,6 @@ import lombok.experimental.FieldDefaults;
 @Where(clause = "deleted = false")
 public class Account extends BaseEntity {
 
-
     @Column(unique = true)
     String email;
 
@@ -38,10 +33,8 @@ public class Account extends BaseEntity {
 
     String password;
 
-
     @Enumerated(EnumType.STRING)
     AccountType accountType;
 
     Boolean isActive;
-
 }

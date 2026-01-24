@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.theatermgnt.theatermgnt.notification.dto.request.CreateNotificationRequest;
-import com.theatermgnt.theatermgnt.notification.enums.Priority;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.theatermgnt.theatermgnt.common.exception.AppException;
 import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
+import com.theatermgnt.theatermgnt.notification.dto.request.CreateNotificationRequest;
 import com.theatermgnt.theatermgnt.notification.dto.response.NotificationDetailResponse;
 import com.theatermgnt.theatermgnt.notification.dto.response.NotificationLogDetailResponse;
 import com.theatermgnt.theatermgnt.notification.dto.response.NotificationLogResponse;
@@ -63,7 +62,6 @@ public class NotificationService {
         // 1. Get template
         NotificationTemplate template = templateService.getTemplateByCode(request.getTemplateCode());
 
-
         // 3. Build base metadata
         Map<String, Object> baseMetadata = new HashMap<>();
         if (request.getMetadata() != null) {
@@ -99,7 +97,7 @@ public class NotificationService {
         for (Notification saved : savedNotifications) {
             // Dispatch asynchronously
             dispatcher.dispatch(saved.getId(), request.getChannels(), saved.getMetadata());
-            
+
             // Emit to Socket.IO for IN_APP channel
             if (request.getChannels().contains("IN_APP")) {
                 NotificationDetailResponse response = notificationMapper.toDetailResponse(saved);
@@ -200,16 +198,14 @@ public class NotificationService {
         log.debug("Getting in-app notifications for user: {}", userId);
 
         // Get all notifications for user, then filter by IN_APP channel in logs
-        List<Notification> allNotifications =
-                notificationRepository.findByRecipientIdOrderByCreatedAtDesc(userId);
+        List<Notification> allNotifications = notificationRepository.findByRecipientIdOrderByCreatedAtDesc(userId);
 
         return allNotifications.stream()
                 .filter(notification -> {
                     // Check if any log has IN_APP channel
                     List<NotificationLog> logs = logRepository.findByNotificationOrderBySentAtDesc(notification);
                     return logs.stream()
-                            .anyMatch(log ->
-                                    log.getChannelName() != null && "IN_APP".equals(log.getChannelName()));
+                            .anyMatch(log -> log.getChannelName() != null && "IN_APP".equals(log.getChannelName()));
                 })
                 .map(notification -> {
                     List<NotificationLog> logs = logRepository.findByNotificationOrderBySentAtDesc(notification);

@@ -58,7 +58,8 @@ public class AdminNotificationController {
     @PostMapping("/send")
     public ApiResponse<List<NotificationDetailResponse>> sendNotification(
             @RequestBody @Valid CreateNotificationRequest request) {
-        log.info("Admin sending notification(s) to {} recipient(s)", 
+        log.info(
+                "Admin sending notification(s) to {} recipient(s)",
                 request.getRecipientIds() != null ? request.getRecipientIds().size() : 0);
 
         return ApiResponse.<List<NotificationDetailResponse>>builder()
@@ -147,7 +148,7 @@ public class AdminNotificationController {
         log.info("Getting in-app notifications for admin: {}", authentication.getName());
 
         String userId = authentication.getName();
-        
+
         return ApiResponse.<List<NotificationDetailResponse>>builder()
                 .result(notificationService.getInAppNotifications(userId))
                 .build();

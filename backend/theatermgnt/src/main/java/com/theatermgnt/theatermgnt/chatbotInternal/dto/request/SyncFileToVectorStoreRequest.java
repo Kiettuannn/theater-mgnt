@@ -1,7 +1,9 @@
 package com.theatermgnt.theatermgnt.chatbotInternal.dto.request;
 
-import com.theatermgnt.theatermgnt.chatbotInternal.enums.DocumentType;
 import jakarta.validation.constraints.NotBlank;
+
+import com.theatermgnt.theatermgnt.chatbotInternal.enums.DocumentType;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

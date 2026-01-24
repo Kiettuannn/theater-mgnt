@@ -42,6 +42,19 @@ public class StaffController {
                 .build();
     }
 
+    @GetMapping("/available-managers")
+    public ApiResponse<List<StaffResponse>> getAvailableManagers() {
+        return ApiResponse.<List<StaffResponse>>builder()
+                .result(staffService.getStaffRoleManagerDontManageAnyCinema())
+                .build();
+    }
+
+    @GetMapping("/cinema/{cinemaId}/staff-role")
+    public ApiResponse<List<StaffResponse>> getStaffByCinemaWithStaffRole(@PathVariable String cinemaId) {
+        var staffs = staffService.getStaffByCinemaAndStaffRole(cinemaId);
+        return ApiResponse.<List<StaffResponse>>builder().result(staffs).build();
+    }
+
     @GetMapping
     public ApiResponse<List<StaffResponse>> getAll() {
         return ApiResponse.<List<StaffResponse>>builder()
@@ -65,7 +78,7 @@ public class StaffController {
 
     @PutMapping("/{staffId}")
     public ApiResponse<StaffResponse> updateStaffProfile(
-            @PathVariable String staffId,@Valid @RequestBody StaffProfileUpdateRequest request) {
+            @PathVariable String staffId, @Valid @RequestBody StaffProfileUpdateRequest request) {
         return ApiResponse.<StaffResponse>builder()
                 .result(staffService.updateStaffProfile(staffId, request))
                 .build();

@@ -36,6 +36,4 @@ public interface ScreeningRepository extends JpaRepository<Screening, String> {
 	AND s.endTime > :startTime
 	""")
     boolean isTimeOverlap(String roomId, LocalDateTime startTime, LocalDateTime endTime, String excludeId);
-
-
 }

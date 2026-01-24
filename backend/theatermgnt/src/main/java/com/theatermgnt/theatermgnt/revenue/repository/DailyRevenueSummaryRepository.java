@@ -26,7 +26,7 @@ public interface DailyRevenueSummaryRepository extends JpaRepository<DailyRevenu
             @Param("toDate") LocalDate toDate);
 
     Optional<DailyRevenueSummary> findByCinemaIdAndReportDate(String cinemaId, LocalDate reportDate);
-    
+
     // Handle duplicates by returning list
     List<DailyRevenueSummary> findAllByCinemaIdAndReportDate(String cinemaId, LocalDate reportDate);
 }

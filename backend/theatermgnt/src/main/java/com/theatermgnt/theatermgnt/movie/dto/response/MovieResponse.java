@@ -19,6 +19,7 @@ public class MovieResponse {
 
     String id;
     String title;
+    String slug;
     String description;
     Integer durationMinutes;
     String director;

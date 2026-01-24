@@ -163,6 +163,13 @@
             <version>1.17.2</version>
         </dependency>
 
+        <!-- Slugify for SEO-friendly URLs -->
+        <dependency>
+            <groupId>com.github.slugify</groupId>
+            <artifactId>slugify</artifactId>
+            <version>3.0.7</version>
+        </dependency>
+
         <!-- Socket.IO for real-time notifications -->
         <dependency>
             <groupId>com.corundumstudio.socketio</groupId>

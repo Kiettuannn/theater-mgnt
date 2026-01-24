@@ -2,13 +2,12 @@ package com.theatermgnt.theatermgnt.customer.dto.request;
 
 import java.time.LocalDate;
 
-import com.theatermgnt.theatermgnt.common.enums.Gender;
-
-import com.theatermgnt.theatermgnt.validator.DobConstraint;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+
+import com.theatermgnt.theatermgnt.common.enums.Gender;
+import com.theatermgnt.theatermgnt.validator.DobConstraint;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -29,6 +28,7 @@ public class CustomerProfileUpdateRequest {
 
     @Size(max = 200, message = "ADDRESS_TOO_LONG")
     String address;
+
     String avatarUrl;
 
     Gender gender;
