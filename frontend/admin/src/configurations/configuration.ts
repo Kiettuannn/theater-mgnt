@@ -1,6 +1,6 @@
 export const CONFIG = {
   // API: "http://localhost:8080/api/theater-mgnt",
-  API: `${import.meta.env.VITE_API_URL}/theater-mgnt`,
+  API: import.meta.env.VITE_API_URL, // Đã có /api/theater-mgnt trong env
 }
 export const API = {
   LOGIN: "/auth/admin/login",
