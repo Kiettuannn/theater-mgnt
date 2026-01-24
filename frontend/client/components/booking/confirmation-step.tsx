@@ -99,7 +99,7 @@ export default function ConfirmationStep({
       {isLoadingSummary && (
         <div className="mb-6 p-4 rounded-lg border border-border dark:border-slate-800 bg-muted/60 dark:bg-slate-800 flex items-center justify-between">
           <span className="text-sm text-muted-foreground">
-            Đang tải thông tin đơn đặt...
+            Loading latest booking summary...
           </span>
           <div className="inline-block w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin" />
         </div>
