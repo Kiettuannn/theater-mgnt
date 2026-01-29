@@ -4,14 +4,6 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/api-backend/:path*",
-      "destination": "http://18.183.39.22:8080/api/:path*"
-    },
-    {
-      "source": "/socket.io/:path*",
-      "destination": "http://18.183.39.22:9092/socket.io/:path*"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

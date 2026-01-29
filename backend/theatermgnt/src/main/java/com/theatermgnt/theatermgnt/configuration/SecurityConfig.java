@@ -1,8 +1,6 @@
 package com.theatermgnt.theatermgnt.configuration;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,8 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
-
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -51,7 +48,6 @@ public class SecurityConfig {
 
     private final CorsProperties corsProperties;
 
-
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS)
@@ -82,8 +78,8 @@ public class SecurityConfig {
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-//        corsConfiguration.addAllowedOrigin("http://localhost:3000");
-//        corsConfiguration.addAllowedOrigin("http://localhost:5173");
+        //        corsConfiguration.addAllowedOrigin("http://localhost:3000");
+        //        corsConfiguration.addAllowedOrigin("http://localhost:5173");
         corsConfiguration.setAllowedOrigins(corsProperties.getAllowedOrigins());
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");

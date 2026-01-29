@@ -1,5 +1,4 @@
 import httpClient from "@/configurations/httpClient";
-import { CONFIG } from "@/configurations/configuration";
 
 export interface MovieRevenue {
   id: string;
@@ -34,7 +33,7 @@ export interface RevenueReportRow {
   generatedAt: string;
 }
 
-const base = `${CONFIG.API}/revenue`;
+const base = `/revenue`;
 
 export const revenueService = {
   async getMovieRevenue(params: {

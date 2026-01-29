@@ -20,11 +20,9 @@ public class ScreeningSeatResponse {
     String bookingId;
     String status;
 
-
     Boolean isForTransfer;
     String transferTicketId;
     String sellerName;
     String sellerEmail;
     String sellerPhone;
-
 }

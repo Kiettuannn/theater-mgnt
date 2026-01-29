@@ -173,7 +173,7 @@ export default function MediaLibrary() {
         <div className="flex border border-gray-300 rounded-lg overflow-hidden ml-auto">
           <button
             onClick={() => setViewMode("grid")}
-            className={`p-1.5 transition-colors ${
+            className={`p-1.5 transition-colors cursor-pointer ${
               viewMode === "grid"
                 ? "bg-gray-200 text-gray-900"
                 : "bg-white text-gray-600 hover:bg-gray-50"
@@ -184,7 +184,7 @@ export default function MediaLibrary() {
           </button>
           <button
             onClick={() => setViewMode("list")}
-            className={`p-1.5 transition-colors border-l border-gray-300 ${
+            className={`p-1.5 transition-colors cursor-pointer border-l border-gray-300 ${
               viewMode === "list"
                 ? "bg-gray-200 text-gray-900"
                 : "bg-white text-gray-600 hover:bg-gray-50"

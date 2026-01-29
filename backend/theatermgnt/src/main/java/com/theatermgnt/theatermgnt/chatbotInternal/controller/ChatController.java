@@ -1,20 +1,19 @@
 package com.theatermgnt.theatermgnt.chatbotInternal.controller;
 
-import com.cloudinary.Api;
-import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatMessageResponse;
-import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
+import java.util.List;
+
 import org.springframework.web.bind.annotation.*;
 
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.request.ChatBotInternalRequest;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatBotInternalResponse;
+import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatMessageResponse;
 import com.theatermgnt.theatermgnt.chatbotInternal.service.ChatService;
+import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/chatbot")
@@ -32,7 +31,7 @@ public class ChatController {
     }
 
     @GetMapping("/history")
-    public ApiResponse<List<ChatMessageResponse>> getChatHistory(){
+    public ApiResponse<List<ChatMessageResponse>> getChatHistory() {
         return ApiResponse.<List<ChatMessageResponse>>builder()
                 .result(chatService.getChatHistory())
                 .build();

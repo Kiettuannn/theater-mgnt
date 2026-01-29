@@ -1,18 +1,21 @@
 package com.theatermgnt.theatermgnt.chatbotInternal.controller;
 
+import java.util.List;
+
+import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.request.AddDocumentRequest;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.ChatbotDocumentResponse;
 import com.theatermgnt.theatermgnt.chatbotInternal.dto.response.HealthCheckResponse;
 import com.theatermgnt.theatermgnt.chatbotInternal.service.ChatbotConfigService;
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
-import jakarta.validation.Valid;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/chatbot/documents")

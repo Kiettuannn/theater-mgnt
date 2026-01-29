@@ -99,9 +99,15 @@ api.interceptors.response.use(
       }
       handleAuthFailure();
     }
+    
+    // Bỏ qua log lỗi 404 khi lookup movie (slug/id fallback logic)
+    const isMovieLookup = url && typeof url === 'string' && 
+      (url.includes('/movies/') || url.includes('movies/'));
+    
     if (
       status !== 401 &&
-      !(isCancelBookingRequest && (status === 400 || status === 404))
+      !(isCancelBookingRequest && (status === 400 || status === 404)) &&
+      !(isMovieLookup && status === 404)
     ) {
       console.error('API Error:', error.response?.data || error.message)
     }
@@ -113,6 +119,11 @@ api.interceptors.response.use(
 
 export async function getMovieById(id: string) {
   const response = await api.get(`/movies/${id}`)
+  return response.data
+}
+
+export async function getMovieBySlug(slug: string) {
+  const response = await api.get(`/movies/slug/${slug}`)
   return response.data
 }
 
@@ -188,6 +199,7 @@ export function mapMovieForDisplay(movie: any) {
 
   return {
     id: movie.id,
+    slug: movie.slug,
     title: movie.title || 'Untitled',
     description: movie.description || '',
     poster: movie.posterUrl || '/placeholder.svg',

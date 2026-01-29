@@ -22,6 +22,10 @@ import lombok.experimental.FieldDefaults;
 @Table(name = "movies")
 public class Movie extends BaseEntity {
     String title;
+
+    @Column(unique = true)
+    String slug;
+
     String description;
     Integer durationMinutes;
     String director;

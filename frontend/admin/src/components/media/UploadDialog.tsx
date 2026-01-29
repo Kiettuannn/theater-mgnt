@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { X, Upload, Loader2 } from "lucide-react";
 import { uploadMediaFile } from "@/services/mediaService";
+import { useNotificationStore } from "@/stores";
 
 interface UploadDialogProps {
   isOpen: boolean;
@@ -18,6 +19,9 @@ export function UploadDialog({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const addNotification = useNotificationStore(
+    (state) => state.addNotification
+  );
 
   if (!isOpen) return null;
 
@@ -68,12 +72,20 @@ export function UploadDialog({
     setUploading(true);
     try {
       await uploadMediaFile(selectedFile);
-      alert("File uploaded successfully!");
+      addNotification({
+        type: "success",
+        title: "Success",
+        message: "File uploaded successfully!",
+      });
       onSuccess();
       handleClose();
     } catch (error) {
       console.error("Upload failed:", error);
-      alert("Upload failed. Please try again.");
+      addNotification({
+        type: "error",
+        title: "Error",
+        message: "Upload failed. Please try again.",
+      });
     } finally {
       setUploading(false);
     }
@@ -96,7 +108,7 @@ export function UploadDialog({
             <h2 className="text-xl font-semibold text-gray-900">Add File</h2>
             <button
               onClick={handleClose}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -135,7 +147,7 @@ export function UploadDialog({
                     setSelectedFile(null);
                     setPreviewUrl(null);
                   }}
-                  className="text-sm text-blue-600 hover:text-blue-700"
+                  className="text-sm text-blue-600 hover:text-blue-700 cursor-pointer"
                 >
                   Choose another file
                 </button>
@@ -148,7 +160,7 @@ export function UploadDialog({
                 </p>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
                 >
                   Choose file from computer
                 </button>
@@ -171,7 +183,7 @@ export function UploadDialog({
           <div className="flex gap-3 mt-6">
             <button
               onClick={handleClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
               disabled={uploading}
             >
               Cancel
@@ -179,7 +191,7 @@ export function UploadDialog({
             <button
               onClick={handleUpload}
               disabled={!selectedFile || uploading}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
             >
               {uploading ? (
                 <>

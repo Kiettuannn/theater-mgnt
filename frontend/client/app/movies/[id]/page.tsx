@@ -12,6 +12,7 @@ import {
 import type { Showtime } from "@/lib/types";
 import {
   getMovieById,
+  getMovieBySlug,
   mapMovieForDisplay,
   getScreeningsByMovieId,
   mapScreeningToShowtime,
@@ -54,6 +55,37 @@ export default function MovieDetailPage({
   const [showtimeLoading, setShowtimeLoading] = useState(false);
   const [cinemaLoading, setCinemaLoading] = useState(false);
 
+  // Load movie by slug or id
+  useEffect(() => {
+    const fetchMovie = async () => {
+      if (!id) return;
+      try {
+        setLoading(true);
+        let data;
+        
+        // Kiểm tra xem id có phải UUID format không
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+        
+        if (isUUID) {
+          // Nếu là UUID, gọi trực tiếp getMovieById
+          data = await getMovieById(id);
+        } else {
+          // Nếu không phải UUID, chỉ gọi getMovieBySlug
+          data = await getMovieBySlug(id);
+        }
+        
+        const mapped = mapMovieForDisplay(data);
+        setMovie(mapped);
+      } catch (error) {
+        console.error("Error fetching movie", error);
+        setMovie(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMovie();
+  }, [id]);
+
   // Load cinemas once
   useEffect(() => {
     const fetchCinemas = async () => {
@@ -74,10 +106,10 @@ export default function MovieDetailPage({
   // Load screenings for this movie
   useEffect(() => {
     const fetchScreenings = async () => {
-      if (!id) return;
+      if (!movie?.id) return; // Đợi movie được load trước
       try {
         setShowtimeLoading(true);
-        const data = await getScreeningsByMovieId(id);
+        const data = await getScreeningsByMovieId(movie.id); // Dùng movie.id thực sự
         const mapped = (data || [])
           .map(mapScreeningToShowtime)
           .filter(Boolean) as Showtime[];
@@ -121,7 +153,7 @@ export default function MovieDetailPage({
     };
 
     fetchScreenings();
-  }, [id]);
+  }, [movie]); // Dependency là movie thay vì id
 
   // Derived data
   const availableCinemas = useMemo(() => {
@@ -545,31 +577,7 @@ export default function MovieDetailPage({
                       {showtime.cinemaName ? `${showtime.cinemaName}` : "N/A"}
                     </p>
                   </div>
-                  {showtime.price !== undefined && (
-                    <div className="mb-3 text-left">
-                      <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
-                        {showtime.price.toLocaleString()} VND
-                      </p>
-                    </div>
-                  )}
-                  {showtime.availableSeats !== undefined && (
-                    <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 text-left">
-                      <svg
-                        className="w-4 h-4 text-purple-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                        />
-                      </svg>
-                      <span>{showtime.availableSeats} available</span>
-                    </div>
-                  )}
+                  
                 </button>
               ))}
             </div>
@@ -585,7 +593,7 @@ export default function MovieDetailPage({
             {selectedShowtime && (
               <div className="mt-8 flex justify-center">
                 <Link
-                  href={`/booking/${id}/${selectedShowtime.id}`}
+                  href={`/booking/${movie.id}/${selectedShowtime.id}`}
                   className="px-8 py-4 rounded-lg gradient-primary text-white font-semibold hover:shadow-lg transition-all"
                 >
                   Continue to Booking
@@ -604,7 +612,7 @@ export default function MovieDetailPage({
 
       {/* Reviews & Ratings Section */}
       <div className="container-max px-4 md:px-8 py-12 border-t border-border dark:border-slate-800">
-        <ReviewsSection movieId={id} movieStatus={movie.status} />
+        <ReviewsSection movieId={movie.id} movieStatus={movie.status} />
       </div>
     </div>
   );

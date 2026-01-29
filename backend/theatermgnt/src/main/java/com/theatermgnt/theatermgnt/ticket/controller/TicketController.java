@@ -68,8 +68,7 @@ public class TicketController {
     }
 
     @PostMapping("/{ticketCode}/mark-for-transfer")
-    public ApiResponse<String> markTicketForTransfer(
-            @PathVariable String ticketCode, @RequestParam String customerId) {
+    public ApiResponse<String> markTicketForTransfer(@PathVariable String ticketCode, @RequestParam String customerId) {
         ticketService.markTicketForTransfer(ticketCode, customerId);
         return ApiResponse.<String>builder()
                 .result("Ticket marked for transfer successfully")
@@ -77,8 +76,7 @@ public class TicketController {
     }
 
     @PostMapping("/{ticketCode}/cancel-transfer")
-    public ApiResponse<String> cancelTicketTransfer(
-            @PathVariable String ticketCode, @RequestParam String customerId) {
+    public ApiResponse<String> cancelTicketTransfer(@PathVariable String ticketCode, @RequestParam String customerId) {
         ticketService.cancelTicketTransfer(ticketCode, customerId);
         return ApiResponse.<String>builder()
                 .result("Ticket transfer cancelled successfully")

@@ -22,9 +22,9 @@ public class MovieSimpleResponse {
 
     String id;
     String title;
+    String slug;
     String posterUrl;
     String trailerUrl;
-
 
     Integer durationMinutes;
 

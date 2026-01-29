@@ -1,13 +1,21 @@
 "use client";
 
-import { ChevronRight, Play } from "lucide-react";
+import { ChevronRight, Play, Search } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getNowShowingMovies, mapMovieForDisplay } from "@/lib/api-movie";
+import { useRouter } from "next/navigation";
+import { getNowShowingMovies, mapMovieForDisplay, searchMovies, getAllGenres } from "@/lib/api-movie";
 
 export function HeroSection() {
   const [featuredMovie, setFeaturedMovie] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const [genres, setGenres] = useState<any[]>([]);
+  const [selectedGenre, setSelectedGenre] = useState("");
+  const [searchType, setSearchType] = useState<"title" | "cast" | "genre">("title");
+  const router = useRouter();
 
   useEffect(() => {
     const fetchFeaturedMovie = async () => {
@@ -34,6 +42,48 @@ export function HeroSection() {
 
     fetchFeaturedMovie();
   }, []);
+
+  // Fetch genres for filter
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const data = await getAllGenres();
+        setGenres(data || []);
+      } catch (error) {
+        console.error("Error fetching genres:", error);
+      }
+    };
+    fetchGenres();
+  }, []);
+
+  // Handle search with debounce
+  useEffect(() => {
+    if (searchQuery.trim().length < 2) {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    const delayTimer = setTimeout(async () => {
+      try {
+        const results = await searchMovies(searchQuery);
+        const mappedResults = results.map(mapMovieForDisplay);
+        setSearchResults(mappedResults);
+        setShowResults(true);
+      } catch (error) {
+        console.error("Error searching movies:", error);
+        setSearchResults([]);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayTimer);
+  }, [searchQuery]);
+
+  const handleMovieClick = (movieSlug: string) => {
+    setShowResults(false);
+    setSearchQuery("");
+    router.push(`/movies/${movieSlug}`);
+  };
 
   return (
     <section className="relative min-h-screen pt-16 overflow-hidden bg-background">
@@ -65,6 +115,121 @@ export function HeroSection() {
                 Immerse yourself in premium entertainment with cutting-edge
                 technology, luxury seating, and unforgettable moments.
               </p>
+            </div>
+
+            {/* Search Bar */}
+            <div className="relative w-full max-w-2xl">
+              <div className="bg-card dark:bg-slate-900 rounded-xl border border-border dark:border-slate-800 overflow-hidden shadow-lg">
+                {/* Search Type Selector */}
+                <div className="flex border-b border-border dark:border-slate-800">
+                  <button
+                    onClick={() => setSearchType("title")}
+                    className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                      searchType === "title"
+                        ? "bg-purple-500/20 text-purple-600 dark:text-purple-300"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Movie Title
+                  </button>
+                  <button
+                    onClick={() => setSearchType("cast")}
+                    className={`flex-1 px-4 py-2 text-sm font-medium transition-colors border-x border-border dark:border-slate-800 ${
+                      searchType === "cast"
+                        ? "bg-purple-500/20 text-purple-600 dark:text-purple-300"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Actor/Director
+                  </button>
+                  <button
+                    onClick={() => setSearchType("genre")}
+                    className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                      searchType === "genre"
+                        ? "bg-purple-500/20 text-purple-600 dark:text-purple-300"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Genre
+                  </button>
+                </div>
+
+                {/* Search Input or Genre Select */}
+                <div className="relative">
+                  {searchType === "genre" ? (
+                    <select
+                      value={selectedGenre}
+                      onChange={(e) => {
+                        setSelectedGenre(e.target.value);
+                        if (e.target.value) {
+                          router.push(`/#now-showing`);
+                          setTimeout(() => {
+                            const element = document.querySelector(`[data-genre="${e.target.value}"]`);
+                            element?.scrollIntoView({ behavior: "smooth" });
+                          }, 100);
+                        }
+                      }}
+                      className="w-full px-4 py-4 pl-12 bg-transparent text-foreground focus:outline-none"
+                    >
+                      <option value="">Select a genre...</option>
+                      {genres.map((genre) => (
+                        <option key={genre.id} value={genre.id}>
+                          {genre.name}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onFocus={() => searchResults.length > 0 && setShowResults(true)}
+                      placeholder={
+                        searchType === "title"
+                          ? "Search for movies..."
+                          : "Search by actor or director..."
+                      }
+                      className="w-full px-4 py-4 pl-12 bg-transparent text-foreground placeholder:text-muted-foreground focus:outline-none"
+                    />
+                  )}
+                  <Search
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    size={20}
+                  />
+                </div>
+
+                {/* Search Results Dropdown */}
+                {showResults && searchResults.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-card dark:bg-slate-900 border border-border dark:border-slate-800 rounded-xl shadow-xl max-h-96 overflow-y-auto z-50">
+                    {searchResults.map((movie) => (
+                      <button
+                        key={movie.id}
+                        onClick={() => handleMovieClick(movie.slug || movie.id)}
+                        className="w-full px-4 py-3 flex items-center gap-4 hover:bg-purple-500/10 transition-colors text-left"
+                      >
+                        <img
+                          src={movie.poster || "/placeholder.svg"}
+                          alt={movie.title}
+                          className="w-12 h-16 object-cover rounded"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-foreground truncate">
+                            {movie.title}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {movie.releaseDate
+                              ? new Date(movie.releaseDate).getFullYear()
+                              : "TBA"}
+                          </p>
+                        </div>
+                        <div className="text-xs text-purple-600 dark:text-purple-300">
+                          {movie.rating || "NR"}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* CTA Buttons */}

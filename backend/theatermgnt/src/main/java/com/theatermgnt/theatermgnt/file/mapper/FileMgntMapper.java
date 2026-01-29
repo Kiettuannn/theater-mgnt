@@ -1,10 +1,11 @@
 package com.theatermgnt.theatermgnt.file.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
 import com.theatermgnt.theatermgnt.file.dto.request.FileInfo;
 import com.theatermgnt.theatermgnt.file.dto.response.FileItemResponse;
 import com.theatermgnt.theatermgnt.file.entity.FileMgnt;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface FileMgntMapper {

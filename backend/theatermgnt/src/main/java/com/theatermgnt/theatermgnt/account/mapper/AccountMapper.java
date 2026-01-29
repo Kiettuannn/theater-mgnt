@@ -9,7 +9,6 @@ import com.theatermgnt.theatermgnt.account.entity.Account;
 @Mapper(componentModel = "spring")
 public interface AccountMapper {
 
-
     @Mapping(target = "isActive", constant = "true")
     @Mapping(target = "password", ignore = true) // Password is handled separately
     @Mapping(target = "accountType", ignore = true)

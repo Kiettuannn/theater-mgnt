@@ -1,24 +1,21 @@
 package com.theatermgnt.theatermgnt.file.repository;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
-import com.theatermgnt.theatermgnt.file.dto.request.FileInfo;
-import com.theatermgnt.theatermgnt.file.entity.FileMgnt;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.util.DigestUtils;
-
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
+
+import org.springframework.stereotype.Repository;
+import org.springframework.util.DigestUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import com.theatermgnt.theatermgnt.file.dto.request.FileInfo;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Repository
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -30,14 +27,12 @@ public class FileRepository {
 
         String fileName = UUID.randomUUID().toString();
         byte[] bytes = file.getBytes();
-        
 
         Map params = ObjectUtils.asMap(
                 "public_id", fileName,
                 "folder", "theatermgnt_files",
-                "resource_type", "auto"
-        );
-        
+                "resource_type", "auto");
+
         Map uploadResult = cloudinary.uploader().upload(bytes, params);
 
         return FileInfo.builder()

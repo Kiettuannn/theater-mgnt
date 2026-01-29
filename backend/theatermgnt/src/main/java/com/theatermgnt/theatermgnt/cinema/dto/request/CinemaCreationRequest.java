@@ -24,4 +24,8 @@ public class CinemaCreationRequest {
 
     @Pattern(regexp = "^\\+?[0-9]{8,15}$", message = "CINEMA_PHONE_NUMBER_INVALID")
     String phoneNumber;
+
+    Integer buffer;
+
+    String managerId;
 }

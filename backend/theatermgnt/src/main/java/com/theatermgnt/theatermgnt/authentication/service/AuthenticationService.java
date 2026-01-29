@@ -6,7 +6,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
-import com.theatermgnt.theatermgnt.authentication.enums.AccountType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -24,6 +23,7 @@ import com.theatermgnt.theatermgnt.authentication.dto.response.AuthenticationRes
 import com.theatermgnt.theatermgnt.authentication.dto.response.IntrospectResponse;
 import com.theatermgnt.theatermgnt.authentication.entity.InvalidatedToken;
 import com.theatermgnt.theatermgnt.authentication.entity.OtpToken;
+import com.theatermgnt.theatermgnt.authentication.enums.AccountType;
 import com.theatermgnt.theatermgnt.authentication.event.PasswordResetEvent;
 import com.theatermgnt.theatermgnt.authentication.repository.InvalidatedTokenRepository;
 import com.theatermgnt.theatermgnt.authentication.repository.OtpTokenRepository;
@@ -74,14 +74,12 @@ public class AuthenticationService {
         return IntrospectResponse.builder().valid(isValid).build();
     }
 
-
     /// AUTHENTICATE WITH ACCOUNT TYPE VALIDATION
     public AuthenticationResponse authenticate(AuthenticationRequest request, AccountType requiredAccountType) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
         var account = accountRepository
-                .findByUsernameOrEmail(
-                        request.getLoginIdentifier(), request.getLoginIdentifier())
+                .findByUsernameOrEmail(request.getLoginIdentifier(), request.getLoginIdentifier())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), account.getPassword());
@@ -89,8 +87,10 @@ public class AuthenticationService {
 
         // Validate account type
         if (account.getAccountType() != requiredAccountType) {
-            log.warn("Account type mismatch: {} tried to login with {} account type",
-                    account.getUsername(), requiredAccountType);
+            log.warn(
+                    "Account type mismatch: {} tried to login with {} account type",
+                    account.getUsername(),
+                    requiredAccountType);
             throw new AppException(ErrorCode.WRONG_ACCOUNT_TYPE);
         }
 
@@ -139,8 +139,8 @@ public class AuthenticationService {
     @Transactional
     public void forgotPassword(ForgotPasswordRequest request) {
 
-        var account = accountRepository.findByUsernameOrEmail(
-                request.getLoginIdentifier(), request.getLoginIdentifier());
+        var account =
+                accountRepository.findByUsernameOrEmail(request.getLoginIdentifier(), request.getLoginIdentifier());
 
         // Does not throw exception if not found
         if (account.isEmpty()) {
@@ -160,7 +160,6 @@ public class AuthenticationService {
         String otpCode = generateOtpCode();
         Instant expiryTime = Instant.now().plus(OTP_VALID_DURATION, ChronoUnit.MINUTES);
 
-
         // Save OTP into database
         OtpToken newOtpToken = OtpToken.builder()
                 .account(acc)
@@ -177,7 +176,6 @@ public class AuthenticationService {
             // Log error but do not throw to avoid user enumeration
             log.error("Error publishing password reset event: {}", e.getMessage(), e);
         }
-
     }
 
     /// RESET PASSWORD
@@ -185,8 +183,7 @@ public class AuthenticationService {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
 
         var account = accountRepository
-                .findByUsernameOrEmail(
-                        request.getLoginIdentifier(), request.getLoginIdentifier())
+                .findByUsernameOrEmail(request.getLoginIdentifier(), request.getLoginIdentifier())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         // Get saved OTP from database
@@ -219,11 +216,11 @@ public class AuthenticationService {
 
         Date expiryTime = (isRefreshToken)
                 ? new Date(signedJWT
-                .getJWTClaimsSet()
-                .getIssueTime()
-                .toInstant()
-                .plus(REFRESHABLE_DURATION, ChronoUnit.MILLIS)
-                .toEpochMilli())
+                        .getJWTClaimsSet()
+                        .getIssueTime()
+                        .toInstant()
+                        .plus(REFRESHABLE_DURATION, ChronoUnit.MILLIS)
+                        .toEpochMilli())
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
 
         var verified = signedJWT.verify(verifier);
