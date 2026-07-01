@@ -102,7 +102,7 @@ public class NotificationEventListener {
                 "name", event.getStaff().getFirstName(),
                 "username", event.getStaff().getAccount().getUsername(),
                 "password", event.getRawPassword(),
-                "loginUrl", "http://localhost:5173/admin/login");
+                "loginUrl", "https://uitcifastar-admin.vercel.app/login");
 
         String htmlContent = emailTemplateFactory.buildTemplate(EmailType.WELCOME_STAFF, variables);
 
@@ -201,7 +201,7 @@ public class NotificationEventListener {
                 "password",
                 event.getRawPassword(),
                 "loginUrl",
-                "http://localhost:3000");
+                "https://uitcifastar.vercel.app");
 
         String htmlContent = emailTemplateFactory.buildTemplate(EmailType.WELCOME_CUSTOMER, variables);
 
