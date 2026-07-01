@@ -3,7 +3,6 @@ package com.theatermgnt.theatermgnt.movie.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -11,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.theatermgnt.theatermgnt.common.enums.MovieStatus;
 import com.theatermgnt.theatermgnt.common.exception.AppException;
 import com.theatermgnt.theatermgnt.common.exception.ErrorCode;
+import com.theatermgnt.theatermgnt.common.util.SlugUtil;
 import com.theatermgnt.theatermgnt.movie.dto.request.CreateMovieRequest;
 import com.theatermgnt.theatermgnt.movie.dto.request.UpdateMovieRequest;
 import com.theatermgnt.theatermgnt.movie.dto.response.MovieResponse;
@@ -60,6 +60,9 @@ public class MovieService {
         movie.setAgeRating(ageRating);
         movie.setGenres(genres);
 
+        // Generate unique slug
+        movie.setSlug(generateUniqueSlug(request.getTitle()));
+
         // Save and return response
         Movie savedMovie = movieRepository.save(movie);
         log.info("Created movie with id: {}", savedMovie.getId());
@@ -80,6 +83,11 @@ public class MovieService {
 
     public MovieResponse getMovieById(String id) {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
+        return movieMapper.toMovieResponse(movie);
+    }
+
+    public MovieResponse getMovieBySlug(String slug) {
+        Movie movie = movieRepository.findBySlug(slug).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_EXISTED));
         return movieMapper.toMovieResponse(movie);
     }
 
@@ -129,6 +137,11 @@ public class MovieService {
         // Update basic fields using MapStruct
         movieMapper.updateMovieFromRequest(request, movie);
 
+        // Update slug if title changed
+        if (request.getTitle() != null && !request.getTitle().equals(movie.getTitle())) {
+            movie.setSlug(generateUniqueSlug(request.getTitle()));
+        }
+
         // Update AgeRating if provided
         if (request.getAgeRatingId() != null) {
             AgeRating ageRating = ageRatingRepository
@@ -173,8 +186,7 @@ public class MovieService {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime sevenDaysLater = now.plusDays(7);
 
-        return !screeningRepository.existsByMovieIdAndStartTimeBetween(
-                movie.getId(), now, sevenDaysLater);
+        return !screeningRepository.existsByMovieIdAndStartTimeBetween(movie.getId(), now, sevenDaysLater);
     }
 
     // ========== DELETE ==========
@@ -185,4 +197,18 @@ public class MovieService {
         log.info("Deleted movie with id: {}", movieId);
     }
 
+    // ========== SLUG GENERATION ==========
+    private String generateUniqueSlug(String title) {
+        String baseSlug = SlugUtil.generateSlug(title);
+        String slug = baseSlug;
+        int counter = 0;
+
+        // Check if slug exists, if yes, append counter
+        while (movieRepository.findBySlug(slug).isPresent()) {
+            counter++;
+            slug = SlugUtil.generateUniqueSlug(title, counter);
+        }
+
+        return slug;
+    }
 }

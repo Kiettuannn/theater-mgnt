@@ -2,7 +2,6 @@ import httpClient from "@/configurations/httpClient";
 import type { CreateRoomRequest, Room, UpdateRoomRequest } from "@/types/RoomType/room";
 import {  handleApiResponse } from "@/utils/apiResponse";
 import type { ApiResponse } from "@/utils/apiResponse";
-import { CONFIG } from "@/configurations/configuration";
 
 // Re-export types for convenience
 export type { Room, CreateRoomRequest, UpdateRoomRequest };
@@ -38,9 +37,9 @@ export const updateRoom = async (id: string, roomData: UpdateRoomRequest): Promi
 }
 
 export const getRoomsByCinema = async (cinemaId: string) => {
-  return await httpClient.get(`${CONFIG.API}/rooms/cinema/${cinemaId}`);
+  return await httpClient.get(`/rooms/cinema/${cinemaId}`);
 };
 
 export const deleteRoom = async (roomId: string) => {
-  return await httpClient.delete(`${CONFIG.API}/rooms/${roomId}`);
+  return await httpClient.delete(`/rooms/${roomId}`);
 };

@@ -33,17 +33,17 @@ public class SocketIOService {
 
         try {
             String roomName = "user:" + userId;
-            
+
             // Check how many clients are in this room
             var room = socketServer.getRoomOperations(roomName);
             var clients = room.getClients();
             log.info("📡 Room '{}' has {} clients", roomName, clients.size());
-            
+
             if (clients.isEmpty()) {
                 log.warn("⚠️ No clients in room '{}' - notification will not be delivered", roomName);
                 return;
             }
-            
+
             // Serialize to JSON string first (like chat-service does)
             // This uses Spring's ObjectMapper which already has JavaTimeModule configured
             String notificationJson = objectMapper.writeValueAsString(notification);

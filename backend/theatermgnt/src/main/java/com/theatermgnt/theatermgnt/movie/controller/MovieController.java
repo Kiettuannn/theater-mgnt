@@ -52,6 +52,13 @@ public class MovieController {
                 .build();
     }
 
+    @GetMapping("/slug/{slug}")
+    ApiResponse<MovieResponse> getMovieBySlug(@PathVariable("slug") String slug) {
+        return ApiResponse.<MovieResponse>builder()
+                .result(movieService.getMovieBySlug(slug))
+                .build();
+    }
+
     @GetMapping("/status/{status}")
     ApiResponse<List<MovieSimpleResponse>> getMoviesByStatus(@PathVariable("status") MovieStatus status) {
         return ApiResponse.<List<MovieSimpleResponse>>builder()

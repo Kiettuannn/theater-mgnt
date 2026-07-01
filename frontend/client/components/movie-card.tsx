@@ -13,9 +13,12 @@ export function MovieCard({ movie, onBook }: MovieCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [imageError, setImageError] = useState(false);
 
+  // Sử dụng slug nếu có, không thì dùng id
+  const movieUrl = movie.slug ? `/movies/${movie.slug}` : `/movies/${movie.id}`;
+
   return (
     <div>
-      <Link href={`/movies/${movie.id}`}>
+      <Link href={movieUrl}>
         <div
           className="group relative rounded-xl overflow-hidden bg-card dark:bg-slate-900 border border-border dark:border-slate-800 hover:border-purple-500/50 transition-all duration-300 cursor-pointer"
           onMouseEnter={() => setIsHovered(true)}

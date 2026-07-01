@@ -1,14 +1,16 @@
 package com.theatermgnt.theatermgnt.staff.dto.request;
 
-import com.theatermgnt.theatermgnt.common.enums.Gender;
-import com.theatermgnt.theatermgnt.validator.DobConstraint;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.time.LocalDate;
 import java.util.List;
+
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+import com.theatermgnt.theatermgnt.common.enums.Gender;
+import com.theatermgnt.theatermgnt.validator.DobConstraint;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @NoArgsConstructor
@@ -30,6 +32,7 @@ public class StaffProfileUpdateRequest {
 
     @Size(max = 200, message = "ADDRESS_TOO_LONG")
     String address;
+
     String avatarUrl;
     Gender gender;
 

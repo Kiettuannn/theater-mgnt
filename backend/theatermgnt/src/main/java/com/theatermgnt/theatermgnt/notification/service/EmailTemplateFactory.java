@@ -39,6 +39,5 @@ public class EmailTemplateFactory {
                     case REFUND_NOTIFICATION -> "email/refund-notification";
                 };
         return templateEngine.process(templateName, context);
-      
     }
 }

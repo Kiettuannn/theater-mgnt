@@ -1,6 +1,7 @@
 package com.theatermgnt.theatermgnt.movie.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -12,6 +13,8 @@ import com.theatermgnt.theatermgnt.movie.entity.Movie;
 
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, String> {
+
+    Optional<Movie> findBySlug(String slug);
 
     List<Movie> findByStatus(MovieStatus status);
 

@@ -1,6 +1,5 @@
 package com.theatermgnt.theatermgnt.websocket.service;
 
-import java.time.Instant;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -23,9 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class WebSocketSessionService {
-    
+
     WebSocketSessionRepository webSocketSessionRepository;
-    
+
     /**
      * Create a new WebSocket session
      */
@@ -34,22 +33,21 @@ public class WebSocketSessionService {
         log.info("Creating WebSocket session for user: {}", session.getUserId());
         return webSocketSessionRepository.save(session);
     }
-    
+
     /**
      * Find session by socket session ID
      */
     public WebSocketSession findBySocketSessionId(String socketSessionId) {
-        return webSocketSessionRepository.findBySocketSessionId(socketSessionId)
-                .orElse(null);
+        return webSocketSessionRepository.findBySocketSessionId(socketSessionId).orElse(null);
     }
-    
+
     /**
      * Find all sessions for a user
      */
     public List<WebSocketSession> findByUserId(String userId) {
         return webSocketSessionRepository.findByUserId(userId);
     }
-    
+
     /**
      * Delete session by socket session ID
      */
@@ -58,7 +56,7 @@ public class WebSocketSessionService {
         log.info("Deleting WebSocket session: {}", socketSessionId);
         webSocketSessionRepository.deleteBySocketSessionId(socketSessionId);
     }
-    
+
     /**
      * Delete all sessions for a user
      */
@@ -68,7 +66,7 @@ public class WebSocketSessionService {
         List<WebSocketSession> sessions = webSocketSessionRepository.findByUserId(userId);
         webSocketSessionRepository.deleteAll(sessions);
     }
-    
+
     /**
      * Check if session exists
      */

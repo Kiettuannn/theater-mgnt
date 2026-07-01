@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import com.theatermgnt.theatermgnt.cinema.dto.request.CinemaCreationRequest;
+import com.theatermgnt.theatermgnt.cinema.dto.request.CinemaUpdateRequest;
 import com.theatermgnt.theatermgnt.cinema.dto.response.CinemaResponse;
 import com.theatermgnt.theatermgnt.cinema.service.CinemaService;
 import com.theatermgnt.theatermgnt.common.dto.response.ApiResponse;
@@ -52,12 +53,26 @@ public class CinemaController {
                 .result("Delete cinema successfully")
                 .build();
     }
-    //
-    //    @PutMapping("/{cinemaId}")
-    //    ApiResponse<CinemaResponse> updateUser(
-    //            @PathVariable String cinemaId, @RequestBody @Valid CinemaUpdateRequest request) {
-    //        return ApiResponse.<CinemaResponse>builder()
-    //                .result(cinemaService.updateCinema(cinemaId, request))
-    //                .build();
-    //    }
+
+    @PutMapping("/{cinemaId}")
+    ApiResponse<CinemaResponse> updateUser(
+            @PathVariable String cinemaId, @RequestBody @Valid CinemaUpdateRequest request) {
+        return ApiResponse.<CinemaResponse>builder()
+                .result(cinemaService.updateCinema(cinemaId, request))
+                .build();
+    }
+
+    @GetMapping("/buffer-management")
+    ApiResponse<List<CinemaResponse>> getCinemasForBufferManagement() {
+        return ApiResponse.<List<CinemaResponse>>builder()
+                .result(cinemaService.getCinemasForBufferManagement())
+                .build();
+    }
+
+    @PatchMapping("/{cinemaId}/buffer")
+    ApiResponse<CinemaResponse> updateCinemaBuffer(@PathVariable String cinemaId, @RequestParam Integer buffer) {
+        return ApiResponse.<CinemaResponse>builder()
+                .result(cinemaService.updateCinemaBuffer(cinemaId, buffer))
+                .build();
+    }
 }

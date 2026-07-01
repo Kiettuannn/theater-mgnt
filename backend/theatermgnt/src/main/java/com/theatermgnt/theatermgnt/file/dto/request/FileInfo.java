@@ -1,15 +1,9 @@
 package com.theatermgnt.theatermgnt.file.dto.request;
 
-import com.theatermgnt.theatermgnt.common.enums.RoomType;
-import com.theatermgnt.theatermgnt.room.enums.RoomStatus;
-import com.theatermgnt.theatermgnt.seat.dto.request.SeatRequest;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder

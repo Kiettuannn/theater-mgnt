@@ -45,10 +45,11 @@ public class DailyRevenueInitializerService {
         LocalDate today = LocalDate.now();
 
         // Check if today has any DailyRevenueSummary
+        // Use findAllByCinemaIdAndReportDate to handle potential duplicates
         long existingCount = cinemaRepository.findAll().stream()
-                .filter(cinema -> dailyRevenueSummaryRepository
-                        .findByCinemaIdAndReportDate(cinema.getId(), today)
-                        .isPresent())
+                .filter(cinema -> !dailyRevenueSummaryRepository
+                        .findAllByCinemaIdAndReportDate(cinema.getId(), today)
+                        .isEmpty())
                 .count();
 
         if (existingCount == 0) {

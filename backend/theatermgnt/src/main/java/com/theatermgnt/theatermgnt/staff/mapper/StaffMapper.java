@@ -1,10 +1,11 @@
 package com.theatermgnt.theatermgnt.staff.mapper;
 
+import org.mapstruct.*;
+
 import com.theatermgnt.theatermgnt.staff.dto.request.StaffAccountCreationRequest;
 import com.theatermgnt.theatermgnt.staff.dto.request.StaffProfileUpdateRequest;
 import com.theatermgnt.theatermgnt.staff.dto.response.StaffResponse;
 import com.theatermgnt.theatermgnt.staff.entity.Staff;
-import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface StaffMapper {

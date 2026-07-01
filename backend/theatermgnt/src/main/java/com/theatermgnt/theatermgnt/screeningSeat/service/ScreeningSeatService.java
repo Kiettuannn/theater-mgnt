@@ -143,8 +143,8 @@ public class ScreeningSeatService {
             // Get transfer tickets for this screening
             List<String> screeningSeatIds =
                     seatsInGroup.stream().map(ScreeningSeat::getId).toList();
-            List<Ticket> transferTickets = ticketRepository.findByScreeningSeatIdInAndStatus(
-                    screeningSeatIds, TicketStatus.FOR_TRANSFER);
+            List<Ticket> transferTickets =
+                    ticketRepository.findByScreeningSeatIdInAndStatus(screeningSeatIds, TicketStatus.FOR_TRANSFER);
 
             Map<String, Ticket> transferTicketMap = transferTickets.stream()
                     .collect(Collectors.toMap(
@@ -152,8 +152,7 @@ public class ScreeningSeatService {
 
             List<ScreeningSeatResponse> groupResponses = seatsInGroup.stream()
                     .map(seat -> {
-                        ScreeningSeatResponse response =
-                                screeningSeatMapper.toScreeningSeatResponse(seat, priceMap);
+                        ScreeningSeatResponse response = screeningSeatMapper.toScreeningSeatResponse(seat, priceMap);
 
                         // Add transfer information if available
                         Ticket transferTicket = transferTicketMap.get(seat.getId());
@@ -166,10 +165,9 @@ public class ScreeningSeatService {
                                 var customer = transferTicket.getBooking().getCustomer();
                                 var account = customer.getAccount();
 
-                                response.setSellerName(
-                                        (customer.getFirstName() != null ? customer.getFirstName() : "")
-                                                + " "
-                                                + (customer.getLastName() != null ? customer.getLastName() : ""));
+                                response.setSellerName((customer.getFirstName() != null ? customer.getFirstName() : "")
+                                        + " "
+                                        + (customer.getLastName() != null ? customer.getLastName() : ""));
                                 response.setSellerEmail(account != null ? account.getEmail() : null);
                                 response.setSellerPhone(customer.getPhoneNumber());
                             }

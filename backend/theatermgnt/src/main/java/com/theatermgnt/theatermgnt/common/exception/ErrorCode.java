@@ -139,7 +139,6 @@ public enum ErrorCode {
     // Payment
     PAYMENT_METHOD_NOT_EXISTED(2057, "Payment method not existed", HttpStatus.NOT_FOUND),
 
-
     // ticket
     TICKET_NOT_EXISTED(2063, "Ticket not existed", HttpStatus.NOT_FOUND),
     TICKET_NOT_ACTIVE(2068, "Ticket not active", HttpStatus.BAD_REQUEST),
